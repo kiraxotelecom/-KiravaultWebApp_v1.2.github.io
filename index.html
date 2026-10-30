@@ -69,6 +69,24 @@ nav .brand,nav .usr,nav .sub{display:none}
 .sc.p{background:linear-gradient(135deg,#6B47E6,#9B6CFF);color:#fff}.sc.p small{color:#ffffffc4}.sc.a{background:var(--ab);border-color:color-mix(in srgb,var(--amber) 40%,transparent)}.sc.a b{color:var(--amber)}
 @media(max-width:600px){.sc b{font-size:17px}.sc{padding:14px}}
 .mt{display:flex;gap:6px;overflow-x:auto;margin:8px 0}.mt button{flex:none;white-space:nowrap}
+
+/* ===== v15 premium finish ===== */
+body{background:radial-gradient(900px 420px at 88% -120px,color-mix(in srgb,var(--accent) 12%,transparent),transparent),var(--bg);background-attachment:fixed;font-variant-numeric:tabular-nums}
+.pg h1{font-weight:800;letter-spacing:-.025em}
+.card{background:linear-gradient(180deg,color-mix(in srgb,var(--card) 94%,#fff),var(--card));box-shadow:0 1px 0 #ffffff0d inset,0 10px 26px -16px #000a}
+.bar{background:color-mix(in srgb,var(--text) 9%,transparent)}.bar i{background:var(--accent)}
+button.p{box-shadow:0 8px 18px -10px var(--accent)}button:active{transform:scale(.97)}
+input:focus,select:focus{outline:2px solid color-mix(in srgb,var(--accent) 60%,transparent);outline-offset:1px;border-color:var(--accent)}
+dialog{border:1px solid var(--line);box-shadow:0 30px 80px -20px #000c}
+.sc{position:relative;overflow:hidden;box-shadow:0 14px 28px -18px #000b}.sc b{font-weight:800}
+.sc.t,.sc.b,.sc.x,.sc.p{box-shadow:0 14px 28px -16px #000c,0 1px 0 #ffffff30 inset}
+.sc.t::after,.sc.b::after,.sc.x::after,.sc.p::after{content:"";position:absolute;inset:0;background:radial-gradient(120% 90% at 100% 0,#ffffff2e,transparent 60%);pointer-events:none}
+.sc.t{background:linear-gradient(135deg,color-mix(in srgb,var(--accent) 55%,#000),var(--accent))}
+.sc.b{background:linear-gradient(135deg,var(--accent),color-mix(in srgb,var(--accent) 60%,#fff))}
+nav{background:radial-gradient(130% 50% at 0 0,color-mix(in srgb,var(--accent) 30%,transparent),transparent),linear-gradient(180deg,#0C1330,#070B1B)}
+nav>button.on{background:linear-gradient(90deg,color-mix(in srgb,var(--accent) 38%,#0A1022),#131B3C);box-shadow:inset 3px 0 0 var(--accent)}
+nav .brand img{box-shadow:0 0 0 1px #ffffff22,0 6px 18px -4px var(--accent)}
+@media(min-width:900px){.sc b{font-size:24px}}
 </style></head><body><header id=hd><img src=icon-192.png alt=''><b>KiraVault</b></header><main id=m></main><nav id=nav></nav><dialog id=dlg></dialog><div id=toast hidden></div><div id=lk hidden></div><button id=fab class=p onclick=quickAdd()>+</button><div id=sp><button class=gb onclick="sp.remove();sessionStorage.s=1;persist(1)">Get Started</button></div>
 <script>
 const $=s=>document.querySelector(s),K='kiravault.web.v1',E=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])),F=n=>Math.round(n).toLocaleString('en-US'),
@@ -464,7 +482,7 @@ V.home=()=>{const s=sm(),nm=S.set.name,hr=new Date().getHours(),gr=hr<12?'Good m
  return`<div class=pg><div><h1>${gr}${nm?', '+E(nm):''}</h1><small>Here's what's happening with your money and work today.</small></div><small>${dt}</small></div>
  ${!S.tx.length&&S.acc.every(a=>!a.b)?C('amber','ab',H('Get started','amber')+'<b style="display:block">Set your opening balances</b><small>Enter what you hold in Bank, Mobile Money and Cash.</small>',"onclick=\"go('more')\""):''}
  ${at.length?C('amber','ab',H('Needs attention','amber')+at.slice(0,6).map(([t,k,a])=>`<div class="${k}" ${a?`onclick="${a}" style="cursor:pointer;margin:4px 0"`:''}><b>${E(t)}</b></div>`).join('')+(at.length>6?`<small>+${at.length-6} more</small>`:'')):''}
- <div class=hg><div class="sc t"><small>Available balance</small><b>UGX ${F(s.av)}</b><small>Bank, Mobile Money and Cash</small></div>
+ <div class=hg><div class="sc t"><small>Available balance</small><b>UGX ${F(s.av)}</b><small>Bank, Mobile Money and Cash</small>${spark()}</div>
  <div class="sc ${neg?'x':'b'}"><small>${neg?'Short by':'Safe to spend'}</small><b>UGX ${F(neg?s.short:s.safe)}</b><small>After this month's commitments</small></div>
  <div class="sc p"><small>Expected income</small><b>UGX ${F(s.aw)}</b><small>Not counted until received</small></div><div class="sc a"><small>Still to pay</small><b>UGX ${F(s.cm)}</b><small>Bills, debts and savings left</small></div><div class="sc g"><small>This month's income</small><b>UGX ${F(m.i)}</b>${vs(m.i,pm.i,1)}</div>
  <div class="sc r"><small>This month's expenses</small><b>UGX ${F(m.e)}</b>${vs(m.e,pm.e,0)}</div></div>
@@ -566,6 +584,8 @@ function AQ(q,a){const c=/^Yes/.test(a)?'green':/^Not safely/.test(a)?'red':'blu
 function addX(){ask('Expected income',[{k:'client',l:'From (client or employer)'},{k:'project',l:'Note (project or what for)'},{k:'amt',l:'Amount',m:1},{k:'dt',l:'Expected date (or first date if it repeats)',t:'date'},{k:'src',l:'Type',o:['Freelance','Salary','Business','Gift','Other']},{k:'acc',l:'Will arrive in',o:AN(),v:'Mobile Money'},{k:'rep',l:'Repeats',o:['Does not repeat','Every month']}],f=>{const a=pa(f.amt);if(!a)return'Enter a valid amount';
  if(f.rep=='Every month'){if(!f.dt)return'Pick the date it first arrives';S.ri.push({id:id(),title:f.project||f.client||f.src,from:f.project&&f.client?f.client:'',amt:a,day:+f.dt.slice(8),src:f.src,acc:f.acc,on:true,skip:f.dt.slice(0,7)>ym0(0)?[ym0(0)]:[]})}
  else S.ex.push({id:id(),client:f.client,project:f.project,amt:a,dt:f.dt,src:f.src,acc:f.acc});save()})}
+function spark(){const p=hist(30),mn=Math.min(...p),mx=Math.max(...p),rg=mx-mn||1,d=p.map((v,i)=>`${i?'L':'M'}${i/29*100},${22-(v-mn)/rg*20}`).join('');return`<svg viewBox="0 0 100 24" preserveAspectRatio=none style="width:100%;height:28px;margin-top:8px"><path d="${d}L100,24L0,24Z" fill="#fff" opacity=.16 /><path d="${d}" fill=none stroke="#fff" stroke-width=2 vector-effect=non-scaling-stroke /></svg>`}
+const th0=theme;theme=function(){th0();const r=document.documentElement.style;r.setProperty('--teal','var(--accent)');r.setProperty('--tb','color-mix(in srgb,var(--accent) 14%,var(--card))')};
 $('#fab').onclick=fabMenu;
 if(lkS)lockNow();if(sessionStorage.s)sp.remove();render();persist(1);matchMedia('(prefers-color-scheme:dark)').onchange=theme;if('serviceWorker'in navigator)navigator.serviceWorker.register('sw.js');
 </script></body></html>
