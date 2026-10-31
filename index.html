@@ -87,6 +87,11 @@ nav{background:radial-gradient(130% 50% at 0 0,color-mix(in srgb,var(--accent) 3
 nav>button.on{background:linear-gradient(90deg,color-mix(in srgb,var(--accent) 38%,#0A1022),#131B3C);box-shadow:inset 3px 0 0 var(--accent)}
 nav .brand img{box-shadow:0 0 0 1px #ffffff22,0 6px 18px -4px var(--accent)}
 @media(min-width:900px){.sc b{font-size:24px}}
+
+.dy{padding:8px 0 6px;border-radius:12px;display:flex;flex-direction:column;align-items:center;gap:5px;min-height:50px;border:1px solid transparent;font-size:14px}
+.dd{display:flex;gap:3px;height:6px}.dd i{width:6px;height:6px;border-radius:50%}
+.ccols{display:grid;gap:14px}@media(min-width:900px){.ccols{grid-template-columns:1.5fr 1fr}}
+.cg{gap:6px}.cg>small{padding:4px 0}
 </style></head><body><header id=hd><img src=icon-192.png alt=''><b>KiraVault</b></header><main id=m></main><nav id=nav></nav><dialog id=dlg></dialog><div id=toast hidden></div><div id=lk hidden></div><button id=fab class=p onclick=quickAdd()>+</button><div id=sp><button class=gb onclick="sp.remove();sessionStorage.s=1;persist(1)">Get Started</button></div>
 <script>
 const $=s=>document.querySelector(s),K='kiravault.web.v1',E=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])),F=n=>Math.round(n).toLocaleString('en-US'),
@@ -147,7 +152,7 @@ const V={home(){const s=sm(),nm=S.set.name,hr=new Date().getHours(),gr=hr<12?'GO
  return`<div class=top><small><b>${gr}${nm?', '+E(nm).toUpperCase():''}</b></small></div>
  
  ${!S.tx.length&&S.acc.every(a=>!a.b)?C('amber','ab',H('Get started','amber')+'<b style="display:block">Set your opening balances</b><small>Enter what you hold in Bank, Mobile Money and Cash.</small>',"onclick=\"go('more')\""):''}
- ${at.length?C('amber','ab',H('Needs attention','amber')+at.slice(0,6).map(([t,k,a])=>`<div class="${k}" ${a?`onclick="${a}" style="cursor:pointer;margin:4px 0"`:''}><b>${E(t)}</b></div>`).join('')+(at.length>6?`<small>+${at.length-6} more</small>`:'')):''}
+ ${at.length?attCard(at):''}
  ${C('blue','',H('Total available','blue')+BG('text','UGX '+F(s.av),28)+S.acc.map(a=>KV(a.id,a.b,a.b<0?'r':'')).join(''))}
  ${C('amber','',H('Committed','amber')+BG('amber','UGX '+F(s.cm))+KV('Bills',s.g.Bills)+KV('Debt',s.g.Debt)+KV('Savings target',s.g.Savings))}
  ${C(neg?'red':'green',neg?'rb':'gb',H('Safe to spend',neg?'red':'green')+BG(neg?'red':'green','UGX '+F(s.safe),36)+'<small>Available money minus everything you\'ve already promised this month.</small>')}
@@ -589,6 +594,24 @@ const th0=theme;theme=function(){th0();const r=document.documentElement.style;r.
 function sk(){const s=sm(),o=[];for(let k=29;k>=0;k--){const d=addD(td(),-k),af=S.tx.filter(x=>x.date>d),bal=s.av-af.reduce((a,x)=>a+(x.type=='income'?x.amt:x.type=='transfer'?0:-x.amt),0),cm=s.cm+af.filter(x=>x.cid||x.gid).reduce((a,x)=>a+x.amt,0);o.push(Math.max(bal-cm,0))}
  const mn=Math.min(...o),mx=Math.max(...o),rg=mx-mn||1,d=o.map((v,i)=>`${i?'L':'M'}${i/29*100},${22-(v-mn)/rg*20}`).join('');return`<svg viewBox="0 0 100 24" preserveAspectRatio=none style="width:100%;height:28px;margin-top:8px"><path d="${d}L100,24L0,24Z" fill="#fff" opacity=.16 /><path d="${d}" fill=none stroke="#fff" stroke-width=2 vector-effect=non-scaling-stroke /></svg>`}
 function tr(a,b,up){if(!b)return'<small>First month tracked</small>';const c=(a>=b)==up?'green':'red';return`<div style="display:flex;align-items:center;gap:6px;margin-top:2px"><span style="display:inline-flex;gap:3px;padding:2px 8px;border-radius:20px;font-size:12px;font-weight:700;color:var(--${c});background:color-mix(in srgb,var(--${c}) 16%,transparent)">${a>=b?'▲':'▼'} ${Math.abs(Math.round((a-b)/b*100))}%</span><small>vs last month</small></div>`}
+function attCard(at){const T_={r:['red','rb','⚠'],a:['amber','ab','!'],g:['green','gb','↓']};
+ return`<div class=card style="padding:0;overflow:hidden"><div class=top style="padding:14px 16px 10px"><b style="font-size:15px">Needs attention</b><span style="background:var(--red);color:#fff;border-radius:20px;padding:1px 9px;font-size:12px;font-weight:700">${at.length}</span></div>${at.slice(0,5).map(([t,k,a])=>{const[c,b,i]=T_[k]||T_.a;return`<div ${a?`onclick="${a}"`:''} style="display:flex;align-items:center;gap:12px;padding:11px 16px;border-top:1px solid var(--line);cursor:${a?'pointer':'default'}"><span style="flex:none;width:32px;height:32px;border-radius:10px;display:grid;place-items:center;font-weight:800;background:var(--${b});color:var(--${c})">${i}</span><b style="flex:1;min-width:0;font-size:14px">${E(t)}</b>${a?'<span style="color:var(--muted);font-size:18px">›</span>':''}</div>`}).join('')}${at.length>5?`<div style="padding:10px 16px;border-top:1px solid var(--line)"><small>+${at.length-5} more</small></div>`:''}</div>`}
+let cf='All';const CFS=['All','Work','Bills','Income','Expenses'],CI={Work:'▣',Bills:'▤',Income:'↓',Expenses:'↑'},DCL={pu:'pu',amber:'amber',green:'green',teal:'green',red:'red'};
+V.cal=()=>{const y=cd.getFullYear(),m=cd.getMonth(),f=(new Date(y,m,1).getDay()+6)%7,n=new Date(y,m+1,0).getDate(),L=ld(),t=td(),ym=`${y}-${String(m+1).padStart(2,'0')}`,
+ ev=k=>{const o=[],A=cf=='All';
+  if(A||cf=='Work')L(k)[1].forEach(p=>o.push({c:'pu',ty:'Work',t:p.title,s:p.st+(p.dl==k?' · deadline':''),a:`pj=${p.id};go('work')`}));
+  if(A||cf=='Bills')S.cm.filter(c=>c.st=='pending'&&c.due==k).forEach(c=>o.push({c:'amber',ty:'Bills',t:c.title,s:'Bill due',r:'UGX '+F(rem(c)),a:`mv='b';go('money')`}));
+  if(A||cf=='Income'){S.tx.filter(x=>x.date==k&&x.type=='income').forEach(x=>o.push({c:'green',ty:'Income',t:x.desc||x.cat||'Income',s:'Received',r:'+'+F(x.amt)}));S.ex.filter(x=>x.dt==k).forEach(x=>o.push({c:'teal',ty:'Income',t:x.project||x.client||x.src,s:'Expected',r:'+'+F(x.amt),a:`recv(${x.id})`}));riOcc(62).filter(x=>x.date==k).forEach(x=>o.push({c:'teal',ty:'Income',t:x.title,s:'Expected, monthly',r:'+'+F(x.amt),a:`riRecv(${x.r.id},'${x.ym}')`}))}
+  if(A||cf=='Expenses')S.tx.filter(x=>x.date==k&&(x.type=='expense'||x.type=='saving')).forEach(x=>o.push({c:'red',ty:'Expenses',t:x.desc||x.cat||'Expense',s:x.cat||x.acc,r:'−'+F(x.amt)}));return o};
+ let c='';for(let i=0;i<f;i++)c+='<div></div>';
+ for(let d=1;d<=n;d++){const k=`${ym}-${String(d).padStart(2,'0')}`,s=L(k)[0],dots=[...new Set(ev(k).map(x=>DCL[x.c]))].slice(0,4),bg=k==sd?'var(--accent)':s<=0?'':`color-mix(in srgb,var(--accent) ${s<.5?8:s<1?16:26}%,transparent)`;
+  c+=`<div class=dy onclick="sd='${k}';render()" style="${bg?'background:'+bg+';':''}${k==sd?'color:#fff;':''}${k==t&&k!=sd?'border-color:var(--accent);':''}"><b>${d}</b><span class=dd>${dots.map(x=>`<i style="background:${k==sd?'#fff':'var(--'+x+')'}"></i>`).join('')}</span></div>`}
+ const[s,ps]=L(sd),lv=s<=0?'Free':s<.5?'Light':s<1?'Moderate':s<1.5?'Heavy':'Overloaded',es=ev(sd),lab=new Date(sd+'T00:00').toLocaleDateString('en',{weekday:'long',day:'numeric',month:'long'});
+ return`<div class=pg><div><h1>Calendar</h1><small>Your schedule, all in one place.</small></div><div style="display:flex;gap:6px;align-items:center"><button class=s onclick="cd=new Date(${y},${m-1},1);render()">‹</button><button class=s onclick="cd=new Date(${y},${m+1},1);render()">›</button><button class="s p" onclick="cd=new Date();sd=td();render()">Today</button></div></div>
+ <div class=mt>${CFS.map(x=>`<button class="s ${cf==x?'p':''}" onclick="cf='${x}';render()">${x}</button>`).join('')}</div>
+ <div class=ccols><div class=card><div class=top style="margin-bottom:10px"><b style="font-size:17px">${cd.toLocaleString('en',{month:'long',year:'numeric'})}</b><small>Shading shows workload</small></div><div class=cg>${['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].map(x=>`<small>${x}</small>`).join('')}${c}</div>
+ <div style="display:flex;gap:14px;flex-wrap:wrap;margin-top:12px"><small><span style="color:var(--pu)">●</span> Work</small><small><span style="color:var(--amber)">●</span> Bills</small><small><span style="color:var(--green)">●</span> Income</small><small><span style="color:var(--red)">●</span> Expenses</small></div></div>
+ <div class=card><b style="font-size:16px">${lab}</b><br><small>Workload: <b>${lv}</b>${s>0?` (${Math.round(s*100)}% of a full day)`:''}</small>${es.map(x=>`<div class=row2 ${x.a?`onclick="${x.a}" style="cursor:pointer"`:''}><div style="display:flex;gap:10px;align-items:center;min-width:0"><span style="flex:none;width:32px;height:32px;border-radius:10px;display:grid;place-items:center;font-weight:800;background:color-mix(in srgb,var(--${x.c}) 16%,transparent);color:var(--${x.c})">${CI[x.ty]}</span><div style="min-width:0"><b>${E(x.t)}</b><small>${E(x.s)}</small></div></div><div class=rt><b style="color:var(--${DCL[x.c]=='red'?'red':DCL[x.c]=='green'?'green':'text'})">${x.r||''}</b></div></div>`).join('')||'<br><small>Nothing scheduled. A free day.</small>'}</div></div>`};
 $('#fab').onclick=fabMenu;
 if(lkS)lockNow();if(sessionStorage.s)sp.remove();render();persist(1);matchMedia('(prefers-color-scheme:dark)').onchange=theme;if('serviceWorker'in navigator)navigator.serviceWorker.register('sw.js');
 </script></body></html>
