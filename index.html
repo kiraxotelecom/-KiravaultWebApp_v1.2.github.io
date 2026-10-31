@@ -169,14 +169,15 @@ nav .usr .eye svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-wi
 .dac{position:relative;display:flex;align-items:flex-end;gap:8px;height:64px;margin:14px 0 4px}.dac>i{flex:1;border-radius:5px 5px 2px 2px}.dal{position:absolute;left:0;right:0;border-top:2px dashed var(--muted);opacity:.8;pointer-events:none}.dax{display:flex;gap:8px;margin-bottom:4px}.dax small{flex:1;text-align:center;font-size:11px}
 
 /* ===== v29: PIN lock redesign + tappable cards ===== */
-#lk{background:radial-gradient(120% 80% at 50% 0%,color-mix(in srgb,var(--accent) 55%,#0A1022) 0%,#0A1022 62%);color:#fff;gap:10px}
+#lk{background:radial-gradient(120% 80% at 50% 0%,color-mix(in srgb,color-mix(in srgb,var(--accent) 55%,#0A1022) 80%,transparent) 0%,#0A1022d4 62%);-webkit-backdrop-filter:blur(24px);backdrop-filter:blur(24px);color:#fff;gap:10px}
+body.locked>:not(#lk):not(#sp){visibility:visible!important;filter:blur(18px) saturate(.7);pointer-events:none;user-select:none}body.locked>#sp{visibility:hidden}
 #lk b{color:#fff}#lk #lks{color:#ffffffb8;font-size:14px;min-height:20px}#lk #lks[style]{color:#ff9aa2!important;font-weight:600}
 #lk>img{box-shadow:0 8px 24px #0006;margin-bottom:6px}
 #lkd{gap:18px;margin:14px 0 22px}#lkd i{width:16px;height:16px;border:2px solid #ffffff80;transition:transform .12s,background .12s}
 #lkd i.f{background:#fff;border-color:#fff;transform:scale(1.15);box-shadow:0 0 12px #ffffff90}
 #lkd.shk{animation:shk .35s}@keyframes shk{20%,60%{transform:translateX(-9px)}40%,80%{transform:translateX(9px)}}
 #lk .kp{grid-template-columns:repeat(3,82px);gap:16px}
-#lk .kp button{width:82px;height:82px;font-size:32px;font-weight:500;color:#fff;background:#ffffff1c;border:1px solid #ffffff26;backdrop-filter:blur(6px);-webkit-tap-highlight-color:transparent;touch-action:manipulation;user-select:none;transition:transform .08s,background .12s}
+#lk .kp button{width:82px;height:82px;font-size:32px;font-weight:500;color:#fff;background:#ffffff1c;border:1px solid #ffffff26;-webkit-tap-highlight-color:transparent;touch-action:manipulation;user-select:none;transition:transform .08s,background .12s}
 #lk .kp button:active{background:var(--accent);transform:scale(.92)}
 #lk .kp button:last-child{font-size:26px;background:none;border-color:transparent}
 #lk .row button{background:none;color:#ffffffd0;font-weight:600;padding:10px 14px}
