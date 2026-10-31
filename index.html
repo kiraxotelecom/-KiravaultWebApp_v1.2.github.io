@@ -206,12 +206,20 @@ body.locked>:not(#lk):not(#sp){visibility:visible!important;filter:blur(18px) sa
 .k9pmh{display:flex;align-items:center;gap:8px;margin:20px 4px 8px;font-size:16px;font-weight:800}.k9pmh i{width:10px;height:10px;border-radius:50%}.k9pmc{padding:4px 16px 14px}.k9pmc .row2{padding:12px 0;border-top:1px solid var(--line)}.k9pmc .row2:first-child{border-top:0}.k9pmt{display:flex;justify-content:space-between;padding-top:12px;margin-top:4px;border-top:2px solid var(--line);font-size:15px}
 .k9tdr2{flex:1;min-width:0}.k9tdl{display:flex;justify-content:space-between;align-items:baseline;gap:10px;padding:9px 0;border-top:1px solid var(--line)}.k9tdl:first-child{border-top:0}.k9tdl b{font-size:16px}
 .k9ptt .chip{white-space:nowrap;flex:none}
+
+.pf{display:flex;align-items:center;gap:14px;padding:16px;cursor:pointer}.pf .av{width:56px;height:56px;border-radius:50%;background:var(--accent);color:#fff;display:grid;place-items:center;font-size:24px;font-weight:700;flex:none}
+.pf em,.sr em{font-style:normal;color:var(--muted);font-size:22px;line-height:1}
+.stp{padding:0!important;overflow:hidden}.sr{display:flex;align-items:center;gap:12px;padding:14px 16px;cursor:pointer;border-top:1px solid var(--line);-webkit-tap-highlight-color:transparent}.sr:first-child{border-top:0}.sr:active{background:color-mix(in srgb,var(--accent) 8%,transparent)}
+.sr i{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;background:color-mix(in srgb,var(--accent) 12%,transparent);color:var(--accent);flex:none}.sr i svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.sr b{flex:1;font-size:15px}.sr small{color:var(--muted)}
+.offc{border-left:5px solid var(--green)}
 </style></head><body><header id=hd></header><main id=m></main><nav id=nav></nav><dialog id=dlg></dialog><div id=toast hidden></div><div id=lk hidden></div><button id=fab class=p onclick=quickAdd()>+</button><div id=sp><button class=gb onclick="sp.remove();sessionStorage.s=1;persist(1);if(lkS)lockNow()">Get Started</button></div>
 <script>
 let HM=0;
-const $=s=>document.querySelector(s),K='kiravault.web.v1',E=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])),F=n=>HM?'••••':Math.round(n).toLocaleString('en-US'),
+const $=s=>document.querySelector(s),K='kiravault.web.v1',E=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])),xr=()=>S&&S.set&&S.set.cur=='USD'&&+S.set.rate>0?+S.set.rate:0,fu=v=>Math.abs(v)>=1000?Math.round(v).toLocaleString('en-US'):v.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}),F=n=>HM?'••••':(xr()?fu(n/xr()):Math.round(n).toLocaleString('en-US')),
  td=()=>new Date().toLocaleDateString('sv'),me=()=>{const d=new Date();return new Date(d.getFullYear(),d.getMonth()+1,0).toLocaleDateString('sv')},
- pa=s=>{const m=String(s).toLowerCase().replace(/[,\s]|ugx|shs/g,'').match(/^(\d+(?:\.\d+)?)(k|m)?$/);return m?+m[1]*({k:1e3,m:1e6}[m[2]]||1):0},
+ pa0=s=>{const m=String(s).toLowerCase().replace(/[,\s$]|ugx|usd|shs/g,'').match(/^(\d+(?:\.\d+)?)(k|m)?$/);return m?+m[1]*({k:1e3,m:1e6}[m[2]]||1):0},
+ pa=s=>{const v=pa0(s),r=xr();return r?Math.round(v*r):v},
  addM=(s,n)=>{const[y,m,d]=s.split('-').map(Number),l=new Date(y,m+n,0).getDate();return new Date(y,m-1+n,Math.min(d,l)).toLocaleDateString('sv')},
  addD=(s,n)=>{const[y,m,d]=s.split('-').map(Number);return new Date(y,m-1,d+n).toLocaleDateString('sv')},
  dd=s=>s?Math.round((new Date(s+'T00:00')-new Date(td()+'T00:00'))/864e5):null;
@@ -230,7 +238,7 @@ const id=()=>S.n++,save=()=>{hideT();try{localStorage.setItem(K,JSON.stringify(S
  dtx=c=>{if(c.st=='paid')return'Paid';const n=dd(c.due);return n===null?'No due date':n<0?`${-n} day${n==-1?'':'s'} overdue`:n==0?'Due today':n==1?'Due tomorrow':`Due in ${n} days`};
 function theme(){const d=S.set.mode=='dark'||(S.set.mode=='auto'&&matchMedia('(prefers-color-scheme:dark)').matches),c={...(d?DK:LT),accent:AC[S.set.accent][+d]};for(const k in c)document.documentElement.style.setProperty('--'+k,c[k]);document.querySelector('meta[name=theme-color]').content=c.accent}
 function sm(){const e=me(),av=S.acc.reduce((a,x)=>a+x.b,0),g={Bills:0,Debt:0,Savings:0};let pb=0,pn=0;S.cm.filter(c=>c.st=='pending').forEach(c=>{const k=c.kind=='Debt'?'Debt':c.kind=='Savings'?'Savings':'Bills';if(!c.due||c.due<=e)g[k]+=rem(c);if(k=='Bills'){pb+=rem(c);pn++}});const cm=g.Bills+g.Debt+g.Savings,pw=S.pr.filter(p=>p.src!='Job'&&p.st!='Cancelled').reduce((a,p)=>a+Math.max(p.amt-paid(p),0),0),aw=S.ex.reduce((a,x)=>a+x.amt,0)+riOcc(30).reduce((a,o)=>a+o.amt,0);return{av,cm,g,pb,pn,aw,pw,sv:S.gl.reduce((a,x)=>a+x.saved,0),safe:Math.max(av-cm-goalRes(),0),gr:goalRes(),short:Math.max(cm-av,0)}}
-const sh=n=>{if(HM)return'••••';const a=Math.abs(n);return(n<0?'-':'')+(a>=1e6?(a/1e6).toFixed(1).replace(/\.0$/,'')+'M':a>=1e3?Math.round(a/1e3)+'K':Math.round(a))},
+const sh=n=>{if(HM)return'••••';if(xr())return shU(n/xr());const a=Math.abs(n);return(n<0?'-':'')+(a>=1e6?(a/1e6).toFixed(1).replace(/\.0$/,'')+'M':a>=1e3?Math.round(a/1e3)+'K':Math.round(a))},
  C=(c,bg,x,a='')=>`<div class=card ${a} style="border-left:5px solid var(--${c});${bg?'background:var(--'+bg+')':''}">${x}</div>`,
  H=(t,c)=>`<small style="color:var(--${c});font-weight:700;text-transform:uppercase">${t}</small>`,
  KV=(a,b,c='')=>`<div class=top style="margin-top:4px"><small>${a}</small><span class="${c}">${F(b)}</span></div>`,
@@ -241,7 +249,7 @@ function delTx(t){const A=acc(t.acc);if(A)A.b+=t.type=='income'?-t.amt:t.amt;if(
  if(t.cid){const c=S.cm.find(c=>c.id==t.cid);if(c){c.paid=Math.max(c.paid-t.amt,0);c.st='pending'}}
  if(t.gid){const g=S.gl.find(g=>g.id==t.gid);if(g)g.saved=Math.max(g.saved-t.amt,0)}
  if(t.pid){const p=S.pr.find(p=>p.id==t.pid);if(p)p.pay=p.pay.filter(x=>x.id!=t.pp)}S.tx=S.tx.filter(x=>x!==t)}
-function ask(title,fs,ok){const d=$('#dlg');d.innerHTML=`<form><h3>${title}</h3>${fs.map(f=>`<label>${f.l}${f.o?`<select name=${f.k}>${f.o.map(o=>`<option${o==f.v?' selected':''}>${E(o)}</option>`).join('')}</select>`:`<input name=${f.k} type=${f.t||'text'} value="${E(f.v??'')}" autocomplete=off ${f.m?'inputmode=decimal':''}>`}</label>`).join('')}<div class=row><button type=button onclick=dlg.close()>Cancel</button><button class=p>Save</button></div></form>`;
+function ask(title,fs,ok){const d=$('#dlg');d.innerHTML=`<form><h3>${title}</h3>${fs.map(f=>`<label>${f.l}${f.o?`<select name=${f.k}>${f.o.map(o=>`<option${o==f.v?' selected':''}>${E(o)}</option>`).join('')}</select>`:`<input name=${f.k} type=${f.t||'text'} value="${E(f.m&&xr()&&typeof f.v=='number'?+(f.v/xr()).toFixed(2):f.v??'')}" autocomplete=off ${f.m?'inputmode=decimal':''}>`}</label>`).join('')}<div class=row><button type=button onclick=dlg.close()>Cancel</button><button class=p>Save</button></div></form>`;
  d.querySelector('form').onsubmit=e=>{e.preventDefault();const r=ok(Object.fromEntries(new FormData(e.target)));if(r)alert(r);else d.close()};d.showModal()}
 const AN=()=>S.acc.map(a=>a.id);
 function txForm(v={}){ask('Add transaction',[{k:'type',l:'Type',o:['expense','income'],v:v.type},{k:'amt',l:'Amount (25k, 1.5m, 150,000)',v:v.amt,m:1},{k:'acc',l:'Account',o:AN(),v:v.acc||'Cash'},{k:'cat',l:'Category (expense) / source (income)',o:[...CATS,'Salary','Freelance','Business','Gift','Other'],v:v.cat},{k:'desc',l:'Note',v:v.desc},{k:'date',l:'Date',t:'date',v:v.date||td()},{k:'oo',l:'One-off? (kept out of averages)',o:['No','Yes'],v:v.oo?'Yes':'No'}],f=>{
@@ -1239,6 +1247,33 @@ function todayCard3(){const s=sm(),t=td(),n=+t.slice(8),[y,mo]=t.split('-').map(
  l=(a,b,x)=>`<div class=k9tdl><small>${a}</small><b${x?` style="color:var(--${x})"`:''}>${b}</b></div>`;
  return C('teal','tb',H('Today','teal')+`<div class=tdb><div class=tdw><svg viewBox="0 0 80 80"><circle cx=40 cy=40 r=34 fill=none stroke="var(--line)" stroke-width=8 /><circle cx=40 cy=40 r=34 fill=none stroke="var(--${c})" stroke-width=8 stroke-linecap=round stroke-dasharray="${Math.min(f,1)*K} ${K}" transform="rotate(-90 40 40)" /></svg><div class=tdc><b style="color:var(--${c})">${al?sh(Math.abs(left)):'–'}</b><small>${al?(left>=0?'left today':'over'):'no allowance'}</small></div></div><div class=k9tdr2>${l('Daily allowance',al?'UGX '+sh(al):'None')}${l('Spent today','UGX '+sh(sp),sp?c:'')}${l(s.gr?'Safe · after goals':'Safe this month','UGX '+sh(s.safe))}</div></div>`
  +(nx?`<div class=tdn><span class=tdi>↓</span><div><small>Next money</small><b>${E(nx.l)}</b></div><div class=mes><b class=g>+${sh(nx.a)}</b><small>${nd<0?'overdue':nd==0?'today':'in '+nd+' day'+(nd>1?'s':'')}</small></div></div>`:'<small>No money expected yet.</small>'))}
+
+
+/* ===== v40: organised Settings, USD display ===== */
+function shU(v){const a=Math.abs(v);return(v<0?'-':'')+(a>=1e6?(a/1e6).toFixed(1).replace(/\.0$/,'')+'M':a>=1e3?(a/1e3).toFixed(a>=1e4?0:1).replace(/\.0$/,'')+'K':a>=100?Math.round(a):a.toFixed(2).replace(/\.00$/,''))}
+function curFx(){if(!(S.set&&S.set.cur=='USD'))return;const w=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT),L=[];let n;while(n=w.nextNode()){if(n.nodeValue.includes('UGX')&&!n.parentElement.closest('[data-nocur],script,style,textarea'))L.push(n)}L.forEach(n=>n.nodeValue=n.nodeValue.replace(/UGX/g,'USD'))}
+new MutationObserver(curFx).observe(document.body,{childList:true,subtree:true,characterData:true});
+const alert0=window.alert.bind(window);window.alert=m=>alert0(xr()?String(m).replace(/UGX/g,'USD'):m);
+function setCur(k){if(k=='USD'&&!(+S.set.rate>0)){alert('Enter the exchange rate first.');return}S.set.cur=k;save()}
+function setRate(v){const n=parseFloat(String(v).replace(/,/g,''));S.set.rate=n>0?n:0;if(!(n>0)&&S.set.cur=='USD')S.set.cur='UGX';save()}
+let stg='';
+const MORE_ALL=V.more,nh2=x=>(x||'').replace(/^<h3>.*?<\/h3>/,''),
+ SI2={p:'<circle cx=12 cy=8 r=4 /><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/>',c:'<circle cx=12 cy=12 r=9 /><path d="M15 9.5c-.5-1-1.7-1.5-3-1.5-1.7 0-3 .9-3 2.2 0 3 6 1.6 6 4.6 0 1.3-1.3 2.2-3 2.2-1.4 0-2.6-.6-3.1-1.6M12 6v2M12 16v2"/>',w:IS.money,h:IS.home,l:'<rect x=5 y=11 width=14 height=10 rx=2 /><path d="M8 11V8a4 4 0 0 1 8 0v3"/>',b:'<path d="M12 16V4M7 9l5-5 5 5M4 20h16"/>',i:'<circle cx=12 cy=12 r=9 /><path d="M12 11v6M12 7.5v.5"/>'};
+function stSects(){const ps=MORE_ALL().split(/(?=<h3>)/),o={top:ps[0].replace('<h1>Settings</h1>','').replace(bkBanner(),'')};ps.slice(1).forEach(x=>{const m=x.match(/^<h3>(.*?)<\/h3>/);if(m)o[m[1]]=x});return o}
+function curPg(){const r=+S.set.rate>0?+S.set.rate:0,c=S.set.cur=='USD'?'USD':'UGX';
+ return`<div data-nocur=1><div class=card><small style="display:block">Show amounts in</small><div class=tabs style="margin:8px 0 12px">${[['UGX','UGX'],['USD','USD']].map(([k,l])=>`<button class="${c==k?'on':''}" onclick="setCur('${k}')">${l}</button>`).join('')}</div><label>Exchange rate (UGX for 1 USD)<input inputmode=decimal placeholder="e.g. 3,700" value="${r||''}" onchange="setRate(this.value)"></label>${r?`<small style="display:block;margin-top:8px">1 USD = UGX ${r.toLocaleString('en-US')} · UGX 100,000 = USD ${(100000/r).toFixed(2)}</small>`:'<small style="display:block;margin-top:8px">Enter the rate to switch to US dollars.</small>'}</div><small>Your data is always saved in UGX. This changes how amounts are shown and typed.</small></div>`}
+function accPg(){return`<div class=card><small>Set what you hold in each account right now.</small>${S.acc.map(a=>`<label>${a.id} (UGX)<input inputmode=decimal value="${xr()?(a.b/xr()).toFixed(2):a.b}" onchange="setBal('${a.id}',this.value)"></label>`).join('')}</div>`}
+const STG={profile:['Profile & Preferences',o=>o.top+(o['Kind of work (optional)']||'')+(o['Quick add memory']||'')],cur:['Currency',curPg],acc:['Accounts & balances',accPg],home:['Home layout',o=>nh2(o['Home layout'])],sec:['Security & PIN',o=>nh2(o['App lock'])],bak:['Backup & Export',o=>(o['Backup']||'')+(o['Export and reminders']||'')+(o['Data']||'')],about:['About KiraVault',o=>nh2(o['About KiraVault'])]};
+V.more=()=>{const o=stSects();
+ if(stg&&STG[stg])return`<div class=top style="margin-bottom:12px"><button class=s onclick="stg='';render()">‹ Settings</button><b>${STG[stg][0]}</b><span style="width:70px"></span></div>`+STG[stg][1](o);
+ const nm=(S.set.name||'').trim(),on=navigator.onLine,sw=!!(navigator.serviceWorker&&navigator.serviceWorker.controller),
+ R=[['profile','p','Profile & Preferences',''],['cur','c','Currency',S.set.cur=='USD'?'USD':'UGX'],['acc','w','Accounts & balances',''],['home','h','Home layout',''],['sec','l','Security & PIN',lkS?'On':'Off'],['bak','b','Backup & Export',bkTxt()],['about','i','About KiraVault','']];
+ return`<h1>Settings</h1>${bkBanner()}<div class="card pf" onclick="stg='profile';render()"><div class=av>${E((nm[0]||'K').toUpperCase())}</div><div style="flex:1"><b style="font-size:17px">${E(nm||'Your name')}</b><br><small>Offline · stays on this device</small></div><em>›</em></div>`
+ +`<div class="card stp">${R.map(([k,i,l,v])=>`<div class=sr onclick="stg='${k}';render()"><i><svg viewBox="0 0 24 24">${SI2[i]}</svg></i><b>${l}</b><small ${k=='cur'?'data-nocur=1':''}>${v}</small><em>›</em></div>`).join('')}</div>`
+ +`<div class="card offc"><div class=top><b>${on?'🟢 Online':'🟠 Offline'} · works either way</b></div><small>Everything is saved on this device and nothing is sent anywhere.${sw?' The app is stored for offline use.':' Open it once online to store it for offline use.'}</small></div>`};
+const go2=go;go=function(k){if(k=='more')stg='';return go2.apply(this,arguments)};
+addEventListener('online',()=>tab=='more'&&render());addEventListener('offline',()=>tab=='more'&&render());
+curFx();
 
 $('#fab').onclick=fabMenu;
 if(lkS&&sessionStorage.s)lockNow();if(sessionStorage.s)sp.remove();render();persist(1);matchMedia('(prefers-color-scheme:dark)').onchange=theme;if('serviceWorker'in navigator)navigator.serviceWorker.register('sw.js');
