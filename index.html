@@ -185,6 +185,11 @@ body.locked>:not(#lk):not(#sp){visibility:visible!important;filter:blur(18px) sa
 [data-t]{cursor:pointer;-webkit-tap-highlight-color:transparent;transition:transform .12s}[data-t]:active{transform:scale(.98)}
 .sc[data-t]{position:relative}.sc[data-t]::before{content:'›';z-index:1;position:absolute;top:10px;right:14px;font-size:20px;line-height:1;opacity:.55}
 .accl{margin:8px 0 0;display:grid;gap:3px}.accl div{display:flex;justify-content:space-between;gap:8px;font-size:12px;color:#ffffffe0}.accl span:last-child{font-weight:700}
+.stg{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:0 0 8px}.stg button{display:flex;flex-direction:column;align-items:center;gap:2px;padding:10px 4px;border-radius:12px;background:var(--card);border:1px solid var(--line);color:var(--text)}.stg button b{font-size:13px}.stg button small{font-size:12px;color:var(--muted)}.stg button.on{background:var(--accent);border-color:var(--accent);color:#fff}.stg button.on small{color:#ffffffcc}
+.bgs{display:grid;gap:8px;margin:10px 0}.bgs label{display:block;font-size:13px;color:var(--muted)}.bgs select,.bgs input{margin-top:4px}.bg2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.bgk{border-radius:14px;padding:12px;background:color-mix(in srgb,var(--accent) 10%,transparent);margin:10px 0}.bgk .top{margin-top:4px}
+.bgl{display:grid;gap:6px;margin:8px 0}.bgl .bmr{margin:0;padding:8px 10px;border-radius:12px;background:color-mix(in srgb,var(--text) 5%,transparent);align-items:center}.bgl .bmr>div{flex:1;min-width:0}.bgl .bmr>div b{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.bgl .bmr input{width:104px}
+.bgw{border-radius:12px;padding:10px 12px;margin:8px 0;font-size:13px}.bgw.r{background:var(--rb)}.bgw.a{background:var(--ab)}.bgw.g{background:var(--gb)}
 </style></head><body><header id=hd></header><main id=m></main><nav id=nav></nav><dialog id=dlg></dialog><div id=toast hidden></div><div id=lk hidden></div><button id=fab class=p onclick=quickAdd()>+</button><div id=sp><button class=gb onclick="sp.remove();sessionStorage.s=1;persist(1);if(lkS)lockNow()">Get Started</button></div>
 <script>
 let HM=0;
@@ -274,18 +279,18 @@ const V={home(){const s=sm(),nm=S.set.name,hr=new Date().getHours(),gr=hr<12?'GO
 function setBal(n,v){acc(n).b=pa(v);save()}
 V.mo=V.money;V.money=()=>{const M={a:'Overview',t:'History',p:'Plan Month',b:'Bills & Debts',s:'Savings'};
  return`<div class=stabs>${Object.entries(M).map(([k,v])=>`<button class="${mv==k?'on':''}" onclick="mv='${k}';render()">${v}</button>`).join('')}</div>`+(mv=='a'?V.ov():mv=='t'?V.hist():mv=='p'?V.plan():mv=='b'?V.bills():V.sav())};
-const p_=i=>S.pr.find(p=>p.id==i),DONE=['Completed','Cancelled'],ST=['Pending','Started','In Progress','Review','Completed','Cancelled'],SC={Pending:'muted',Started:'blue','In Progress':'pu',Review:'amber',Completed:'green',Cancelled:'muted'},
+const p_=i=>S.pr.find(p=>p.id==i),DONE=['Completed','Cancelled'],ST=['Pending','Started','In Progress','Polishing','Review','Completed','Cancelled'],STP={Pending:0,Started:15,'In Progress':45,Polishing:70,Review:90,Completed:100},SC={Pending:'muted',Started:'blue','In Progress':'pu',Polishing:'teal',Review:'amber',Completed:'green',Cancelled:'muted'},
  late=p=>!DONE.includes(p.st)&&p.dl&&p.dl<td(),pcol=p=>late(p)?'red':SC[p.st]||'accent',DL={"High": 0.6, "Medium": 0.4, "Low": 0.25},
  pcard=p=>{const c=pcol(p);return C(c,'',`<div class=top><b>${E(p.title)}</b><b style="color:var(--${c})">${p.pg}%</b></div><small>${[p.client,p.wt,p.st].filter(Boolean).map(E).join('  |  ')}</small><div class=bar><i style="width:${p.pg}%;background:var(--${c})"></i></div>${p.src!='Job'?`<small>UGX ${F(p.amt)}  |  Paid ${F(paid(p))}</small><br>`:''}${p.dl?`<small class="${late(p)?'r':''}">${late(p)?'OVERDUE  ':'Due '}${p.dl}</small>`:''}`,`onclick="pj=${p.id};render()"`)};
 function pdet(p){const c=pcol(p),o=Math.max(p.amt-paid(p),0),dn=p.tk.filter(t=>t.d).length,rw=(a,b)=>`<div class=top style="margin-top:4px"><small>${a}</small><span>${b}</span></div>`;
  return`<div class=top><button class=s onclick="pj=null;render()">‹ Back</button><b>Project details</b><span></span></div><div style="height:10px"></div>`+
- C(c,'',`<b style="font-size:20px">${E(p.title)}</b><br><small>${[p.client,p.wt,p.src,p.pri+' priority'].filter(Boolean).map(E).join('  |  ')}</small><br><b style="color:var(--${c});font-size:13px">${p.st=='Cancelled'?'Cancelled at '+p.pg+'%':p.pg+'% complete'}</b><div class=bar><i style="width:${p.pg}%;background:var(--${c})"></i></div><input type=range min=0 max=100 step=5 value=${p.pg} onchange="p_(${p.id}).pg=+this.value;save()">`+
+ C(c,'',`<b style="font-size:20px">${E(p.title)}</b><br><small>${[p.client,p.wt,p.src,p.pri+' priority'].filter(Boolean).map(E).join('  |  ')}</small><br><b style="color:var(--${c});font-size:13px">${p.st=='Cancelled'?'Cancelled at '+p.pg+'%':p.pg+'% complete'}</b><div class=bar><i style="width:${p.pg}%;background:var(--${c})"></i></div>`+
   (p.src!='Job'?`<div style="margin-top:12px"><small>Outstanding</small>${BG(o?'red':'green','UGX '+F(o),32)}</div><div class=grid style="margin:2px 0 8px"><div><small>Quoted</small><b><span class=cu>UGX</span> ${F(p.amt)}</b></div><div><small>Paid</small><b class=g><span class=cu>UGX</span> ${F(paid(p))}</b></div></div>`:'')+rw('Start / Deadline',`${p.s0||'-'} / ${p.dl||'-'}`)+(p.est?rw('Estimated effort',`${p.est} days (${(p.est*(1-p.pg/100)).toFixed(1)} left)`):''))+
- `<div class=tabs style="flex-wrap:wrap">${ST.map(s=>`<button class="s ${p.st==s?'on':''}" onclick="stS(${p.id},'${s}')">${s}</button>`).join('')}</div><div class=row style="justify-content:flex-start;margin:0 0 10px"><button class="s p" onclick="projForm(${p.id})">Edit</button>${p.src!='Job'?`<button class=s onclick="payP(p_(${p.id}))">Add payment</button>`:''}${p.src!='Job'&&o>0?`<button class=s onclick="remind(${p.id})">💬 Remind client</button>`:''}<button class=s onclick="delP(${p.id})">Delete</button></div>`+
+ `<div class=stg>${ST.map(s=>`<button class="${p.st==s?'on':''}" onclick="stS(${p.id},'${s}')"><b>${s}</b><small>${s in STP?STP[s]+'%':'keeps %'}</small></button>`).join('')}</div><small style="display:block;margin:-2px 0 10px">Tap a stage and progress updates by itself.</small><div class=row style="justify-content:flex-start;margin:0 0 10px"><button class="s p" onclick="projForm(${p.id})">Edit</button>${p.src!='Job'?`<button class=s onclick="payP(p_(${p.id}))">Add payment</button>`:''}${p.src!='Job'&&o>0?`<button class=s onclick="remind(${p.id})">💬 Remind client</button>`:''}<button class=s onclick="delP(${p.id})">Delete</button></div>`+
  C('pu','',H(`Tasks ${dn}/${p.tk.length} done`,'pu')+p.tk.map(t=>`<div class=top style="margin-top:6px;gap:6px"><button style="flex:1;text-align:left;${t.d?'background:var(--gb);color:var(--muted)':''}" onclick="tg(${p.id},${t.id})">${t.d?'☑':'☐'} ${E(t.t)}</button><button class=s onclick="UD('Task deleted',()=>{p_(${p.id}).tk=p_(${p.id}).tk.filter(x=>x.id!=${t.id})})">✕</button></div>`).join('')+`<div style="margin-top:8px"><button class=s onclick="addT(${p.id})">+ Add task</button></div>`)+
  (p.src!='Job'?C('green','',H('Payments','green')+(p.pay.map(y=>`<div class=top style="margin-top:6px;gap:6px"><span class=g style="flex:1;background:var(--gb);border-radius:10px;padding:9px 12px">${y.date}   UGX ${F(y.amt)}</span><button class=s onclick="delPay(${p.id},${y.id})">✕</button></div>`).join('')||'<br><small>No payments recorded yet.</small>')):'')}
 function projForm(i){const p=i?p_(i):{};ask(i?'Edit project':'New project',[{k:'title',l:'Project',v:p.title},{k:'client',l:'Client',v:p.client=='No client'?'':p.client},{k:'amt',l:'Amount quoted (UGX)',m:1,v:p.amt},{k:'src',l:'Type',o:['Freelance','Job'],v:p.src},{k:'pri',l:'Priority',o:['High','Medium','Low'],v:p.pri||'Medium'},{k:'s0',l:'Start date',t:'date',v:p.s0},{k:'dl',l:'Deadline',t:'date',v:p.dl},{k:'est',l:'Estimated effort in days (optional)',m:1,v:p.est}],f=>{if(!f.title)return'Give the project a name';const q={title:f.title,client:f.client||'No client',amt:pa(f.amt),src:f.src,pri:f.pri,s0:f.s0,dl:f.dl,est:+f.est||0};if(i)Object.assign(p,q);else S.pr.push({id:id(),st:'Pending',pg:0,tk:[],pay:[],wt:'',...q});save()})}
-function stS(i,s){const p=p_(i);p.st=s;if(s=='Completed')p.pg=100;save()}
+function stS(i,s){const p=p_(i);p.st=s;if(s in STP)p.pg=STP[s];save()}
 function tg(i,t){const k=p_(i).tk.find(x=>x.id==t);k.d=!k.d;save()}
 function addT(i){ask('New task',[{k:'t',l:'Task'}],f=>{if(!f.t)return'Enter a task';p_(i).tk.push({id:id(),t:f.t,d:false});save()})}
 function delPay(i,y){UD('Payment deleted',()=>{const p=p_(i),t=S.tx.find(x=>x.pid==i&&x.pp==y);if(t)delTx(t);else p.pay=p.pay.filter(x=>x.id!=y)})}
@@ -709,7 +714,7 @@ V.cal=()=>{const y=cd.getFullYear(),m=cd.getMonth(),f=(new Date(y,m,1).getDay()+
  <div class=card><b style="font-size:16px">${lab}</b><br><small>Workload: <b>${lv}</b>${s>0?` (${Math.round(s*100)}% of a full day)`:''}</small>${es.map(x=>`<div class=row2 ${x.a?`onclick="${x.a}" style="cursor:pointer"`:''}><div style="display:flex;gap:10px;align-items:center;min-width:0"><span style="flex:none;width:32px;height:32px;border-radius:10px;display:grid;place-items:center;font-weight:800;background:color-mix(in srgb,var(--${x.c}) 16%,transparent);color:var(--${x.c})">${CI[x.ty]}</span><div style="min-width:0"><b>${E(x.t)}</b><small>${E(x.s)}</small></div></div><div class=rt><b style="color:var(--${DCL[x.c]=='red'?'red':DCL[x.c]=='green'?'green':'text'})">${x.r||''}</b></div></div>`).join('')||'<br><small>Nothing scheduled.</small>'}</div></div>`};
 let budAll=0;
 function budgetCard(bn,cat){const L=bn.slice().sort((a,b)=>(cat[b[0]]||0)/b[1]-(cat[a[0]]||0)/a[1]),vis=budAll?L:L.slice(0,4),tl=bn.reduce((a,[,l])=>a+l,0),tu=bn.reduce((a,[k])=>a+(cat[k]||0),0),tf=tl?tu/tl:0,tc=tf>=1?'red':tf>=.8?'amber':'accent';
- return C('amber','',`<div class=top><b style="font-size:16px">Budget</b><button class="s p" onclick=budMgr()>Manage budgets</button></div>`+(bn.length?`<div style="display:flex;justify-content:space-between;align-items:baseline;margin-top:14px"><b style="font-size:24px;letter-spacing:-.02em">${sh(tu)}</b><small>of ${sh(tl)} · ${Math.round(tf*100)}% used</small></div><div class=bar style="height:10px;margin:6px 0 2px"><i style="width:${Math.min(tf,1)*100}%;background:var(--${tc})"></i></div>`+vis.map(([k,l])=>{const u=cat[k]||0,fr=u/l,c=fr>=1?'red':fr>=.8?'amber':'green';return`<div style="margin-top:14px"><div class=top><b>${E(k)}</b><span><b style="color:var(--${c})">${sh(u)}</b> <small>/ ${sh(l)}</small> <span style="font-size:12px;font-weight:700;padding:1px 8px;border-radius:20px;color:var(--${c});background:color-mix(in srgb,var(--${c}) 16%,transparent)">${Math.round(fr*100)}%</span></span></div><div class=bar style="margin:6px 0 2px"><i style="width:${Math.min(fr,1)*100}%;background:var(--${c})"></i></div><small>${fr>=1?'Over by '+sh(u-l):sh(l-u)+' left'}</small></div>`}).join('')+(L.length>4?`<button class=s style="width:100%;margin-top:14px" onclick="budAll=${budAll?0:1};render()">${budAll?'Show less':'Show all '+L.length+' budgets'}</button>`:''):'<br><small>No budgets set yet.</small>'))}
+ return C('amber','',`<div class=top><b style="font-size:16px">Budget</b><span><button class=s onclick=bgOpen()>✨ Smart budget</button> <button class="s p" onclick=budMgr()>Manage</button></span></div>`+(bn.length?`<div style="display:flex;justify-content:space-between;align-items:baseline;margin-top:14px"><b style="font-size:24px;letter-spacing:-.02em">${sh(tu)}</b><small>of ${sh(tl)} · ${Math.round(tf*100)}% used</small></div><div class=bar style="height:10px;margin:6px 0 2px"><i style="width:${Math.min(tf,1)*100}%;background:var(--${tc})"></i></div>`+vis.map(([k,l])=>{const u=cat[k]||0,fr=u/l,c=fr>=1?'red':fr>=.8?'amber':'green';return`<div style="margin-top:14px"><div class=top><b>${E(k)}</b><span><b style="color:var(--${c})">${sh(u)}</b> <small>/ ${sh(l)}</small> <span style="font-size:12px;font-weight:700;padding:1px 8px;border-radius:20px;color:var(--${c});background:color-mix(in srgb,var(--${c}) 16%,transparent)">${Math.round(fr*100)}%</span></span></div><div class=bar style="margin:6px 0 2px"><i style="width:${Math.min(fr,1)*100}%;background:var(--${c})"></i></div><small>${fr>=1?'Over by '+sh(u-l):sh(l-u)+' left'}</small></div>`}).join('')+(L.length>4?`<button class=s style="width:100%;margin-top:14px" onclick="budAll=${budAll?0:1};render()">${budAll?'Show less':'Show all '+L.length+' budgets'}</button>`:''):'<br><small>No budgets set yet.</small>'))}
 function budMgr(){const cs=[...new Set([...CATS,...Object.keys(S.bd)])];ask('Manage budgets',cs.map(c=>({k:'b_'+c,l:c,m:1,v:S.bd[c]||''})),f=>{const nb={};cs.forEach(c=>{const v=pa(f['b_'+c]);if(v)nb[c]=v});UD('Budgets updated',()=>{S.bd=nb})});$('#dlg h3').insertAdjacentHTML('afterend','<small>Set a monthly limit for each category. Leave a box empty for no budget.</small>')}
 let wq='';
 function pjHTML(){const arch=p=>DONE.includes(p.st)&&(p.src=='Job'||p.amt<=paid(p)),q=wq.trim().toLowerCase(),L=S.pr.filter(p=>(wf=='Completed'?arch(p):!arch(p)&&(wf=='All'||p.src==wf||(wf=='Unpaid'&&p.amt>paid(p)&&p.st!='Cancelled')))&&(!q||(p.title+' '+p.client+' '+(p.wt||'')).toLowerCase().includes(q))).sort(wsort);
@@ -880,7 +885,7 @@ syncCats();
 let bm={};
 function budMgr(){bm={...S.bd};budUI();$('#dlg').showModal()}
 function budUI(){const d=$('#dlg'),ks=Object.keys(bm),free=CATS.filter(c=>!(c in bm)),tot=ks.reduce((a,k)=>a+bm[k],0);
- d.innerHTML=`<h3 style="margin:0">Budgets</h3><small>Monthly limit for each category${ks.length?` · total UGX ${sh(tot)}`:''}</small>
+ d.innerHTML=`<h3 style="margin:0">Budgets</h3><small>Monthly limit for each category${ks.length?` · total UGX ${sh(tot)}`:''}</small><div style="margin-top:8px"><button type=button class=s onclick=bgOpen()>✨ Smart budget: generate one for me</button></div>
  <div class=bml>${ks.map(k=>`<div class=bmr><b>${E(k)}</b><input inputmode=decimal value="${F(bm[k])}" data-k="${E(k)}" onchange="bmSet(this)" aria-label="${E(k)} limit"><button type=button class=s onclick="bmDel(this.parentNode.querySelector('input').dataset.k)" aria-label="Remove">✕</button></div>`).join('')||'<small>No budgets yet. Add one below.</small>'}</div>
  <div class=bma><small><b>Add a budget</b></small><div class=bmr><select id=bmc onchange="bmSel()">${free.map(c=>`<option>${E(c)}</option>`).join('')}<option value="__new">+ Custom category…</option></select></div><input id=bmn maxlength=24 placeholder="Category name, e.g. Pets" hidden><div class=bmr><input id=bma inputmode=decimal placeholder="Limit, e.g. 200k"><button type=button class="s p" onclick="bmAdd()">Add</button></div><small id=bme class=r></small></div>
  <div class=row style="margin-top:14px"><button type=button onclick="dlg.close()">Cancel</button><button type=button class=p onclick="bmSave()">Save</button></div>`;bmSel()}
@@ -911,6 +916,77 @@ const ask2=ask;ask=function(t,f,ok){ask2(t,f,ok);const sl=document.querySelector
   const ty=fm.querySelector('[name=type]'),inc=ty&&ty.value=='income',ex=CATS.find(c=>c.toLowerCase()==nm.toLowerCase()),val=ex||nm;
   if(!inc&&!ex){S.set.cc=[...(S.set.cc||[]),nm];syncCats()}
   const op=document.createElement('option');op.value=op.textContent=val;sl.insertBefore(op,sl.querySelector('option[value=__new]'));sl.value=val},true)};
+
+
+/* ===== v34: smart budget generator ===== */
+const BS=()=>(S.bs=S.bs||{pct:30,mode:'cap',base:'rel',fig:'',mon:'',gig:0,buf:5,trim:0}),
+ BESS=['Food','Transport','Internet','Bills','Work','Rent'],
+ BDEF={Food:35,Transport:20,Work:10,Shopping:10,Entertainment:8,Others:12,Internet:5,Bills:8},
+ BLK=['Rent','Internet','Electricity','Debt','Subscription'],
+ bgR=v=>v>=50000?Math.floor(v/5000)*5000:Math.floor(v/1000)*1000;
+let bgE={};
+function bgSv(){try{localStorage.setItem(K,JSON.stringify(S))}catch(e){}}
+function bgMo(n){return[...Array(n)].map((_,i)=>ym0(-(i+1)))}
+function bgInc(){const B=BS(),rel=S.ri.filter(r=>r.on!==false).reduce((a,r)=>a+r.amt,0),
+ gm=bgMo(3).map(m=>S.tx.filter(t=>t.type=='income'&&!t.ri&&t.date.startsWith(m)).reduce((a,t)=>a+t.amt,0)),floor=Math.min(...gm)/2,
+ all=m=>S.tx.filter(t=>t.type=='income'&&t.date.startsWith(m)).reduce((a,t)=>a+t.amt,0);
+ let inc=0,lab='',note='';
+ if(B.base=='fig'){inc=pa(B.fig);lab='the figure you typed'}
+ else if(B.base=='mon'){const m=B.mon||bgMo(1)[0];inc=all(m);lab='income in '+m;if(rel&&inc>rel*1.3)note='That month was '+Math.round((inc/rel-1)*100)+'% above your reliable income, so this budget may be too generous.'}
+ else{inc=rel+(B.gig?floor:0);lab=B.gig?'reliable income + a small gig floor':'reliable income (salary and monthly income)';if(!rel)note='No monthly income is set up yet. Add your salary under Income > Every month, or choose "A figure I type" above.'}
+ return{inc,lab,note,rel,floor}}
+function bgLock(){const ym=ym0(0),cat={},items=[];let debt=0;
+ S.cm.filter(c=>c.st=='pending'&&BLK.includes(c.kind)).forEach(c=>{const mo=c.rec=='Monthly'?c.amt:c.rec=='Weekly'?c.amt*52/12:((c.due||'').startsWith(ym)?rem(c):0);if(!mo)return;
+  if(c.kind=='Debt')debt+=mo;else{const k=K2C[c.kind]||'Others';cat[k]=(cat[k]||0)+mo}items.push({id:c.id,t:c.title,k:c.kind,a:mo})});
+ return{cat,debt,items,tot:Object.values(cat).reduce((a,x)=>a+x,0)+debt}}
+function bgHist(){const ms=bgMo(3),h={};let n=0;ms.forEach(m=>{const t=S.tx.filter(x=>x.type=='expense'&&x.date.startsWith(m));if(t.length)n++;t.forEach(x=>{const k=x.cat||'Others';h[k]=(h[k]||0)+x.amt})});
+ n=Math.max(n,1);Object.keys(h).forEach(k=>h[k]/=n);return h}
+function bgGen(){const B=BS(),I=bgInc(),L=bgLock(),H=bgHist(),r={I,L,H,warn:[]};if(!I.inc){r.err=I.note||'Enter an income figure to start.';return r}
+ const cp=B.mode=='sav'?100-B.pct:B.pct,cap=I.inc*cp/100,buf=cap*B.buf/100,room=cap-L.tot-buf;r.cap=cap;r.buf=buf;r.room=room;
+ r.needPct=Math.min(95,Math.ceil(L.tot/(1-B.buf/100)/I.inc*20)*5);
+ const cs=[...new Set([...CATS,...Object.keys(S.bd||{})])].filter(c=>c!='Debt'&&c!='Savings'),flex={},need={},ess=c=>BESS.includes(c);
+ cs.forEach(c=>{const lk=L.cat[c]||0;let n=Math.max(0,(H[c]||0)-lk);if(!ess(c))n*=1-B.trim/100;need[c]=n});
+ let tn=Object.values(need).reduce((a,x)=>a+x,0);r.noHist=tn==0;
+ if(r.noHist){const ks=cs.filter(c=>BDEF[c]),w=ks.reduce((a,c)=>a+BDEF[c],0);ks.forEach(c=>{if(!L.cat[c]||c=='Entertainment')need[c]=Math.max(room,0)*BDEF[c]/w*.9});tn=Object.values(need).reduce((a,x)=>a+x,0)}
+ const eN=cs.filter(ess).reduce((a,c)=>a+need[c],0),wN=tn-eN,rr=Math.max(room,0);
+ if(rr>=tn){cs.forEach(c=>flex[c]=need[c]*Math.min(1.05,tn?rr/tn:1))}
+ else if(rr>=eN){const left=rr-eN;cs.forEach(c=>flex[c]=ess(c)?need[c]:(wN?need[c]/wN*left:0))}
+ else{cs.forEach(c=>flex[c]=ess(c)&&eN?need[c]/eN*rr:0);if(eN>0)r.warn.push(['a','Even essentials like food and transport had to be trimmed to fit this cap. Consider a higher cap.'])}
+ const lines=[];cs.forEach(c=>{const lk=L.cat[c]||0,fx=bgR(flex[c]||0),tot=lk+fx;if(tot>0)lines.push({c,lk,fx,tot,h:H[c]||0,need:need[c]||0})});
+ lines.sort((a,b)=>b.tot-a.tot);r.lines=lines;
+ if(L.tot>cap){r.bad=1;r.warn.unshift(['r','Your fixed costs alone (UGX '+F(L.tot)+') are '+Math.round(L.tot/I.inc*100)+'% of this income, more than the '+cp+'% cap. This target is not reachable unless a fixed cost like rent changes, or you raise the cap to about '+r.needPct+'%.'])}
+ return r}
+function bgTot(r){return r.lines.reduce((a,l)=>a+(l.c in bgE?bgE[l.c]:l.tot),0)}
+function bgOpen(){bgE={};bgUI();const d=$('#dlg');if(!d.open)d.showModal()}
+function bgSet(k,v){const B=BS();if(k=='pct')B.pct=Math.min(95,Math.max(5,Math.round(+v)||30));else if(k=='buf'||k=='trim'||k=='gig')B[k]=+v;else B[k]=v;bgE={};bgSv();bgUI()}
+function bgEd(el){bgE[el.dataset.k]=pa(el.value);bgUI()}
+function bgGo(id){if(!confirm('This is a locked cost. Only change it if it really changed (for example you are moving house). Your old budgets stay in the history. Continue?'))return;dlg.close();editC(id)}
+function bgUI(){const B=BS(),r=bgGen(),d=$('#dlg'),mo=bgMo(6),lm=mtot(bgMo(1)[0]);
+ let h=`<h3 style="margin:0">✨ Smart budget</h3><small>Builds category budgets under a cap, using money you can count on. Nothing changes until you press Apply.</small>
+ <div class=bgs><div class=bg2><label>Percent<input inputmode=numeric value="${B.pct}" onchange="bgSet('pct',this.value)"></label><label>This percent is your<select onchange="bgSet('mode',this.value)"><option value=cap${B.mode=='cap'?' selected':''}>Spending cap</option><option value=sav${B.mode=='sav'?' selected':''}>Savings target</option></select></label></div>
+ <label>Income to base it on<select onchange="bgSet('base',this.value)"><option value=rel${B.base=='rel'?' selected':''}>Reliable income (recommended)</option><option value=fig${B.base=='fig'?' selected':''}>A figure I type</option><option value=mon${B.base=='mon'?' selected':''}>A past month's income</option></select></label>
+ ${B.base=='fig'?`<label>Monthly income (UGX)<input inputmode=decimal value="${E(B.fig||'')}" placeholder="e.g. 2.5m" onchange="bgSet('fig',this.value)"></label>`:''}
+ ${B.base=='mon'?`<label>Which month<select onchange="bgSet('mon',this.value)">${mo.map(m=>`<option${m==(B.mon||mo[0])?' selected':''}>${m}</option>`).join('')}</select></label>`:''}
+ ${B.base=='rel'?`<label style="display:flex;gap:8px;align-items:center"><input type=checkbox style="width:auto;margin:0" ${B.gig?'checked':''} onchange="bgSet('gig',this.checked?1:0)"> Add a small gig floor (half of your lowest non-monthly income month: UGX ${sh(r.I.floor)})</label>`:''}
+ <div class=bg2><label>Safety buffer<select onchange="bgSet('buf',this.value)">${[0,5,10].map(v=>`<option value=${v}${B.buf==v?' selected':''}>${v}% of the cap</option>`).join('')}</select></label><label>Trim wants by<select onchange="bgSet('trim',this.value)">${[0,5,10].map(v=>`<option value=${v}${B.trim==v?' selected':''}>${v}%</option>`).join('')}</select></label></div></div>`;
+ if(r.err){d.innerHTML=h+`<div class="bgw a">${E(r.err)}</div><div class=row><button type=button onclick=dlg.close()>Close</button></div>`;return}
+ const cp=B.mode=='sav'?100-B.pct:B.pct,sub=bgTot(r),tt=sub+r.L.debt,left=r.I.inc-tt,np=B.mode=='sav'?100-r.needPct:r.needPct;
+ h+=`<div class=bgk><div class=top><small>Income base (${E(r.I.lab)})</small><b>UGX ${F(r.I.inc)}</b></div><div class=top><small>Cap (${cp}% of income)</small><b>UGX ${F(r.cap)}</b></div><div class=top><small>Locked: rent, bills, debts</small><b>UGX ${F(r.L.tot)}</b></div><div class=top><small>This budget totals${r.L.debt?' (with debts)':''}</small><b style="color:var(--${tt>r.cap+.5?'red':'green'})">UGX ${F(tt)}</b></div><div class=top><small>Left for savings and goals</small><b style="color:var(--${left<0?'red':'green'})">UGX ${F(left)}</b></div></div>`;
+ if(r.I.note)h+=`<div class="bgw a">${E(r.I.note)}</div>`;
+ r.warn.forEach(([c,t])=>h+=`<div class="bgw ${c}">${E(t)}</div>`);
+ if(r.bad)h+=`<div class=row style="justify-content:flex-start;margin:0 0 8px"><button type=button class=s onclick="bgSet('pct',${np})">Use ${np}% instead</button></div>`;
+ if(r.noHist)h+=`<div class="bgw a">Not enough spending history yet, so the split uses typical proportions. It gets smarter as you log expenses.</div>`;
+ h+=`<small><b>Proposed budget</b> · "avg" is your 3-month average</small><div class=bgl>${r.lines.map(l=>{const v=l.c in bgE?bgE[l.c]:l.tot;return`<div class=bmr><div><b>${l.lk?'🔒 ':''}${E(l.c)}</b><small>${l.lk?'Locked '+sh(l.lk)+(l.fx?' + flexible '+sh(l.fx):''):(l.need&&l.fx<l.need*.97?'Trimmed '+Math.round((1-l.fx/l.need)*100)+'%':'Flexible')} · avg ${sh(l.h)}</small></div><input inputmode=decimal value="${F(v)}" data-k="${E(l.c)}" onchange="bgEd(this)" aria-label="${E(l.c)} budget"></div>`}).join('')||'<small>Nothing to budget yet.</small>'}</div>`;
+ if(r.L.debt)h+=`<small>Debt repayments of UGX ${F(r.L.debt)} a month count against the cap but are not a budget line.</small>`;
+ if(r.L.items.length)h+=`<details style="margin-top:8px"><summary><small><b>Locked costs</b> (change only if they really changed)</small></summary>${r.L.items.map(i=>`<div class=bmr><div><b>${E(i.t)}</b><small>${E(i.k)} · UGX ${F(i.a)} a month</small></div><button type=button class=s onclick="bgGo(${i.id})">Change</button></div>`).join('')}</details>`;
+ if(lm.e)h+=`<div class="bgw g" style="margin-top:10px">For comparison, last month you earned UGX ${sh(lm.i)} and spent UGX ${sh(lm.e)}. This budget is ${tt<lm.e?Math.round((1-tt/lm.e)*100)+'% below':tt>lm.e?Math.round((tt/lm.e-1)*100)+'% above':'equal to'} that.</div>`;
+ h+=`<small style="display:block;margin-top:8px">Tip: when gig money arrives, send about half to savings or debt first. It is not part of this budget, so a good gig month becomes a savings month.</small>`;
+ const hs=(S.bh||[]).slice(-3).reverse();if(hs.length)h+=`<details style="margin-top:8px"><summary><small><b>Budget history</b></small></summary>${hs.map(v=>`<small style="display:block;margin-top:4px">${E(v.on)} · ${v.pct}% ${v.mode=='sav'?'savings target':'cap'} of UGX ${sh(v.inc)} · total UGX ${sh(v.tot)}</small>`).join('')}</details>`;
+ h+=`<div class=row><button type=button onclick=dlg.close()>Cancel</button><button type=button class=p ${r.lines.length?'':'disabled'} onclick=bgApply()>Apply budget</button></div>`;
+ d.innerHTML=h}
+function bgApply(){const r=bgGen(),B=BS();if(r.err||!r.lines.length)return;const nb={};r.lines.forEach(l=>{const v=l.c in bgE?bgE[l.c]:l.tot;if(v>0)nb[l.c]=v});
+ const tot=Object.values(nb).reduce((a,x)=>a+x,0),cc=[...new Set([...(S.set.cc||[]),...Object.keys(nb).filter(k=>!BASEC.includes(k))])];
+ UD('New budget applied',()=>{S.bh=S.bh||[];S.bh.push({on:td(),ym:ym0(0),bd:{...nb},pct:B.pct,mode:B.mode,base:B.base,inc:r.I.inc,tot});S.bh=S.bh.slice(-12);S.bd=nb;S.set.cc=cc});syncCats();dlg.close()}
 
 $('#fab').onclick=fabMenu;
 if(lkS&&sessionStorage.s)lockNow();if(sessionStorage.s)sp.remove();render();persist(1);matchMedia('(prefers-color-scheme:dark)').onchange=theme;if('serviceWorker'in navigator)navigator.serviceWorker.register('sw.js');
