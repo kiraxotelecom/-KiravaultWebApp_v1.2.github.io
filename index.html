@@ -483,9 +483,9 @@ V.home=()=>{const s=sm(),nm=S.set.name,hr=new Date().getHours(),gr=hr<12?'Good m
  ${!S.tx.length&&S.acc.every(a=>!a.b)?C('amber','ab',H('Get started','amber')+'<b style="display:block">Set your opening balances</b><small>Enter what you hold in Bank, Mobile Money and Cash.</small>',"onclick=\"go('more')\""):''}
  ${at.length?C('amber','ab',H('Needs attention','amber')+at.slice(0,6).map(([t,k,a])=>`<div class="${k}" ${a?`onclick="${a}" style="cursor:pointer;margin:4px 0"`:''}><b>${E(t)}</b></div>`).join('')+(at.length>6?`<small>+${at.length-6} more</small>`:'')):''}
  <div class=hg><div class="sc t"><small>Available balance</small><b>UGX ${F(s.av)}</b><small>Bank, Mobile Money and Cash</small>${spark()}</div>
- <div class="sc ${neg?'x':'b'}"><small>${neg?'Short by':'Safe to spend'}</small><b>UGX ${F(neg?s.short:s.safe)}</b><small>After this month's commitments</small></div>
- <div class="sc p"><small>Expected income</small><b>UGX ${F(s.aw)}</b><small>Not counted until received</small></div><div class="sc a"><small>Still to pay</small><b>UGX ${F(s.cm)}</b><small>Bills, debts and savings left</small></div><div class="sc g"><small>This month's income</small><b>UGX ${F(m.i)}</b>${vs(m.i,pm.i,1)}</div>
- <div class="sc r"><small>This month's expenses</small><b>UGX ${F(m.e)}</b>${vs(m.e,pm.e,0)}</div></div>
+ <div class="sc ${neg?'x':'b'}"><small>${neg?'Short by':'Safe to spend'}</small><b>UGX ${F(neg?s.short:s.safe)}</b><small>After this month's commitments</small>${sk()}</div>
+ <div class="sc p"><small>Expected income</small><b>UGX ${F(s.aw)}</b><small>Not counted until received</small></div><div class="sc a"><small>Still to pay</small><b>UGX ${F(s.cm)}</b><small>Bills, debts and savings left</small></div><div class="sc g"><small>This month's income</small><b>UGX ${F(m.i)}</b>${tr(m.i,pm.i,1)}</div>
+ <div class="sc r"><small>This month's expenses</small><b>UGX ${F(m.e)}</b>${tr(m.e,pm.e,0)}</div></div>
  <div class=cols><div>
   ${C('blue','',H('Upcoming','blue')+(up.map(cRow).join('')||'<br><small>Nothing pending.</small>'))}
   </div><div>
@@ -586,6 +586,9 @@ function addX(){ask('Expected income',[{k:'client',l:'From (client or employer)'
  else S.ex.push({id:id(),client:f.client,project:f.project,amt:a,dt:f.dt,src:f.src,acc:f.acc});save()})}
 function spark(){const p=hist(30),mn=Math.min(...p),mx=Math.max(...p),rg=mx-mn||1,d=p.map((v,i)=>`${i?'L':'M'}${i/29*100},${22-(v-mn)/rg*20}`).join('');return`<svg viewBox="0 0 100 24" preserveAspectRatio=none style="width:100%;height:28px;margin-top:8px"><path d="${d}L100,24L0,24Z" fill="#fff" opacity=.16 /><path d="${d}" fill=none stroke="#fff" stroke-width=2 vector-effect=non-scaling-stroke /></svg>`}
 const th0=theme;theme=function(){th0();const r=document.documentElement.style;r.setProperty('--teal','var(--accent)');r.setProperty('--tb','color-mix(in srgb,var(--accent) 14%,var(--card))')};
+function sk(){const s=sm(),o=[];for(let k=29;k>=0;k--){const d=addD(td(),-k),af=S.tx.filter(x=>x.date>d),bal=s.av-af.reduce((a,x)=>a+(x.type=='income'?x.amt:x.type=='transfer'?0:-x.amt),0),cm=s.cm+af.filter(x=>x.cid||x.gid).reduce((a,x)=>a+x.amt,0);o.push(Math.max(bal-cm,0))}
+ const mn=Math.min(...o),mx=Math.max(...o),rg=mx-mn||1,d=o.map((v,i)=>`${i?'L':'M'}${i/29*100},${22-(v-mn)/rg*20}`).join('');return`<svg viewBox="0 0 100 24" preserveAspectRatio=none style="width:100%;height:28px;margin-top:8px"><path d="${d}L100,24L0,24Z" fill="#fff" opacity=.16 /><path d="${d}" fill=none stroke="#fff" stroke-width=2 vector-effect=non-scaling-stroke /></svg>`}
+function tr(a,b,up){if(!b)return'<small>First month tracked</small>';const c=(a>=b)==up?'green':'red';return`<div style="display:flex;align-items:center;gap:6px;margin-top:2px"><span style="display:inline-flex;gap:3px;padding:2px 8px;border-radius:20px;font-size:12px;font-weight:700;color:var(--${c});background:color-mix(in srgb,var(--${c}) 16%,transparent)">${a>=b?'▲':'▼'} ${Math.abs(Math.round((a-b)/b*100))}%</span><small>vs last month</small></div>`}
 $('#fab').onclick=fabMenu;
 if(lkS)lockNow();if(sessionStorage.s)sp.remove();render();persist(1);matchMedia('(prefers-color-scheme:dark)').onchange=theme;if('serviceWorker'in navigator)navigator.serviceWorker.register('sw.js');
 </script></body></html>
