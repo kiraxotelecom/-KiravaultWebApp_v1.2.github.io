@@ -185,7 +185,7 @@ body.locked>:not(#lk):not(#sp){visibility:visible!important;filter:blur(18px) sa
 [data-t]{cursor:pointer;-webkit-tap-highlight-color:transparent;transition:transform .12s}[data-t]:active{transform:scale(.98)}
 .sc[data-t]{position:relative}.sc[data-t]::before{content:'›';z-index:1;position:absolute;top:10px;right:14px;font-size:20px;line-height:1;opacity:.55}
 .accl{margin:8px 0 0;display:grid;gap:3px}.accl div{display:flex;justify-content:space-between;gap:8px;font-size:12px;color:#ffffffe0}.accl span:last-child{font-weight:700}
-</style></head><body><header id=hd></header><main id=m></main><nav id=nav></nav><dialog id=dlg></dialog><div id=toast hidden></div><div id=lk hidden></div><button id=fab class=p onclick=quickAdd()>+</button><div id=sp><button class=gb onclick="sp.remove();sessionStorage.s=1;persist(1)">Get Started</button></div>
+</style></head><body><header id=hd></header><main id=m></main><nav id=nav></nav><dialog id=dlg></dialog><div id=toast hidden></div><div id=lk hidden></div><button id=fab class=p onclick=quickAdd()>+</button><div id=sp><button class=gb onclick="sp.remove();sessionStorage.s=1;persist(1);if(lkS)lockNow()">Get Started</button></div>
 <script>
 let HM=0;
 const $=s=>document.querySelector(s),K='kiravault.web.v1',E=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])),F=n=>HM?'••••':Math.round(n).toLocaleString('en-US'),
@@ -877,5 +877,5 @@ const ask2=ask;ask=function(t,f,ok){ask2(t,f,ok);const sl=document.querySelector
   const op=document.createElement('option');op.value=op.textContent=val;sl.insertBefore(op,sl.querySelector('option[value=__new]'));sl.value=val},true)};
 
 $('#fab').onclick=fabMenu;
-if(lkS)lockNow();if(sessionStorage.s)sp.remove();render();persist(1);matchMedia('(prefers-color-scheme:dark)').onchange=theme;if('serviceWorker'in navigator)navigator.serviceWorker.register('sw.js');
+if(lkS&&sessionStorage.s)lockNow();if(sessionStorage.s)sp.remove();render();persist(1);matchMedia('(prefers-color-scheme:dark)').onchange=theme;if('serviceWorker'in navigator)navigator.serviceWorker.register('sw.js');
 </script></body></html>
