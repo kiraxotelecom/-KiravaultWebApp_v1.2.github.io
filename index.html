@@ -577,8 +577,11 @@ function cmMonth(ym,cur){const[Y,M]=ym.split('-').map(Number),f=ym+'-01',l=ym+'-
 
 
 /* v42: every month has its own budget. A month without one shows the closest earlier budget until you edit it. */
-function bdOf(ym){S.bm=S.bm||{};if(S.bm[ym])return S.bm[ym];const ks=Object.keys(S.bm).filter(k=>k<ym).sort();return ks.length?S.bm[ks[ks.length-1]]:(S.bd||{})}
-function bdSet(ym,o){S.bm=S.bm||{};S.bm[ym]={...o}}
+/* v44: a month with no budget gets its OWN copy the first time it is used (this month, next month, or any past month after the first budget). Later edits to another month never change it. Months further ahead only preview the nearest earlier budget until you edit them. */
+function bdOf(ym){S.bm=S.bm||{};if(S.bm[ym])return S.bm[ym];const ks=Object.keys(S.bm).filter(k=>k<ym).sort(),src=ks.length?ks[ks.length-1]:null,base=src?S.bm[src]:(S.bd||{});
+ if(ym<=ym0(1)&&Object.keys(base).length){S.bm[ym]={...base};(S.bmc=S.bmc||{})[ym]=src||'start';try{localStorage.setItem(K,JSON.stringify(S))}catch(e){}return S.bm[ym]}
+ return base}
+function bdSet(ym,o){S.bm=S.bm||{};S.bm[ym]={...o};if(S.bmc)delete S.bmc[ym]}
 const BY=()=>ym0(pmo),bdLab=ym=>new Date(ym+'-01T00:00').toLocaleString('en',{month:'long'});
 let lmB={},lmR=null;
 function lmCalc(){
@@ -614,7 +617,7 @@ function pmBud(ym,cur,n){
   ev=ks.filter(k=>!CV.includes(k)),tl=ev.reduce((a,k)=>a+BD[k],0),tu=ev.reduce((a,k)=>a+(sp[k]||0),0),
   dl=cur?Math.max(1,n-new Date().getDate()+1):0,left=Math.max(0,tl-tu),
   un=Object.entries(sp).filter(([k,v])=>!(k in BD)&&v>0).sort((a,b)=>b[1]-a[1]).slice(0,3),
-  hd=`<div class=k43h><div><b class=k43t>Budget</b><small style="display:block">${S.bm&&S.bm[ym]?'Set for this month only':'Carried over until you edit it'}</small></div><div class=k43b><button class=s onclick=bgOpen()>✨ Smart</button><button class="s p" onclick=budMgr()>Manage</button></div></div>`,
+  hd=`<div class=k43h><div><b class=k43t>Budget</b><small style="display:block">${S.bmc&&S.bmc[ym]?(S.bmc[ym]=='start'?'Starting budget · only '+bdLab(ym)+' changes':'Copied from '+bdLab(S.bmc[ym])+' · only '+bdLab(ym)+' changes'):S.bm&&S.bm[ym]?'Set for this month only':'Preview only · edit to set '+bdLab(ym)}</small></div><div class=k43b><button class=s onclick=bgOpen()>✨ Smart</button><button class="s p" onclick=budMgr()>Manage</button></div></div>`,
   TB=ks.reduce((a,k)=>a+BD[k],0),TS=ks.reduce((a,k)=>a+(sp[k]||0),0),TL=TB-TS,TF=TB?TS/TB:0,TC=TF>=1?'x':TF>=.85?'ua':'t',
   tot=`<div class=k42bs><div class="sc b"><small>Total budget</small><b><span class=cu>UGX</span> ${F(TB)}</b><small>${ks.length} categor${ks.length==1?'y':'ies'}</small></div><div class="sc ${TC}"><small>Total spent</small><b><span class=cu>UGX</span> ${F(TS)}</b><small>${Math.round(TF*100)}% of budget</small></div></div><div class=k42bl><div class=bar style="margin:0"><i style="width:${Math.min(TF,1)*100}%;background:var(--${TF>=1?'red':TF>=.85?'amber':'green'})"></i>${cur?pcT(pc):''}</div><div class=top style="margin-top:8px"><small>${TL>=0?'Left to spend':'Over budget by'}</small><b class="${TL>=0?'g':'r'}">UGX ${F(Math.abs(TL))}</b></div></div>`;
  if(!ks.length)return C('pu','pb',hd+'<br><small>No budgets yet. Copy last month\'s regular spending, tap Smart budget to build one from your income, or use Manage to set limits yourself. Watch how you are doing in Insights.</small>');
