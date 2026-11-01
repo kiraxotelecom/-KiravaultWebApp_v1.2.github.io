@@ -281,10 +281,7 @@ dialog>.row{position:sticky;bottom:calc(var(--dp)*-1);z-index:2;margin:14px calc
 
 /* ===== v44: colourful pop-ups (colour follows what you are adding) ===== */
 dialog{--dc:var(--accent)}
-dialog:has(form[data-dc=exp]){--dc:#FF7A45}dialog:has(form[data-dc=inc]){--dc:var(--green)}dialog:has(form[data-dc=bill]){--dc:var(--amber)}
-dialog:has(form[data-dc=proj]){--dc:#8B5CF6}dialog:has(form[data-dc=goal]){--dc:var(--teal)}dialog:has(form[data-dc=bud]){--dc:#F5A524}
-dialog:has(.k43q){--dc:#F5A524}dialog:has(.bgk){--dc:#8B5CF6}
-dialog{background:linear-gradient(90deg,var(--dc),color-mix(in srgb,var(--dc) 40%,#fff)) top/100% 3px no-repeat,linear-gradient(180deg,color-mix(in srgb,var(--dc) 20%,var(--card)),var(--card) 190px) var(--card);border:1px solid color-mix(in srgb,var(--dc) 38%,var(--line));box-shadow:0 30px 80px -20px #000d,0 -12px 54px -20px var(--dc)}
+dialog{background:linear-gradient(90deg,var(--dc),color-mix(in srgb,var(--dc) 40%,#fff)) top/100% 3px no-repeat,linear-gradient(165deg,color-mix(in srgb,var(--dc) 30%,var(--card)),color-mix(in srgb,var(--dc) 8%,var(--card)) 140px,var(--card) 260px) var(--card);border:1px solid color-mix(in srgb,var(--dc) 38%,var(--line));box-shadow:0 30px 80px -20px #000d,0 -12px 54px -20px var(--dc)}
 .kt{display:flex;align-items:center;gap:12px;min-width:0}.kt h3{margin:0}
 .kic{width:40px;height:40px;border-radius:13px;display:grid;place-items:center;font-size:19px;color:#fff;flex:none;background:linear-gradient(135deg,var(--dc),color-mix(in srgb,var(--dc) 55%,#000));box-shadow:0 8px 18px -6px var(--dc),0 1px 0 #ffffff55 inset}
 dialog>h3,.kh h3{font-size:19px}
@@ -296,8 +293,14 @@ dialog input:focus,dialog select:focus{outline:0;border-color:var(--dc);box-shad
 dialog .row button.p,dialog .bgf button.p{background:linear-gradient(135deg,var(--dc),color-mix(in srgb,var(--dc) 60%,#000));color:#fff;font-weight:800;box-shadow:0 10px 22px -8px var(--dc)}
 .kf .row,dialog>.row,.bgf{border-top-color:color-mix(in srgb,var(--dc) 24%,var(--line))}
 .k43q button{background:color-mix(in srgb,var(--dc) 15%,var(--card));border:1px solid color-mix(in srgb,var(--dc) 32%,var(--line))}
-.fm button{border-left:4px solid var(--c,var(--dc))}.fm button:nth-child(1){--c:#FFB020}.fm button:nth-child(2){--c:#FF7A45}.fm button:nth-child(3){--c:#8B5CF6}.fm button:nth-child(4){--c:var(--amber)}.fm button:nth-child(5){--c:var(--green)}
+.fm button{border-left:4px solid var(--dc);background:color-mix(in srgb,var(--dc) 8%,var(--card))}
 @media(max-width:600px){dialog::before{background:color-mix(in srgb,var(--dc) 55%,transparent)}}
+
+/* ===== v46: budget box gradient + three mini cards (accent colour only) ===== */
+.k45bc{background:linear-gradient(145deg,color-mix(in srgb,var(--accent) 26%,var(--card)),color-mix(in srgb,var(--accent) 8%,var(--card)) 55%,var(--card));border:1px solid color-mix(in srgb,var(--accent) 38%,var(--line));box-shadow:0 18px 40px -26px var(--accent)}
+.k45s{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:12px 0 10px}
+.k45c{min-width:0;padding:10px 10px 11px;border-radius:14px;background:color-mix(in srgb,var(--accent) 12%,var(--card));border:1px solid color-mix(in srgb,var(--accent) 26%,var(--line))}
+.k45c small{display:block;font-size:11.5px;font-weight:600}.k45c b{display:block;margin-top:3px;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 </style></head><body><header id=hd></header><main id=m></main><nav id=nav></nav><dialog id=dlg></dialog><div id=toast hidden></div><div id=lk hidden></div><button id=fab class=p onclick=quickAdd()>+</button><div id=sp><button class=gb onclick="sp.remove();sessionStorage.s=1;persist(1);if(lkS)lockNow()">Get Started</button></div>
 <script>
 let HM=0;
@@ -631,18 +634,19 @@ function lmApply(){const ym=BY(),nb={...bdOf(ym)};Object.entries(lmB).forEach(([
  UD('Budget copied into '+bdLab(ym),()=>{bdSet(ym,nb);S.set.cc=cc});syncCats();dlg.close()}
 function pmGo(m){mv='p';pmo=+m||0;go('money')}
 function bdEdit(k){const ym=BY(),b=bdOf(ym);ask(k+' budget',[{k:'l',l:'Limit for '+bdLab(ym)+' (0 removes it)',m:1,v:b[k]||''}],f=>{const l=pa(f.l);UD('Budget updated for '+bdLab(ym),()=>{const nb={...bdOf(ym)};if(l)nb[k]=l;else delete nb[k];bdSet(ym,nb)})})}
+function K45(x){return`<div class="card k45bc">${x}</div>`}
 function pmBud(ym,cur,n){
  const BD=bdOf(ym),pc=cur?paceF():null,CV=['Rent','Bills','Internet'],sp=Object.fromEntries(gp(mtot(ym).t.filter(x=>x.type=='expense'),x=>x.cat||'Others')),
   ks=Object.keys(BD).sort((a,b)=>(CV.includes(a)?1:0)-(CV.includes(b)?1:0)||(sp[b]||0)/BD[b]-(sp[a]||0)/BD[a]),
   ev=ks.filter(k=>!CV.includes(k)),tl=ev.reduce((a,k)=>a+BD[k],0),tu=ev.reduce((a,k)=>a+(sp[k]||0),0),
   dl=cur?Math.max(1,n-new Date().getDate()+1):0,left=Math.max(0,tl-tu),
   un=Object.entries(sp).filter(([k,v])=>!(k in BD)&&v>0).sort((a,b)=>b[1]-a[1]).slice(0,3),
-  hd=`<div class=k43h><div><b class=k43t>Budget</b><small style="display:block">${S.bmc&&S.bmc[ym]?(S.bmc[ym]=='start'?'Starting budget · only '+bdLab(ym)+' changes':'Copied from '+bdLab(S.bmc[ym])+' · only '+bdLab(ym)+' changes'):S.bm&&S.bm[ym]?'Set for this month only':'Preview only · edit to set '+bdLab(ym)}</small></div><div class=k43b><button class=s onclick=bgOpen()>✨ Smart</button><button class="s p" onclick=budMgr()>Manage</button></div></div>`,
+  hd=`<div class=k43h><div><b class=k43t>Budget</b><small style="display:block">${S.bmc&&S.bmc[ym]?(S.bmc[ym]=='start'?'Starting budget · only '+bdLab(ym)+' changes':'Copied from '+bdLab(S.bmc[ym])+' · only '+bdLab(ym)+' changes'):S.bm&&S.bm[ym]?'':'Preview only · edit to set '+bdLab(ym)}</small></div><div class=k43b><button class=s onclick=bgOpen()>✨ Smart</button><button class="s p" onclick=budMgr()>Manage</button></div></div>`,
   TB=ks.reduce((a,k)=>a+BD[k],0),TS=ks.reduce((a,k)=>a+(sp[k]||0),0),TL=TB-TS,TF=TB?TS/TB:0,
   fc=TF>=1?'red':TF>=.85?'amber':'green',
-  tot=`<div class=k9bsum><div><small>Total budget</small><b><span class=cu>UGX</span> ${sh(TB)}</b></div><div><small>Spent</small><b style="color:var(--${fc})"><span class=cu>UGX</span> ${sh(TS)}</b></div></div><div class=k9ptp><div class=bar style="height:10px"><i style="width:${Math.min(TF,1)*100}%;background:var(--${fc})"></i>${cur?pcT(pc):''}</div><b>${Math.round(TF*100)}%</b></div><div class=top style="margin-bottom:6px"><small>${TL>=0?'Left to spend':'Over budget by'}</small><b class="${TL>=0?'g':'r'}">UGX ${sh(Math.abs(TL))}</b></div>`;
- if(!ks.length)return C('amber','',hd+'<br><small>No budgets yet. Copy last month\'s regular spending, tap Smart budget to build one from your income, or use Manage to set limits yourself. Watch how you are doing in Insights.</small>');
- return C('amber','',hd+tot
+  tot=`<div class=k45s><div class=k45c><small>Total budget</small><b><span class=cu>UGX</span> ${sh(TB)}</b></div><div class=k45c><small>Spent</small><b style="color:var(--${fc})"><span class=cu>UGX</span> ${sh(TS)}</b></div><div class=k45c><small>${TL>=0?'Left':'Over by'}</small><b class="${TL>=0?'g':'r'}"><span class=cu>UGX</span> ${sh(Math.abs(TL))}</b></div></div><div class=k9ptp><div class=bar style="height:10px"><i style="width:${Math.min(TF,1)*100}%;background:var(--${fc})"></i>${cur?pcT(pc):''}</div><b>${Math.round(TF*100)}%</b></div>`;
+ if(!ks.length)return K45(hd+'<br><small>No budgets yet. Copy last month\'s regular spending, tap Smart budget to build one from your income, or use Manage to set limits yourself. Watch how you are doing in Insights.</small>');
+ return K45(hd+tot
   +(cur&&tl?`<small>${tu>=tl?'Everyday budgets are used up for this month.':'UGX '+sh(left)+' left, about <b>UGX '+sh(left/dl)+' a day</b> for the next '+dl+' day'+(dl>1?'s':'')+'.'}</small>`:'')
   +ks.slice(0,pmAll?ks.length:4).map(k=>{const l=BD[k],u=sp[k]||0,fr=u/l,c=pcC(fr,pc);return`<div class=k9bgr style="--c:var(--${c});cursor:pointer" data-c="${E(k)}" onclick="bdEdit(this.dataset.c)"><span class=k9txi>${CATI[k]||E(k[0].toUpperCase())}</span><div class=k9txm><div class=top><b>${E(k)}</b><span class=k9bgp>${Math.round(fr*100)}%</span></div><div class=bar style="margin:6px 0 3px"><i style="width:${Math.min(fr,1)*100}%;background:var(--${c})"></i>${pcT(pc)}</div><small>${CV.includes(k)?'In your bills · ':''}${fr>=1?(u>l?'Over by '+sh(u-l):'Fully used'):sh(l-u)+' left'}${pc!=null&&fr<1&&fr>pc+.15?' · ahead of pace':''}</small></div><div class=k9txa><b style="color:var(--${c})">${sh(u)}</b><small>of ${sh(l)}</small></div></div>`}).join('')
   +(ks.length>4?`<button class=s style="width:100%;margin-top:14px" onclick="pmAll=${pmAll?0:1};render()">${pmAll?'Show less':'Show all '+ks.length+' categories'}</button>`:'')
