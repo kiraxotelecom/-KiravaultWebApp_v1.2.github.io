@@ -150,12 +150,13 @@ img.logo{width:min(92%,400px);margin:4px 0}
 .bm-bd{border-left:1px solid #75532f;padding-left:9px;color:#d6c3a5;font-size:10.5px;line-height:1.45}.bm-bd b{color:#f0d49f;font-weight:600}.bm-bd em{display:block;color:var(--gold);font-style:normal;margin-top:3px;font-size:10px}
 .bm-play{width:36px;height:36px;border-radius:50%;border:1px solid #f1cc7b;color:#ffe4a8;background:linear-gradient(145deg,#a43d28,#4c1712);box-shadow:0 0 0 3px #392316,0 5px 12px #000a;display:grid;place-items:center;font-size:13px}
 .hs{margin-top:8px;color:#ffe08a;font-weight:bold;letter-spacing:.06em;text-shadow:0 0 14px #e6a633}
-</style></head><body><div id="app">
+.qb{height:7px;background:#000a;border:1px solid var(--gold);border-radius:4px;margin:5px 0 2px;overflow:hidden}.qb i{display:block;height:100%;background:linear-gradient(90deg,#b27a35,#ffd98a)}.qh{margin:10px 0 2px;font-size:.9rem;text-align:left;width:100%}
+#chestBox.pop2{transform:scale(1.3) rotate(-6deg)}</style></head><body><div id="app">
 
 <section class="scr on" id="s-home" style="--bg:url(img/menu_bg.webp)">
  <div class="bar"><span></span><div class="r"><button class="ib" data-go="s-set" aria-label="Settings" data-ic="gear"></button></div></div>
  <img class="logo" src="img/title.webp" alt="MindStrike Number Wars">
- <button id="play">ENTER THE ARENA</button><button id="dailyBtn"></button><button id="shopBtn"></button><button data-go="s-hall">🏆 HALL OF GLORY</button><button id="how">HOW TO PLAY</button><div id="prof"></div>
+ <button id="play">ENTER THE ARENA</button><button id="dailyBtn"></button><button id="shopBtn"></button><button id="questBtn"></button><button data-go="s-hall">🏆 HALL OF GLORY</button><button id="how">HOW TO PLAY</button><div id="prof"></div>
 </section>
 
 <section class="scr" id="s-mode" style="--bg:url(img/menu_bg.webp)">
@@ -210,6 +211,11 @@ img.logo{width:min(92%,400px);margin:4px 0}
  <div class="plate"><input id="dNum" type="text" readonly inputmode="none" placeholder="?"></div><div class="kp" id="dkp"></div>
 </section>
 
+<section class="scr" id="s-quests" style="--bg:url(img/menu_bg.webp)">
+ <div class="bar"><button class="ib bk" aria-label="Back" data-ic="back"></button><span></span></div>
+ <h2>📜 QUESTS &amp; REWARDS</h2><div id="qList" style="width:100%;display:flex;flex-direction:column;gap:8px"></div>
+</section>
+
 <section class="scr" id="s-hall" style="--bg:url(img/menu_bg.webp)">
  <div class="bar"><button class="ib bk" aria-label="Back" data-ic="back"></button><span></span></div>
  <h2>🏆 HALL OF GLORY</h2><div id="lb"></div>
@@ -240,6 +246,7 @@ img.logo{width:min(92%,400px);margin:4px 0}
 <button id="secX" style="width:100%;margin-top:10px">CLOSE</button></div></div><div id="gate"><i class="gd gl"></i><i class="gd gr"></i></div><div id="fx"></div><div id="toast"></div><div id="fl"></div><div id="bt"></div>
 <div id="bolt"><svg viewBox="0 0 100 160" preserveAspectRatio="none"><polyline points="58,0 44,38 56,40 38,82 52,84 30,130 40,132 28,160"/><polyline points="82,0 72,30 80,34 66,70 76,74 62,112 70,114 60,160"/><polyline points="20,0 28,26 20,30 30,64 22,68 34,100"/></svg></div>
 <div class="pop" id="wp" style="z-index:11"><h2>⚡ WEAK POINT!</h2><div id="wpb"><div id="wpz"></div><i id="wpm"></i></div><div id="wpt"></div></div><div class="pop" id="pause"><h2>PAUSED</h2><button id="resume">RESUME</button><button id="restart">RESTART MATCH</button><button id="pSet">SETTINGS</button><button id="pHow">HOW TO PLAY</button><button id="quit">QUIT TO MENU</button></div>
+<div class="pop" id="chest" style="z-index:12"><div class="card" style="text-align:center;width:min(92%,360px)"><h2>🎁 DAILY CHEST</h2><div id="chestDays" class="row" style="margin:6px 0"></div><div id="chestBox" style="font-size:4.2rem;cursor:pointer;transition:transform .2s">🎁</div><p id="chestTxt">Tap the chest to open it!</p><button id="chestBtn" style="width:100%">OPEN</button></div></div>
 <div class="pop" id="pass" style="z-index:10"><h2>PASS THE DEVICE</h2><div class="big" id="passname"></div><div id="passsp"></div><button id="ready">I AM READY</button></div>
 <div class="pop" id="pop" style="pointer-events:none"><img id="popimg" alt=""></div>
 <div class="pop" id="help"><div class="card" id="helpBody"></div></div>
@@ -358,7 +365,7 @@ function afterTurn(){if(G.done)return;const t=G.M.t,w=G.cur;
 function award(who,tries,risky){let pts=Math.round((PTS[tries]||3)*G.D.mult)*(risky?3:1),crit=tries===1;if(crit)pts*=2;
  const c=++G.combo[who];G.st[who].best=Math.max(G.st[who].best,c);G.st[who].ok++;if(crit)G.st[who].crit++;
  if(c>=2)pts+=4*(c-1);if(c===5)pts+=15;if(G.special==='DOUBLE')pts*=2;if(G.mut==='rush')pts=Math.round(pts*1.25);if(G.mut==='lean')pts=Math.round(pts*1.5);if(Math.random()<.05)pts+=10;
- G.score[who]+=pts;G.wins[who]++;fxWin(who,pts,c,crit);return{pts,crit,c}}
+ G.score[who]+=pts;G.wins[who]++;fxWin(who,pts,c,crit);if(who===0&&G.mode==='AI'){qEv('round');if(tries===1)qEv('first');if(crit)qEv('crit');qMax('combo',c)}return{pts,crit,c}}
 function temp(g){const span=Math.max(1,G.hi-G.lo),c=1-Math.abs(g-G.secret)/span;
  const t=c>.85?'blazing':c>.6?'hot':c>.35?'warm':c>.15?'cold':'freezing';
  const L={blazing:'blazing hot!',hot:'hot',warm:'warm',cold:'cold',freezing:'freezing'};
@@ -397,7 +404,7 @@ function failTurn(timeout){const w=G.cur,rf=G.rf,rev=G.boss?'':` It was ${G.secr
   G.combo[w]=0;sfx('buzz');shake();vib([70,40,70]);if(G.mode==='AI'&&w===0)ft('😈 HA!');
   msg=(timeout?`TIME'S UP! Round forfeited.${rev}`:`Out of attempts!${rev}`)+pen+dp}
  render(msg);later(afterTurn,1500)}
-function usePow(n){if(!canAct())return;const w=G.cur,rf=G.rf;
+function usePow(n){if(!canAct())return;if(n!=='INTEL')G.powUsed=1;const w=G.cur,rf=G.rf;
  if(n==='INTEL'){$('#secPop').classList.add('on');return}
  if(n==='DESP'){if(!despOK())return;G.desp[w]={used:1,active:1};sfx('powerup');return render('DESPERATION — win this round for +25, lose it for -10!')}
  if(G.pow[w][n]<=0)return;const act={SCAN:rf.scanned,SHIELD:rf.shield,FOCUS:rf.focus,RISK:rf.risk,STEAL:rf.steal,JAM:0}[n];if(act)return;
@@ -411,7 +418,7 @@ function usePow(n){if(!canAct())return;const w=G.cur,rf=G.rf;
  render(m)}
 const despOK=()=>G&&!G.desp[G.cur].used&&(G.score[1-G.cur]-G.score[G.cur])>=DESP_T;
 const intelCost=t=>[1,2,3][Math.min(G.intelUses[G.cur][t]||0,2)];
-function useIntel(t){if(!canAct()||G.rf.intelUsed.includes(t))return;const w=G.cur,c=intelCost(t);
+function useIntel(t){if(!canAct()||G.rf.intelUsed.includes(t))return;G.powUsed=1;const w=G.cur,c=intelCost(t);
  if(G.pow[w].SCAN<c){$('#msg').textContent=`Needs ${c} SCAN charges.`;sfx('buzz');return}
  G.pow[w].SCAN-=c;G.rf.intelUsed.push(t);G.intelUses[w][t]=(G.intelUses[w][t]||0)+1;sfx('powerup');const mid=(G.lo+G.hi)>>1;let r;
  if(t==='DIRECTION')r=`BATTLE SENSE: the secret is ${G.secret>mid?'above':'at or below'} the middle.`;
@@ -429,7 +436,7 @@ function enterBoss(trig){const[lo,hi]=G.D.boss,o=1-trig;G.boss=true;G.cur=trig;G
  later(()=>{G.busy=false;G.round=G.round;startBossFirst()},1600)}
 function startBossFirst(){const first=G.cur;G.cur=first;G.rf=newRF();G.att=0;G.guesses=0;G.hist=[];G.jam=0;G.special='BOSS';const v=G.vit[G.cur];G.maxAtt=G.mode==='PVP'?Math.max(2,v-G.broken):v;timerReset();
  render(`${nm(G.cur)}, shatter his shields!`);if(G.mode==='AI'&&G.cur===1)later(aiPlay,700)}
-function layerHit(who){shatter(G.broken);G.layers--;G.broken++;burst(['💥','🛡','✨','⚡'],26);shake();vib([60,40,100]);tone(110,.35,'sawtooth',.2);
+function layerHit(who){if(who===0&&G.mode==='AI')qEv('layer');shatter(G.broken);G.layers--;G.broken++;burst(['💥','🛡','✨','⚡'],26);shake();vib([60,40,100]);tone(110,.35,'sawtooth',.2);
  if(G.layers<=0){const d=G.dmg;return finish(d[0]===d[1]?who:(d[0]>d[1]?0:1))}
  const w=Math.max(MINW,Math.floor((G.hi-G.lo)*SHRINK)),h=w>>1;let lo=Math.max(G.lo,Math.min(G.secret-h,G.hi-w)),hi=Math.min(G.hi,lo+w);lo=Math.max(G.lo,hi-w);
  G.lo=lo;G.hi=hi;G.kLo=lo;G.kHi=hi;G.secret=rnd(lo,hi);G.armor=ARMOR;G.att=0;G.guesses=0;G.hist=[];G.rf=newRF();timerReset();sfx('powerup');
@@ -481,20 +488,20 @@ addEventListener('keydown',e=>{const d=$('#s-daily').classList.contains('on'),g=
  if(/^\d$/.test(e.key)&&i.value.length<3)i.value+=e.key;else if(e.key==='Backspace')i.value=i.value.slice(0,-1);else if(e.key==='Enter')(d?dStrike:strike)()});
 document.addEventListener('visibilitychange',()=>{if(document.hidden){openPause();curM&&curM.pause()}else if(!S.mute&&curM)curM.play().catch(()=>{})});
 // progression
-const PRO=Object.assign({xp:0,w:0,m:0,ds:0,dl:'',dres:null,gold:0,inv:{},own:{},th:'',ks:'',ps:'',pm:'',hs:{}},LS.get('ms_pro',{})),RANKS=[['RECRUIT',0],['LEGIONARY',100],['CENTURION',300],['OPTIO',650],['LEGATUS',1200],['IMPERATOR',2500]],rk=()=>RANKS.reduce((a,r,i)=>PRO.xp>=r[1]?i:a,0);
+const PRO=Object.assign({xp:0,w:0,m:0,ds:0,dl:'',dres:null,gold:0,inv:{},own:{},th:'',ks:'',ps:'',pm:'',hs:{},q:null,lc:{last:'',s:0},rr:{}},LS.get('ms_pro',{})),RANKS=[['RECRUIT',0],['LEGIONARY',100],['CENTURION',300],['OPTIO',650],['LEGATUS',1200],['IMPERATOR',2500]],rk=()=>RANKS.reduce((a,r,i)=>PRO.xp>=r[1]?i:a,0);
 const ACH={first:['🏆','FIRST BLOOD','Win your first match'],sniper:['🎯','SNIPER','First-try critical hit'],streak3:['🔥','ON FIRE','3-win combo'],unstop:['⚡','UNSTOPPABLE','5-win combo'],boss:['👹','BOSS BREAKER','Beat Kiraxo in Boss Phase'],comeback:['😤','COMEBACK KID','Win a Desperation round'],daily3:['📅','HABIT FORMED','3-day Daily streak']};
 function toast(h){const t=$('#toast');t.innerHTML=h;t.classList.add('on');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('on'),2800);tone(784,.12,'triangle')}
 function unlock(k){const a=LS.get('ms_ach',{});if(a[k])return;a[k]=1;LS.set('ms_ach',a);toast(`${ACH[k][0]} <b>${ACH[k][1]}</b><br><small>${ACH[k][2]}</small>`)}
 const dk=d=>`${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`,today=()=>dk(new Date()),ydy=()=>dk(new Date(Date.now()-864e5));
 function profUI(){const i=rk(),n=RANKS[i],nx=RANKS[i+1],p=nx?(PRO.xp-n[1])/(nx[1]-n[1])*100:100,ac=Object.keys(LS.get('ms_ach',{})).length,ds=PRO.dl===today()||PRO.dl===ydy()?PRO.ds:0;
  $('#prof').innerHTML=`${PRO.ps?PSK[PRO.ps][0]:'🛡️'} <b>${n[0]}</b> · ${PRO.xp}${nx?' / '+nx[1]:''} XP<div id="xp"><i style="width:${p}%"></i></div>${ds?`🔥 ${ds}-day streak · `:''}🏅 ${ac}/${Object.keys(ACH).length} · ⚔️ ${PRO.w} wins<br>${CM()[1]} <b>${CM()[2]}</b> — ${CM()[3]}`;
- $('#dailyBtn').innerHTML='☀️ DAILY STRIKE'+(PRO.dl===today()?' ✓':'');$('#shopBtn').innerHTML=`🛒 ARMORY · 💰 ${PRO.gold}`}
+ $('#dailyBtn').innerHTML='☀️ DAILY STRIKE'+(PRO.dl===today()?' ✓':'');$('#shopBtn').innerHTML=`🛒 ARMORY · 💰 ${PRO.gold}`;qBadge()}
 const CDIF={Easy:1,Medium:1.6,Hard:2.4},MXP={Quick:1,Standard:1.3,War:1.7,Endless:1.4,Sudden:1.5};
 const tmul=m=>S.timer?(MATCH[m].time<=20?1.5:1.3):1,rwx=(d,m)=>CDIF[d]*MXP[m]*tmul(m);
 function hsCheck(w){const key=`${G.mode}|${G.d}|${G.m}`,sc=G.mode==='PVP'?(w>=0?G.score[w]:0):G.score[0];PRO.hs=PRO.hs||{};const old=PRO.hs[key]||0;G.hs={old,sc,isNew:sc>old&&sc>0};if(G.hs.isNew){PRO.hs[key]=sc;LS.set('ms_pro',PRO)}}
 function xpEnd(win){if(G.mode!=='AI')return 0;const k=rwx(G.d,G.m),r0=rk();
  const xp=Math.round((G.score[0]/2+(win?50:10))*k*(G.tome?1.5:1)),gd=Math.round((G.score[0]/3+(win?30:8))*k*(G.mag?1.5:1))+(G.hs&&G.hs.isNew?25:0);
- PRO.xp+=xp;G.gg=gd;G.rwk=k;PRO.gold+=gd;PRO.m++;if(win){PRO.w++;unlock('first');if(G.boss)unlock('boss')}LS.set('ms_pro',PRO);if(rk()>r0)setTimeout(()=>toast(`⬆️ RANK UP<br><b>${RANKS[rk()][0]}</b>`),1500);return xp}
+ PRO.xp+=xp;G.gg=gd;G.rwk=k;PRO.gold+=gd;PRO.m++;if(win){PRO.w++;unlock('first');if(G.boss)unlock('boss')}LS.set('ms_pro',PRO);if(rk()>r0)setTimeout(()=>toast(`⬆️ RANK UP<br><b>${RANKS[rk()][0]}</b><br><small>Reward waiting in Quests</small>`),1500);return xp}
 const rwHtml=xg=>xg?`<br><b>+${xg} XP · 💰 +${G.gg}</b><br><small>×${G.rwk.toFixed(1)} rewards · rank ×${CDIF[G.d]} · mode ×${MXP[G.m]}${S.timer?' · timed ×'+tmul(G.m):''}${G.hs&&G.hs.isNew?' · +25 high-score bonus':''}${G.tome||G.mag?'<br>📜🧲 boosts applied':''}</small>`:'';
 const hsHtml=()=>G.hs?(G.hs.isNew?`<div class="hs">🏆 NEW HIGH SCORE! ${G.hs.sc}<br><small>${G.D.name} · ${G.M.label}${G.hs.old?' · previous best '+G.hs.old:''}</small></div>`:`<br><small>Best here: ${G.hs.old}</small>`):'';
 function shareIt(){if(navigator.share)navigator.share({text:shareText}).catch(()=>{});else if(navigator.clipboard)navigator.clipboard.writeText(shareText).then(()=>toast('📋 Copied!'))}
@@ -600,7 +607,7 @@ $('#strike').onclick=strike;$('#num').addEventListener('keydown',e=>{if(e.key===
 const lbGet=()=>LS.get('ms_lb',[]);
 function lbShow(){profUI();const l=lbGet();$('#lb').innerHTML=l.length?l.map((e,i)=>`<div class="card" style="margin:0"><b>${['🥇','🥈','🥉','4️⃣','5️⃣'][i]} ${e.n||'UNKNOWN'}</b> · ${e.s} pts<br><small>${e.d}</small></div>`).join(''):'<p style="text-align:center">No champions yet. Enter the arena!</p>'}
 function finish(w){G.finishing=true;G.done=true;G.busy=true;resume();$('#pass').classList.remove('on');
- const draw=w<0,win=!draw&&(G.mode==='PVP'||w===0);play('theme');sfx(win?'fanfare':'buzz');hsCheck(w);const xg=xpEnd(win);if(G.hs.isNew)setTimeout(()=>{burst(['🏆','⭐','✨','🪙'],50);sfx('fanfare');toast(`🏆 <b>NEW HIGH SCORE!</b><br><small>${G.hs.sc} · ${G.D.name} · ${G.M.label}</small>`)},700);$('#again').style.display='';if(win)burst(['🎉','🏆','✨','🪙'],40);shareText=`MindStrike ⚔️ ${draw?'DRAW':win?'VICTORY':'DEFEAT'} · ${G.D.name} · ${G.M.label}\n${G.score[0]}–${G.score[1]} · 🔥 best combo ${G.st[0].best}\n${location.href.split('#')[0]}`;
+ const draw=w<0,win=!draw&&(G.mode==='PVP'||w===0);play('theme');sfx(win?'fanfare':'buzz');hsCheck(w);const xg=xpEnd(win);if(G.mode==='AI'){qEv('match');if(win){qEv('win');if(G.boss)qEv('boss');if(!G.powUsed)qEv('clean');if(G.d==='Hard')qEv('hardwin')}}if(G.hs.isNew){const hs=G.hs,tl=`${G.D.name} · ${G.M.label}`;setTimeout(()=>{burst(['🏆','⭐','✨','🪙'],50);sfx('fanfare');toast(`🏆 <b>NEW HIGH SCORE!</b><br><small>${hs.sc} · ${tl}</small>`)},700)}$('#again').style.display='';if(win)burst(['🎉','🏆','✨','🪙'],40);shareText=`MindStrike ⚔️ ${draw?'DRAW':win?'VICTORY':'DEFEAT'} · ${G.D.name} · ${G.M.label}\n${G.score[0]}–${G.score[1]} · 🔥 best combo ${G.st[0].best}\n${location.href.split('#')[0]}`;
  if(!draw&&(G.mode==='PVP'||w===0)){const l=lbGet();l.push({n:nm(w),s:G.score[w],d:G.D.name+' · '+G.M.label});l.sort((a,b)=>b.s-a.s);LS.set('ms_lb',l.slice(0,5))}
  $('#endt').textContent=draw?'DRAW':(G.mode==='PVP'?`${nm(w)} WINS`:win?'VICTORY':'DEFEAT');
  const st=i=>`${nm(i)}: ${G.score[i]} pts · ${G.st[i].ok} correct · best combo ${G.st[i].best} · ${G.st[i].crit} criticals`;
@@ -623,6 +630,41 @@ function launch(){const o=setup.lastOpts;newGame(o);stack=stack.filter(x=>x!=='s
 $$('[data-m]').forEach(b=>b.onclick=()=>{sfx('click');const pvp=setup.mode==='PVP';
  setup.lastOpts={mode:setup.mode,d:setup.d,m:b.dataset.m,pers:setup.k,names:[S.n1||(pvp?'PLAYER 1':'LEGIONARY'),pvp?(S.n2||'PLAYER 2'):GEN[setup.d]]};launch()});
 $('#again').onclick=launch;$('#home').onclick=home;
+// ---- v11: quests, daily chest, rank rewards ----
+const QD=[['d1','Win 3 rounds','round',3,30,20],['d2','Hit the number on the first try','first',2,40,25],['d3','Win a VS match','win',1,50,30],['d4','Play 2 VS matches','match',2,30,20],['d5','Land a critical hit','crit',1,35,20],['d6','Reach a 3-win combo','combo',3,45,25],['d7','Win a match without powers','clean',1,70,40],['d8','Break 2 shield layers','layer',2,50,30]];
+const QW=[['w1','Win 5 VS matches','win',5,200,100],['w2','Win 25 rounds','round',25,180,90],['w3','Defeat Kiraxo in the Boss Phase twice','boss',2,300,150],['w4','Win an Imperator-rank match','hardwin',1,250,120],['w5','Hit 10 numbers on the first try','first',10,220,110]];
+const CHEST=[{c:25},{c:35},{c:50,inv:{'x:SCAN':1}},{c:60},{c:80,inv:{time:1}},{c:100,inv:{pack:1}},{c:150,inv:{phx:1,bane:1}}];
+const RR={1:{c:75,inv:{pack:1}},2:{c:150,inv:{phx:1,'x:SHIELD':1}},3:{c:250,own:['ps:gladiator']},4:{c:400,own:['ps:praetorian'],inv:{bane:2}},5:{c:800,own:['ps:laurel','th:tyrian'],inv:{mag:2,tome:2}}};
+const nmOf=k=>{const it=SHOP.find(x=>x[0]===k);return it?it[1]+' '+it[2]:k};
+function grant(r){PRO.gold+=r.c||0;const t=[`💰 ${r.c||0}`];for(const k in r.inv||{}){PRO.inv[k]=(PRO.inv[k]||0)+r.inv[k];t.push(`${r.inv[k]}× ${nmOf(k)}`)}(r.own||[]).forEach(k=>{PRO.own[k]=1;t.push('NEW: '+nmOf(k))});if(r.x)PRO.xp+=r.x;LS.set('ms_pro',PRO);return t.join(' · ')}
+function qInit(){PRO.q=PRO.q||{};const dk=today(),wk=String(Math.floor((Date.now()/864e5+3)/7));let ch=0;
+ const draw=(pool,n,sd)=>{const r=mul(seed(sd)),p=[...pool],o=[];while(o.length<n){const[id,nme,e,t,c,x]=p.splice(Math.floor(r()*p.length),1)[0];o.push({id,n:nme,e,t,c,x,p:0,cl:0})}return o};
+ if(PRO.q.dk!==dk){PRO.q.d=draw(QD,3,'qd'+dk);PRO.q.dk=dk;ch=1}
+ if(PRO.q.wk!==wk){PRO.q.w=draw(QW,2,'qw'+wk);PRO.q.wk=wk;ch=1}
+ if(ch)LS.set('ms_pro',PRO)}
+function qEach(f){qInit();[...PRO.q.d,...PRO.q.w].forEach(q=>{if(!q.cl&&q.p<q.t)f(q)})}
+function qDone(q){if(q.p>=q.t){toast(`📜 <b>QUEST COMPLETE</b><br><small>${q.n} — claim it in Quests</small>`);qBadge()}}
+function qEv(e,n=1){qEach(q=>{if(q.e===e){q.p=Math.min(q.t,q.p+n);qDone(q)}});LS.set('ms_pro',PRO)}
+function qMax(e,v){qEach(q=>{if(q.e===e&&v>q.p){q.p=Math.min(q.t,v);qDone(q)}});LS.set('ms_pro',PRO)}
+function qCount(){qInit();return[...PRO.q.d,...PRO.q.w].filter(q=>q.p>=q.t&&!q.cl).length+Object.keys(RR).filter(i=>rk()>=i&&!PRO.rr[i]).length}
+function qBadge(){const b=$('#questBtn');if(!b)return;const n=qCount();b.innerHTML='📜 QUESTS &amp; REWARDS'+(n?` · <b>${n}</b> 🎁`:'')}
+function qUI(){qInit();const row=(q,id)=>{const done=q.p>=q.t;return `<div class="card" style="margin:0;display:flex;align-items:center;gap:10px"><div style="flex:1"><b>${q.n}</b><br><small>💰 ${q.c} · ${q.x} XP</small><div class="qb"><i style="width:${q.p/q.t*100}%"></i></div><small>${q.p}/${q.t}</small></div><button data-qc="${id}" style="min-width:84px;padding:8px" ${done&&!q.cl?'':'disabled'}>${q.cl?'✓':done?'CLAIM':'…'}</button></div>`};
+ const rrow=i=>{const ok=rk()>=i,cl=PRO.rr[i],r=RR[i],t=[`💰 ${r.c}`,...Object.entries(r.inv||{}).map(([k,n])=>`${n}× ${nmOf(k)}`),...(r.own||[]).map(nmOf)].join(' · ');return `<div class="card" style="margin:0;display:flex;align-items:center;gap:10px"><div style="flex:1"><b>${RANKS[i][0]}</b><br><small>${t}</small></div><button data-rc="${i}" style="min-width:84px;padding:8px" ${ok&&!cl?'':'disabled'}>${cl?'✓':ok?'CLAIM':'🔒'}</button></div>`};
+ $('#qList').innerHTML=`<h2 class="qh">☀️ DAILY · resets at midnight</h2>${PRO.q.d.map((q,i)=>row(q,'d'+i)).join('')}<h2 class="qh">🗓️ WEEKLY · resets Monday</h2>${PRO.q.w.map((q,i)=>row(q,'w'+i)).join('')}<h2 class="qh">🎖️ RANK REWARDS</h2>${Object.keys(RR).map(rrow).join('')}`}
+$('#qList').onclick=e=>{const a=e.target.closest('[data-qc]'),b=e.target.closest('[data-rc]');
+ if(a){const q=PRO.q[a.dataset.qc[0]==='d'?'d':'w'][+a.dataset.qc.slice(1)];if(!q||q.cl||q.p<q.t)return;q.cl=1;toast('✅ <b>QUEST REWARD</b><br><small>'+grant({c:q.c,x:q.x})+` · ${q.x} XP</small>`)}
+ else if(b){const i=+b.dataset.rc;if(PRO.rr[i]||rk()<i)return;PRO.rr[i]=1;toast(`🎖️ <b>${RANKS[i][0]} REWARD</b><br><small>${grant(RR[i])}</small>`)}else return;
+ burst(['🪙','✨','🎁'],24);tone(780,.12,'triangle');LS.set('ms_pro',PRO);qUI();profUI()};
+$('#questBtn').onclick=()=>{sfx('click');qUI();go('s-quests')};
+let chestN=0,chestOpen=0;
+function chestCheck(){if(PRO.lc.last===today())return;const s=PRO.lc.last===ydy()?PRO.lc.s+1:1;chestN=s;chestOpen=0;const day=(s-1)%7;
+ $('#chestDays').innerHTML=CHEST.map((r,i)=>`<span style="padding:4px 7px;border:1px solid var(--gold);border-radius:6px;font-size:.75rem;${i<day?'opacity:.5;':''}${i===day?'background:#8e1b16;font-weight:bold':''}">${i<day?'✓':'D'+(i+1)}</span>`).join('');
+ $('#chestBox').textContent='🎁';$('#chestTxt').innerHTML=`Day ${day+1} of 7 · 🔥 ${s}-day streak<br><small>Tap the chest to open it!</small>`;$('#chestBtn').textContent='OPEN';$('#chest').classList.add('on')}
+function chestAct(){if(chestOpen){$('#chest').classList.remove('on');profUI();return}
+ chestOpen=1;const day=(chestN-1)%7,t=grant(CHEST[day]);PRO.lc={last:today(),s:chestN};LS.set('ms_pro',PRO);
+ $('#chestBox').textContent='✨';$('#chestBox').classList.add('pop2');setTimeout(()=>$('#chestBox').classList.remove('pop2'),300);$('#chestTxt').innerHTML=`<b>${t}</b>${day===6?'<br><small>7-day streak complete — it starts over tomorrow!</small>':''}`;$('#chestBtn').textContent='COLLECT';burst(['🪙','✨','🎁'],30);sfx('powerup')}
+$('#chestBox').onclick=$('#chestBtn').onclick=chestAct;
+setTimeout(chestCheck,900);
 lbShow();
 if('serviceWorker'in navigator)addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
 </script></body></html>
