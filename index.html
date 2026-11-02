@@ -318,6 +318,16 @@ nav .brand .bl{flex:none;margin-left:auto;width:36px;height:36px;padding:0;borde
 .nl{max-height:56vh;overflow:auto}
 .swr{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 0;border-top:1px solid var(--line)}.swr:first-child{border-top:0}.swr>div{min-width:0}
 .swr input[type=checkbox]{-webkit-appearance:none;appearance:none;width:46px;height:28px;padding:0;border:0;border-radius:14px;background:var(--line);position:relative;flex:none;transition:.15s}.swr input:before{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;transition:.15s}.swr input:checked{background:var(--accent)}.swr input:checked:before{left:21px}
+
+/* v49: insights summary cards */
+.igi .sc{display:flex;flex-direction:column;gap:8px;min-width:0;padding:14px}
+.igi .sc>small{display:flex;align-items:center;gap:7px;font-size:12px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--muted)}
+.igi .sc>small:before{content:"";width:8px;height:8px;border-radius:50%;flex:none;background:var(--accent)}.igi .sc.g>small:before{background:var(--green)}.igi .sc.r>small:before{background:var(--red)}
+.igi .iv{display:flex;align-items:center;justify-content:space-between;gap:8px;min-width:0}
+.igi .iv b{margin:0;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:22px}
+.igi .pc{flex:none;font-size:11.5px;font-weight:800;padding:3px 8px;border-radius:20px;white-space:nowrap}
+.igi .pc.g{color:var(--green);background:color-mix(in srgb,var(--green) 16%,transparent)}.igi .pc.r{color:var(--red);background:color-mix(in srgb,var(--red) 16%,transparent)}
+@media(max-width:560px){.ig.igi{grid-template-columns:1fr;gap:8px}.igi .sc{flex-direction:row;align-items:center;justify-content:space-between;padding:12px 14px}.igi .iv{flex:1;justify-content:flex-end}.igi .iv b{flex:none;font-size:20px;text-align:right}}
 </style></head><body><header id=hd></header><main id=m></main><nav id=nav></nav><dialog id=dlg></dialog><div id=toast hidden></div><div id=lk hidden></div><button id=fab class=p onclick=quickAdd()>+</button><div id=sp><button class=gb onclick="sp.remove();sessionStorage.s=1;persist(1);if(lkS)lockNow()">Get Started</button></div>
 <script>
 let HM=0;
@@ -474,7 +484,7 @@ V.ins=()=>{const ym=ym0(im),[Y,M]=ym.split('-').map(Number),n=new Date(Y,M,0).ge
  cl={};S.pr.filter(p=>p.src!='Job'&&p.st!='Cancelled').forEach(p=>{const c=cl[p.client]||(cl[p.client]=[0,0]);c[0]+=p.amt;c[1]+=paid(p)});const cle=Object.entries(cl).sort((a,b)=>b[1][0]-a[1][0]).slice(0,6),tb=cle.reduce((a,[,c])=>a+c[0],0),tp=cle.reduce((a,[,c])=>a+c[1],0),
  sc={};S.pr.forEach(p=>sc[p.st]=(sc[p.st]||0)+1);
  return`<div class=top><button class=s onclick="im--;render()">‹</button><h1 style="margin:0">Insights · ${new Date(Y,M-1,1).toLocaleString('en',{month:'long',year:'numeric'})}</h1><button class=s onclick="im=Math.min(im+1,0);render()">›</button></div><div style="height:10px"></div>
- <div class=ig><div class="sc g"><small>Income</small><b><span class=cu>UGX</span> ${sh(m.i)}</b>${tr(m.i,pm.i,1)}</div><div class="sc r"><small>Spent</small><b><span class=cu>UGX</span> ${sh(m.e)}</b>${tr(m.e,pm.e,0)}</div><div class="sc n"><small>Saved</small><b><span class=cu>UGX</span> ${sh(m.s)}</b>${tr(m.s,pm.s,1)}</div></div>`
+ <div class="ig igi">${igc('g','Income',m.i,pm.i,1)}${igc('r','Spent',m.e,pm.e,0)}${igc('n','Saved',m.s,pm.s,1)}</div>`
  +(msg.length?C('accent','',H('Heads up','accent')+msg.map(([t,k])=>`<div class="${k}" style="margin-top:6px"><b>${E(t)}</b></div>`).join('')):'')
  +C('teal','tb',H('Key figures','teal')+'<div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px;margin-top:10px">'+[['Savings rate',m.i?Math.round(m.s/m.i*100)+'%':'-'],['Average spend per day','UGX '+sh(avg2)],['Cash runway',avg2?Math.floor(s.av/avg2)+' days':'-'],cur?['Projected month spend','UGX '+sh(avg2*n)]:['Transactions',m.t.length],['Biggest category',cs2[0]?cs2[0][0]:'-'],['Net this month',(m.i>=m.e?'+':'−')+'UGX '+sh(Math.abs(m.i-m.e)),m.i<m.e?'r':''],['No-spend days',day.slice(0,dn_).filter(v=>!v).length+' of '+dn_],['Biggest expense',ex2.length?'UGX '+sh(Math.max(...ex2.map(x=>x.amt))):'-']].map(([a,b,h])=>`<div style="background:color-mix(in srgb,var(--text) 5%,transparent);border-radius:12px;padding:10px 12px"><small>${a}</small><b class="${h||''}" style="display:block;font-size:16px;margin-top:2px">${b}</b></div>`).join('')+'</div>')
  +budgetCard(bn,cat)
@@ -1063,7 +1073,7 @@ function remind(i){const p=p_(i),o=Math.max(p.amt-paid(p),0);S.set.cp=S.set.cp||
 function goalEta(g){if(!g.target)return'';const left=Math.max(g.target-g.saved,0);if(!left)return'<br><small class=g><b>Goal reached 🎉</b></small>';
  let r=g.mo,w='a month';if(!r){const from=addD(td(),-90);r=S.tx.filter(x=>x.gid==g.id&&x.date>=from).reduce((a,x)=>a+x.amt,0)/3;w='a month lately'}
  if(!r)return'';const mo=Math.ceil(left/r),d=new Date(td()+'T00:00');d.setMonth(d.getMonth()+mo);
- return`<br><small class=g><b>On track for ${d.toLocaleDateString('en',{month:'short',year:'numeric'})}</b> at UGX ${sh(r)} ${w}</small>`}
+ return`<br><small class=g><b>🎯 On track for ${d.toLocaleDateString('en',{month:'short',year:'numeric'})}</b></small>`}
 const ltv=()=>lkS&&lkS.t!=null?lkS.t:30,
  ltx=()=>ltv()==0?'as soon as you leave the app':'after '+({30:'30 seconds',300:'5 minutes',900:'15 minutes'}[ltv()]||ltv()+' seconds')+' away',
  ltRow=()=>`<small style="display:block;margin-top:10px">Ask for the PIN again after being away</small><div class=tabs style="margin:6px 0 10px">${[[0,'Right away'],[30,'30 sec'],[300,'5 min'],[900,'15 min']].map(([v,l])=>`<button class="${ltv()==v?'on':''}" onclick="setLt(${v})">${l}</button>`).join('')}</div>`;
@@ -1760,4 +1770,6 @@ const hd0=hdr;hdr=function(){hd0();ntIns()};
 setInterval(()=>{if(!document.body.classList.contains('locked')&&ntScan())ntBadge()},6e4);
 document.addEventListener('visibilitychange',()=>{if(!document.hidden&&ntScan())ntBadge()});
 render();
+
+function igc(c,l,v,b,up){const a=v,ch=b?(a-b)/Math.abs(b):null,pc=ch===null||!isFinite(ch)?'':`<span class="pc ${(ch>=0)==up?'g':'r'}">${ch>=0?'▲':'▼'} ${Math.abs(Math.round(ch*100))}%</span>`;return`<div class="sc ${c}"><small>${l}</small><div class=iv><b><span class=cu>UGX</span> ${sh(v)}</b>${pc}</div></div>`}
 </script></body></html>
