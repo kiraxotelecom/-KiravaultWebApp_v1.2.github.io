@@ -310,6 +310,14 @@ dialog .row button.p,dialog .bgf button.p{background:linear-gradient(135deg,var(
 .chs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:12px}.chs>div{padding:9px 10px;border-radius:12px;background:color-mix(in srgb,var(--text) 5%,transparent);min-width:0}.chs small{display:block;font-size:11px}.chs b{display:block;font-size:15px;margin-top:2px}.chs em{display:block;font-style:normal;font-size:11px;font-weight:700;margin-top:1px}
 .ovf{background-image:repeating-linear-gradient(135deg,#ffffff59 0 5px,transparent 5px 10px)!important;background-color:var(--red)!important}.ovg{background-image:repeating-linear-gradient(135deg,#ffffff59 0 5px,transparent 5px 10px)!important}
 .ans{white-space:pre-line;font-size:13px;font-weight:500;margin-top:4px;line-height:1.45;color:var(--text);opacity:.88}
+
+/* ===== v48: alerts, notifications, AI ===== */
+.hb.bl{position:relative}.bl em{position:absolute;top:-3px;right:-3px;min-width:18px;height:18px;padding:0 4px;border-radius:9px;background:var(--red);color:#fff;font:700 11px/18px system-ui,sans-serif;text-align:center;font-style:normal}
+nav .brand .bl{flex:none;margin-left:auto;width:36px;height:36px;padding:0;border-radius:50%;display:grid;place-items:center;background:#141C3E;border:1px solid #26305a;color:#c7d0ee}nav .brand .bl svg{width:20px;height:20px}
+.nti{display:flex;gap:12px;align-items:flex-start;padding:11px 2px;border-top:1px solid var(--line);cursor:pointer}.nti>span{flex:none;width:32px;height:32px;border-radius:10px;display:grid;place-items:center;font-weight:800}.nti>div{min-width:0}.nti b{display:block;font-size:14px}.nti.un b:before{content:"";display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--accent);margin-right:6px}
+.nl{max-height:56vh;overflow:auto}
+.swr{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 0;border-top:1px solid var(--line)}.swr:first-child{border-top:0}.swr>div{min-width:0}
+.swr input[type=checkbox]{-webkit-appearance:none;appearance:none;width:46px;height:28px;padding:0;border:0;border-radius:14px;background:var(--line);position:relative;flex:none;transition:.15s}.swr input:before{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;transition:.15s}.swr input:checked{background:var(--accent)}.swr input:checked:before{left:21px}
 </style></head><body><header id=hd></header><main id=m></main><nav id=nav></nav><dialog id=dlg></dialog><div id=toast hidden></div><div id=lk hidden></div><button id=fab class=p onclick=quickAdd()>+</button><div id=sp><button class=gb onclick="sp.remove();sessionStorage.s=1;persist(1);if(lkS)lockNow()">Get Started</button></div>
 <script>
 let HM=0;
@@ -1685,4 +1693,71 @@ function kColor(t,fm){const h=fm.querySelector('.kh h3');if(!h)return;const m=KD
 const ask9=ask;ask=function(t,f,ok){ask9(t,f,ok);kbLayout();const fm0=document.querySelector('#dlg form.kf');if(fm0)kColor(t,fm0);const a=document.activeElement;if(a&&a.blur&&!a.matches('input,select,textarea'))a.blur()};
 const pf2=projForm;projForm=function(i){pf2(i);kbLayout()};
 (()=>{const v=window.visualViewport,r=document.documentElement.style;if(!v)return;const up=()=>{r.setProperty('--vvh',v.height+'px');r.setProperty('--kb',Math.max(0,window.innerHeight-v.height-v.offsetTop)+'px')};v.addEventListener('resize',up);v.addEventListener('scroll',up);up()})();
+
+/* ===== v48: in-app alerts (bell), phone notifications, optional online AI ===== */
+const NFD={on:1,ph:0,lead:1,b:1,w:1,i:1},AIK='kiravault.ai.key',
+ nfc=()=>({...NFD,...(S.set.nf||{})}),aic=()=>({on:0,model:'claude-sonnet-5-5',...(S.set.ai||{})}),
+ BELL='<svg viewBox="0 0 24 24"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>',
+ SPK='<path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8zM19 16l.8 2.2L22 19l-2.2.8L19 22l-.8-2.2L16 19l2.2-.8z"/>',
+ ntOk=()=>typeof Notification!='undefined'&&Notification.permission=='granted',
+ ntUn=()=>(S.nt||[]).filter(n=>!n.r).length;
+function ntItems(){const c=nfc(),L=c.lead,t=td(),o=[],am=n=>S.set.hide?'':'UGX '+F(n)+' · ';
+ if(c.b)S.cm.filter(x=>x.st=='pending'&&x.due).forEach(x=>o.push({k:`c${x.id}:${x.due}`,d:addD(x.due,-L),t:(x.kind=='Savings'?'Saving due: ':x.kind=='Debt'?'Debt due: ':'Bill due: ')+x.title,b:am(rem(x))+(x.due<t?'overdue since ':x.due==t?'due today':'due ')+(x.due==t?'':fm(x.due)),c:x.due<t?'r':'a',a:'c'}));
+ if(c.w)S.pr.filter(p=>p.dl&&!DONE.includes(p.st)).forEach(p=>o.push({k:`p${p.id}:${p.dl}`,d:addD(p.dl,-L),t:'Deadline: '+p.title,b:`${p.pg}% done · `+(p.dl<t?'passed ':p.dl==t?'due today':'due ')+(p.dl==t?'':fm(p.dl)),c:p.dl<t?'r':'a',a:'p',i:p.id}));
+ if(c.i)S.ex.filter(x=>x.dt).forEach(x=>o.push({k:`x${x.id}:${x.dt}`,d:x.dt,t:'Income expected: '+(x.project||x.client||x.src),b:am(x.amt)+(x.dt<t?'was expected ':'expected ')+fm(x.dt),c:'g',a:'x',i:x.id}));
+ return o}
+function ntPush(n){if(!ntOk())return;const o={body:n.b,icon:'icon-192.png',badge:'icon-192.png',tag:n.k},f=()=>{try{new Notification(n.t,o)}catch{}};
+ navigator.serviceWorker&&navigator.serviceWorker.ready?navigator.serviceWorker.ready.then(r=>r.showNotification(n.t,o)).catch(f):f()}
+function ntScan(){const c=nfc();if(!c.on&&!c.ph)return 0;S.nt=S.nt||[];S.nk=S.nk||[];const it=ntItems(),live=new Set(it.map(x=>x.k)),have=new Set(S.nk),t=td(),nw=[];
+ it.forEach(x=>{if(x.d<=t&&!have.has(x.k)){const n={k:x.k,t:x.t,b:x.b,c:x.c,a:x.a,i:x.i,ts:Date.now(),r:0};S.nt.unshift(n);S.nk.push(x.k);nw.push(n)}});
+ const len=S.nt.length;S.nt=S.nt.filter(n=>live.has(n.k)).slice(0,60);S.nk=S.nk.slice(-400);
+ if(nw.length||S.nt.length!=len){try{localStorage.setItem(K,JSON.stringify(S))}catch{}}
+ if(c.ph)nw.slice(0,3).forEach(ntPush);return nw.length}
+function ntSync(){if(!window.indexedDB)return;try{const r=indexedDB.open('kvn',1);r.onupgradeneeded=()=>r.result.createObjectStore('s');r.onsuccess=()=>{try{r.result.transaction('s','readwrite').objectStore('s').put({on:nfc().ph&&ntOk()?1:0,items:ntItems().map(({k,d,t,b})=>({k,d,t,b})),seen:S.nk||[]},'plan')}catch{}}}catch{}}
+const ntBell=()=>{const u=ntUn();return`<button class="hb bl" aria-label="Alerts${u?', '+u+' unread':''}" onclick="ntOpen()">${BELL}${u?`<em>${u>9?'9+':u}</em>`:''}</button>`},
+ ntBadge=()=>document.querySelectorAll('.bl').forEach(b=>b.outerHTML=ntBell());
+function ntIns(){if(!nfc().on)return;const h=$('#hd .hs'),b=$('#nav .brand');if(h&&!h.querySelector('.bl'))h.insertAdjacentHTML('afterbegin',ntBell());if(b&&!b.querySelector('.bl'))b.insertAdjacentHTML('beforeend',ntBell())}
+const ntSave=()=>{try{localStorage.setItem(K,JSON.stringify(S))}catch{}ntBadge()};
+function ntOpen(){const d=$('#dlg'),L=(S.nt||[]).slice(0,40),ic={r:['rb','red','⚠'],a:['ab','amber','!'],g:['gb','green','↓']};
+ d.innerHTML=`<div class=kh><h3>Alerts</h3><button type=button class=kx aria-label=Close onclick=dlg.close()>✕</button></div><div class=nl>`+(L.length?L.map(n=>{const[b,k,i]=ic[n.c]||ic.a;return`<div class="nti${n.r?'':' un'}" onclick="ntGo('${E(n.k)}')"><span style="background:var(--${b});color:var(--${k})">${i}</span><div><b>${E(n.t)}</b><small>${E(n.b)}</small></div></div>`}).join(''):'<small>No alerts right now. Bills, project deadlines and expected income will appear here.</small>')+`</div><div class=row style="justify-content:space-between"><button class=s onclick="ntMark()">Mark all read</button><button class=s onclick="ntClear()">Clear</button><button class=s onclick="dlg.close();tab='more';stg='nf';render();scrollTo(0,0)">⚙ Settings</button></div>`;d.showModal()}
+function ntMark(){(S.nt||[]).forEach(n=>n.r=1);ntSave();ntOpen()}
+function ntClear(){S.nt=[];ntSave();ntOpen()}
+function ntGo(k){const n=(S.nt||[]).find(x=>x.k==k);if(!n)return;n.r=1;ntSave();dlg.close();
+ if(n.a=='p'&&p_(n.i)){pj=n.i;go('work')}else if(n.a=='x'){mv='p';go('money')}else{mv='b';go('money')}}
+function ntTest(){if(!ntOk()){alert('Turn on phone notifications first and allow them when asked.');return}ntPush({k:'kv-test'+Date.now(),t:'KiraVault test',b:'Phone notifications are working.'})}
+/* settings pages */
+const sw=(l,s,v,f)=>`<div class=swr><div><b>${l}</b>${s?`<small style="display:block">${s}</small>`:''}</div><input type=checkbox ${v?'checked':''} onchange="${f}"></div>`;
+function nfSet(k,v){S.set.nf={...nfc(),[k]:v};save()}
+async function nfPhone(el){if(!el.checked){nfSet('ph',0);return}
+ if(typeof Notification=='undefined'){el.checked=false;alert('This browser does not support notifications. On iPhone, add KiraVault to your Home Screen first, then try again.');return}
+ let p=Notification.permission;if(p=='default')p=await Notification.requestPermission();
+ if(p!='granted'){el.checked=false;alert('Notifications are blocked. Allow them for KiraVault in your phone or browser settings, then switch this on again.');return}
+ try{const r=await navigator.serviceWorker.ready;r.periodicSync&&await r.periodicSync.register('kv-check',{minInterval:6*36e5})}catch{}
+ nfSet('ph',1)}
+function nfPg(){const c=nfc(),pm=typeof Notification!='undefined'?Notification.permission:'none',
+ st=pm=='granted'?'Allowed on this device.':pm=='denied'?'Blocked. Allow notifications for this app in your phone or browser settings.':pm=='none'?'Not supported here. On iPhone, add the app to your Home Screen first.':'You will be asked to allow them.';
+ return`<div class=card>${sw('In-app alerts','Show a bell with bills, deadlines and expected income.',c.on,"nfSet('on',this.checked)")}${sw('Phone notifications','Also send alerts as notifications. '+st,c.ph,'nfPhone(this)')}</div>
+ <h3>What to alert me about</h3><div class=card>${sw('Bills, debts and savings','',c.b,"nfSet('b',this.checked)")}${sw('Project deadlines','',c.w,"nfSet('w',this.checked)")}${sw('Expected income','',c.i,"nfSet('i',this.checked)")}<label>Remind me<select onchange="nfSet('lead',+this.value)">${[[0,'On the day'],[1,'1 day before'],[2,'2 days before'],[3,'3 days before']].map(([v,l])=>`<option value=${v}${c.lead==v?' selected':''}>${l}</option>`).join('')}</select></label>
+ ${c.ph?'<div class=row style="justify-content:flex-start"><button class=s onclick=ntTest()>Send a test notification</button></div>':''}</div>
+ <small>KiraVault has no server, so phone notifications are best effort: they appear when you open the app and, on Android Chrome with the app installed, from a background check that runs about once a day. They are not guaranteed while the app is closed. For guaranteed reminders, use "Add bill reminders to my calendar" under Commitments. With balances hidden, amounts are left out of notifications.</small>`}
+function aiSet(k,v){S.set.ai={...aic(),[k]:v};save()}
+function aiPg(){const a=aic(),k=localStorage.getItem(AIK)||'';
+ return`<div class=card>${sw('Online AI assistant','Adds answers from Claude in Insights › Assistant. Off by default, so nothing leaves your device.',a.on,"aiSet('on',this.checked)")}</div>`+(a.on?`<div class=card><label>Anthropic API key<input type=password value="${E(k)}" placeholder="sk-ant-..." autocomplete=off onchange="localStorage.setItem(AIK,this.value.trim());render()"></label><label>Model<input value="${E(a.model)}" autocomplete=off onchange="aiSet('model',this.value.trim()||'claude-sonnet-5-5')"></label><small style="display:block;margin-top:8px">${k?'Key saved on this device.':'Paste your key to start.'} It is not included in backups. Use a key with a spend limit. Each question sends Anthropic your question plus a summary: balances, this month's totals, open bills, active projects (titles, progress, amounts), goals and top spending. No client names or backups are sent. Offline or on error, the built-in assistant answers instead.</small></div>`:'<small>Turn it on to ask free-form questions about your money and work. The built-in offline assistant keeps working either way.</small>')}
+function aiCtx(){const s=sm(),m=mtot(ym0(0));return{currency:'UGX',today:td(),available:s.av,safeToSpend:s.safe,shortBy:s.short,monthIncome:m.i,monthExpenses:m.e,expectedIncome:s.aw,bills:S.cm.filter(c=>c.st=='pending').slice(0,25).map(c=>({title:c.title,kind:c.kind,left:rem(c),due:c.due})),projects:S.pr.filter(p=>!DONE.includes(p.st)).slice(0,15).map(p=>({title:p.title,status:p.st,progress:p.pg,deadline:p.dl,unpaid:Math.max(p.amt-paid(p),0)})),goals:S.gl.map(g=>({name:g.name,saved:g.saved,target:g.target})),topSpending:gp(m.t.filter(x=>x.type=='expense'),x=>x.cat||'Others').slice(0,6)}}
+async function askQ(q){const a=aic(),k=localStorage.getItem(AIK);
+ if(!a.on||!k||!navigator.onLine){chat.unshift([q,ans(q)+(a.on&&!k?'\n\n(Add your API key in Settings › AI assistant to use online AI.)':'')]);render();return}
+ const e=[q,'Thinking…'];chat.unshift(e);render();
+ try{const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'content-type':'application/json','x-api-key':k,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:a.model,max_tokens:700,system:'You are the assistant inside KiraVault, a personal finance and freelance-work app used in Uganda. Answer briefly and plainly using only the data given. Amounts are UGX. Never invent numbers. You are not a financial advisor.',messages:[{role:'user',content:'My data:\n'+JSON.stringify(aiCtx())+'\n\nQuestion: '+q}]})}),j=await r.json();
+  if(!r.ok)throw new Error(j.error&&j.error.message||r.status);e[1]=(j.content||[]).filter(x=>x.type=='text').map(x=>x.text).join('\n').trim()||ans(q)}
+ catch(x){e[1]=ans(q)+'\n\n(Online AI unavailable: '+String(x.message||x).slice(0,80)+'. Answered offline.)'}
+ render()}
+const as0=V.asst;V.asst=()=>{const a=aic();return`<small style="display:block;margin-bottom:8px;cursor:pointer" onclick="tab='more';stg='ai';render()">${a.on?'● Online AI is on (Claude)':'Offline assistant · turn on online AI in Settings'}</small>`+as0().replace('chat.unshift([v,ans(v)]);render()','askQ(v)').replace(/chat\.unshift\(\['([^']*)',ans\('[^']*'\)\]\);render\(\)/g,"askQ('$1')")};
+STG.nf=['Notifications & alerts',()=>nfPg()];STG.ai=['AI assistant',()=>aiPg()];
+const mo6=V.more;V.more=()=>{const h=mo6();if(stg)return h;const row=(k,i,l,v)=>`<div class=sr onclick="stGo('${k}')"><i><svg viewBox="0 0 24 24">${i}</svg></i><b>${l}</b><small>${v}</small><em>›</em></div>`,c=nfc();
+ return h.replace('<div class=sr onclick="stGo(\'home\')">',row('nf',BELL.slice(23,-6),'Notifications &amp; alerts',c.on||c.ph?'On':'Off')+row('ai',SPK,'AI assistant',aic().on?'On':'Off')+'<div class=sr onclick="stGo(\'home\')">').replace('nothing is sent anywhere.',aic().on?'only your AI questions leave this device.':'nothing is sent anywhere.')};
+const rn0=render;render=function(){rn0();ntScan();ntIns();ntSync()};
+const hd0=hdr;hdr=function(){hd0();ntIns()};
+setInterval(()=>{if(!document.body.classList.contains('locked')&&ntScan())ntBadge()},6e4);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&ntScan())ntBadge()});
+render();
 </script></body></html>
