@@ -328,6 +328,7 @@ nav .brand .bl{flex:none;margin-left:auto;width:36px;height:36px;padding:0;borde
 .igi .pc{flex:none;font-size:11.5px;font-weight:800;padding:3px 8px;border-radius:20px;white-space:nowrap}
 .igi .pc.g{color:var(--green);background:color-mix(in srgb,var(--green) 16%,transparent)}.igi .pc.r{color:var(--red);background:color-mix(in srgb,var(--red) 16%,transparent)}
 @media(max-width:560px){.ig.igi{gap:8px}.igi .sc{padding:11px 10px;gap:6px}.igi .sc>small{font-size:10.5px;letter-spacing:.04em}.igi .cu{display:none}.igi .iv{flex-wrap:wrap;gap:4px 6px}.igi .iv b{flex:none;font-size:18px}.igi .pc{font-size:10.5px;padding:2px 6px}}
+textarea{width:100%;padding:10px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--text);font:inherit;resize:vertical;margin-top:4px}
 </style></head><body><header id=hd></header><main id=m></main><nav id=nav></nav><dialog id=dlg></dialog><div id=toast hidden></div><div id=lk hidden></div><button id=fab class=p onclick=quickAdd()>+</button><div id=sp><button class=gb onclick="sp.remove();sessionStorage.s=1;persist(1);if(lkS)lockNow()">Get Started</button></div>
 <script>
 let HM=0;
@@ -1705,7 +1706,7 @@ const pf2=projForm;projForm=function(i){pf2(i);kbLayout()};
 (()=>{const v=window.visualViewport,r=document.documentElement.style;if(!v)return;const up=()=>{r.setProperty('--vvh',v.height+'px');r.setProperty('--kb',Math.max(0,window.innerHeight-v.height-v.offsetTop)+'px')};v.addEventListener('resize',up);v.addEventListener('scroll',up);up()})();
 
 /* ===== v48: in-app alerts (bell), phone notifications, optional online AI ===== */
-const NFD={on:1,ph:0,lead:1,b:1,w:1,i:1},AIK='kiravault.ai.key',
+const NFD={on:1,ph:0,lead:1,b:1,w:1,i:1,g:1,wr:1,wd:0},AIK='kiravault.ai.key',
  nfc=()=>({...NFD,...(S.set.nf||{})}),aic=()=>({on:0,model:'claude-sonnet-5-5',...(S.set.ai||{})}),
  BELL='<svg viewBox="0 0 24 24"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>',
  SPK='<path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8zM19 16l.8 2.2L22 19l-2.2.8L19 22l-.8-2.2L16 19l2.2-.8z"/>',
@@ -1715,7 +1716,18 @@ function ntItems(){const c=nfc(),L=c.lead,t=td(),o=[],am=n=>S.set.hide?'':'UGX '
  if(c.b)S.cm.filter(x=>x.st=='pending'&&x.due).forEach(x=>o.push({k:`c${x.id}:${x.due}`,d:addD(x.due,-L),t:(x.kind=='Savings'?'Saving due: ':x.kind=='Debt'?'Debt due: ':'Bill due: ')+x.title,b:am(rem(x))+(x.due<t?'overdue since ':x.due==t?'due today':'due ')+(x.due==t?'':fm(x.due)),c:x.due<t?'r':'a',a:'c'}));
  if(c.w)S.pr.filter(p=>p.dl&&!DONE.includes(p.st)).forEach(p=>o.push({k:`p${p.id}:${p.dl}`,d:addD(p.dl,-L),t:'Deadline: '+p.title,b:`${p.pg}% done · `+(p.dl<t?'passed ':p.dl==t?'due today':'due ')+(p.dl==t?'':fm(p.dl)),c:p.dl<t?'r':'a',a:'p',i:p.id}));
  if(c.i)S.ex.filter(x=>x.dt).forEach(x=>o.push({k:`x${x.id}:${x.dt}`,d:x.dt,t:'Income expected: '+(x.project||x.client||x.src),b:am(x.amt)+(x.dt<t?'was expected ':'expected ')+fm(x.dt),c:'g',a:'x',i:x.id}));
+ if(c.g){const ym=ym0(0),BD=bdOf(ym),sp=Object.fromEntries(gp(mtot(ym).t.filter(x=>x.type=='expense'),x=>x.cat||'Others')),n=new Date(),left=new Date(n.getFullYear(),n.getMonth()+1,0).getDate()-n.getDate();
+  Object.entries(BD).forEach(([k,lim])=>{if(!(lim>0))return;const u=sp[k]||0,f=u/lim,lv=f>=1?100:f>=.8?80:0;if(!lv)return;
+   o.push({k:`b:${ym}:${k}:${lv}`,d:ym+'-01',t:lv==100?`${k} is over budget`:`${k} budget at ${Math.round(f*100)}%`,b:(S.set.hide?'':lv==100?`Over by UGX ${sh(u-lim)} · `:`UGX ${sh(u)} of ${sh(lim)} · `)+(left?left+' days left':'last day of the month'),c:lv==100?'r':'a',a:'g'})})}
+ if(c.wr){const rd=rcDate(c.wd,t),b=ntRecap(rd);if(b)o.push({k:'w:'+rd,d:rd,t:'Your weekly recap',b,c:'i',a:'w'})}
  return o}
+const WD=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+function rcDate(wd,from){const d=new Date(from+'T00:00');d.setDate(d.getDate()-((d.getDay()-wd+7)%7));return d.toLocaleDateString('sv')}
+function ntRecap(rd){const a=addD(rd,-6),z=addD(rd,-7),b0=addD(rd,-13),W=S.tx.filter(x=>x.date>=a&&x.date<=rd),P=S.tx.filter(x=>x.date>=b0&&x.date<=z),sm_=(L,k)=>L.filter(x=>x.type==k).reduce((q,x)=>q+x.amt,0),sp=sm_(W,'expense'),ps=sm_(P,'expense'),inc=sm_(W,'income'),sv=sm_(W,'saving'),due=S.cm.filter(c=>c.st=='pending'&&c.due>rd&&c.due<=addD(rd,7)),top=gp(W.filter(x=>x.type=='expense'),x=>x.cat||'Others')[0];
+ if(!W.length&&!due.length)return null;if(S.set.hide)return'Your week is ready. Open KiraVault to see it.';
+ const ch=ps?Math.round((sp-ps)/ps*100):null,o=['Spent '+sh(sp)+(ch===null?'':` (${ch>0?'▲':'▼'} ${Math.abs(ch)}% on last week)`)];
+ if(inc)o.push('Income '+sh(inc));if(sv)o.push('Saved '+sh(sv));if(top)o.push('Top: '+top[0]);if(due.length)o.push(due.length+' due next week');return o.join(' · ')}
+const ntNext=()=>{const c=nfc();if(!c.wr)return[];const rd=addD(rcDate(c.wd,td()),7);return[{k:'w:'+rd,d:rd,t:'Your weekly recap',b:'Open KiraVault to see how your week went.'}]};
 function ntPush(n){if(!ntOk())return;const o={body:n.b,icon:'icon-192.png',badge:'icon-192.png',tag:n.k},f=()=>{try{new Notification(n.t,o)}catch{}};
  navigator.serviceWorker&&navigator.serviceWorker.ready?navigator.serviceWorker.ready.then(r=>r.showNotification(n.t,o)).catch(f):f()}
 function ntScan(){const c=nfc();if(!c.on&&!c.ph)return 0;S.nt=S.nt||[];S.nk=S.nk||[];const it=ntItems(),live=new Set(it.map(x=>x.k)),have=new Set(S.nk),t=td(),nw=[];
@@ -1723,17 +1735,17 @@ function ntScan(){const c=nfc();if(!c.on&&!c.ph)return 0;S.nt=S.nt||[];S.nk=S.nk
  const len=S.nt.length;S.nt=S.nt.filter(n=>live.has(n.k)).slice(0,60);S.nk=S.nk.slice(-400);
  if(nw.length||S.nt.length!=len){try{localStorage.setItem(K,JSON.stringify(S))}catch{}}
  if(c.ph)nw.slice(0,3).forEach(ntPush);return nw.length}
-function ntSync(){if(!window.indexedDB)return;try{const r=indexedDB.open('kvn',1);r.onupgradeneeded=()=>r.result.createObjectStore('s');r.onsuccess=()=>{try{r.result.transaction('s','readwrite').objectStore('s').put({on:nfc().ph&&ntOk()?1:0,items:ntItems().map(({k,d,t,b})=>({k,d,t,b})),seen:S.nk||[]},'plan')}catch{}}}catch{}}
+function ntSync(){if(!window.indexedDB)return;try{const r=indexedDB.open('kvn',1);r.onupgradeneeded=()=>r.result.createObjectStore('s');r.onsuccess=()=>{try{r.result.transaction('s','readwrite').objectStore('s').put({on:nfc().ph&&ntOk()?1:0,items:[...ntItems(),...ntNext()].map(({k,d,t,b})=>({k,d,t,b})),seen:S.nk||[]},'plan')}catch{}}}catch{}}
 const ntBell=()=>{const u=ntUn();return`<button class="hb bl" aria-label="Alerts${u?', '+u+' unread':''}" onclick="ntOpen()">${BELL}${u?`<em>${u>9?'9+':u}</em>`:''}</button>`},
  ntBadge=()=>document.querySelectorAll('.bl').forEach(b=>b.outerHTML=ntBell());
 function ntIns(){if(!nfc().on)return;const h=$('#hd .hs'),b=$('#nav .brand');if(h&&!h.querySelector('.bl'))h.insertAdjacentHTML('afterbegin',ntBell());if(b&&!b.querySelector('.bl'))b.insertAdjacentHTML('beforeend',ntBell())}
 const ntSave=()=>{try{localStorage.setItem(K,JSON.stringify(S))}catch{}ntBadge()};
-function ntOpen(){const d=$('#dlg'),L=(S.nt||[]).slice(0,40),ic={r:['rb','red','⚠'],a:['ab','amber','!'],g:['gb','green','↓']};
+function ntOpen(){const d=$('#dlg'),L=(S.nt||[]).slice(0,40),ic={r:['rb','red','⚠'],a:['ab','amber','!'],g:['gb','green','↓'],i:['tb','accent','▤']};
  d.innerHTML=`<div class=kh><h3>Alerts</h3><button type=button class=kx aria-label=Close onclick=dlg.close()>✕</button></div><div class=nl>`+(L.length?L.map(n=>{const[b,k,i]=ic[n.c]||ic.a;return`<div class="nti${n.r?'':' un'}" onclick="ntGo('${E(n.k)}')"><span style="background:var(--${b});color:var(--${k})">${i}</span><div><b>${E(n.t)}</b><small>${E(n.b)}</small></div></div>`}).join(''):'<small>No alerts right now. Bills, project deadlines and expected income will appear here.</small>')+`</div><div class=row style="justify-content:space-between"><button class=s onclick="ntMark()">Mark all read</button><button class=s onclick="ntClear()">Clear</button><button class=s onclick="dlg.close();tab='more';stg='nf';render();scrollTo(0,0)">⚙ Settings</button></div>`;d.showModal()}
 function ntMark(){(S.nt||[]).forEach(n=>n.r=1);ntSave();ntOpen()}
 function ntClear(){S.nt=[];ntSave();ntOpen()}
 function ntGo(k){const n=(S.nt||[]).find(x=>x.k==k);if(!n)return;n.r=1;ntSave();dlg.close();
- if(n.a=='p'&&p_(n.i)){pj=n.i;go('work')}else if(n.a=='x'){mv='p';go('money')}else{mv='b';go('money')}}
+ if(n.a=='p'&&p_(n.i)){pj=n.i;go('work')}else if(n.a=='w'){go('ins')}else if(n.a=='x'||n.a=='g'){mv='p';go('money')}else{mv='b';go('money')}}
 function ntTest(){if(!ntOk()){alert('Turn on phone notifications first and allow them when asked.');return}ntPush({k:'kv-test'+Date.now(),t:'KiraVault test',b:'Phone notifications are working.'})}
 /* settings pages */
 const sw=(l,s,v,f)=>`<div class=swr><div><b>${l}</b>${s?`<small style="display:block">${s}</small>`:''}</div><input type=checkbox ${v?'checked':''} onchange="${f}"></div>`;
@@ -1747,7 +1759,7 @@ async function nfPhone(el){if(!el.checked){nfSet('ph',0);return}
 function nfPg(){const c=nfc(),pm=typeof Notification!='undefined'?Notification.permission:'none',
  st=pm=='granted'?'Allowed on this device.':pm=='denied'?'Blocked. Allow notifications for this app in your phone or browser settings.':pm=='none'?'Not supported here. On iPhone, add the app to your Home Screen first.':'You will be asked to allow them.';
  return`<div class=card>${sw('In-app alerts','Show a bell with bills, deadlines and expected income.',c.on,"nfSet('on',this.checked)")}${sw('Phone notifications','Also send alerts as notifications. '+st,c.ph,'nfPhone(this)')}</div>
- <h3>What to alert me about</h3><div class=card>${sw('Bills, debts and savings','',c.b,"nfSet('b',this.checked)")}${sw('Project deadlines','',c.w,"nfSet('w',this.checked)")}${sw('Expected income','',c.i,"nfSet('i',this.checked)")}<label>Remind me<select onchange="nfSet('lead',+this.value)">${[[0,'On the day'],[1,'1 day before'],[2,'2 days before'],[3,'3 days before']].map(([v,l])=>`<option value=${v}${c.lead==v?' selected':''}>${l}</option>`).join('')}</select></label>
+ <h3>What to alert me about</h3><div class=card>${sw('Bills, debts and savings','',c.b,"nfSet('b',this.checked)")}${sw('Project deadlines','',c.w,"nfSet('w',this.checked)")}${sw('Expected income','',c.i,"nfSet('i',this.checked)")}${sw('Budget alerts','When a category reaches 80% and 100% of its budget.',c.g,"nfSet('g',this.checked)")}${sw('Weekly recap','A short summary of your week.',c.wr,"nfSet('wr',this.checked)")}${c.wr?`<label>Recap day<select onchange="nfSet('wd',+this.value)">${WD.map((d,i)=>`<option value=${i}${c.wd==i?' selected':''}>${d}</option>`).join('')}</select></label>`:''}<label>Remind me<select onchange="nfSet('lead',+this.value)">${[[0,'On the day'],[1,'1 day before'],[2,'2 days before'],[3,'3 days before']].map(([v,l])=>`<option value=${v}${c.lead==v?' selected':''}>${l}</option>`).join('')}</select></label>
  ${c.ph?'<div class=row style="justify-content:flex-start"><button class=s onclick=ntTest()>Send a test notification</button></div>':''}</div>
  <small>KiraVault has no server, so phone notifications are best effort: they appear when you open the app and, on Android Chrome with the app installed, from a background check that runs about once a day. They are not guaranteed while the app is closed. For guaranteed reminders, use "Add bill reminders to my calendar" under Commitments. With balances hidden, amounts are left out of notifications.</small>`}
 function aiSet(k,v){S.set.ai={...aic(),[k]:v};save()}
@@ -1772,4 +1784,30 @@ document.addEventListener('visibilitychange',()=>{if(!document.hidden&&ntScan())
 render();
 
 function igc(c,l,v,b,up){const a=v,ch=b?(a-b)/Math.abs(b):null,pc=ch===null||!isFinite(ch)?'':`<span class="pc ${(ch>=0)==up?'g':'r'}">${ch>=0?'▲':'▼'} ${Math.abs(Math.round(ch*100))}%</span>`;return`<div class="sc ${c}"><small>${l}</small><div class=iv><b><span class=cu>UGX</span> ${sh(v)}</b>${pc}</div></div>`}
+
+/* ===== v51: paste a Mobile Money SMS ===== */
+const smsLike=t=>t.length>30&&/(ugx|shs|ush)/i.test(t)&&/(sent|received|paid|payment|withdraw|deposit|balance|txn|transaction|airtime|credited|debited)/i.test(t);
+function smsParse(raw){const t=String(raw).replace(/\s+/g,' ').trim(),l=t.toLowerCase(),nm=v=>+String(v).replace(/,/g,''),C='(?:(?:ugx|shs|ush)\\.?\\s*)?',N='([\\d][\\d,]*(?:\\.\\d+)?)',
+ fe=t.match(new RegExp('(?:fee|charge|tax|levy)s?\\s*(?:of|is|:)?\\s*'+C+N,'i')),bl=t.match(new RegExp('balance\\s*(?:is|:)?\\s*'+C+N,'i'));let r=t;[fe,bl].forEach(m=>{if(m)r=r.replace(m[0],' ')});
+ const am=r.match(/(?:ugx|shs|ush|amount)\.?\s*:?\s*([\d][\d,]*(?:\.\d+)?)/i)||r.match(/([\d][\d,]*(?:\.\d+)?)\s*(?:ugx|shs|ush)/i),
+ IN=['received','credited','deposit','cash in','refund','reversal'],OUT=['sent','paid','payment','withdraw','bought','purchase','transferred','debited','airtime'],
+ first=a=>Math.min(...a.map(w=>{const i=l.indexOf(w);return i<0?1e9:i})),mm=S.acc.find(a=>/mobile|momo/i.test(a.id)),ca=S.acc.find(a=>/cash/i.test(a.id));
+ let type=first(IN)<first(OUT)?'income':'expense',acc_=mm?mm.id:AN()[0],to=ca?ca.id:AN()[0],cat,desc;
+ const cp=((t.match(/\b(?:to|from)\s+([A-Za-z][A-Za-z .'&-]{1,40}?)(?=\s*(?:\(|\+?\d{7,}|\bon\b|\bat\b|\bfee\b|\bnew\b|\bbalance\b|\btxn\b|\btransaction\b|\btid\b|\bref\b|[.,;]|$))/i)||[])[1]||'').trim().toLowerCase().replace(/(^|\s)\S/g,c=>c.toUpperCase());
+ if(/withdraw/.test(l)){type='transfer';desc='Cash withdrawal';cat='Others'}
+ else if(/deposit|cash in/.test(l)&&type=='income'){type='transfer';to=acc_;acc_=ca?ca.id:acc_;desc='Cash deposit';cat='Others'}
+ else{const D=cp.toLowerCase().split(/\s+/).filter(Boolean);
+  cat=/airtime|bundle/.test(l)?'Internet':/umeme|yaka|electric|nwsc|water/.test(l)?'Bills':D.length?gs(D,type=='income'):(type=='income'?'Other':'Others');
+  desc=/airtime/.test(l)?'Airtime':type=='income'?'Received'+(cp?' from '+cp:''):/sent|transferred/.test(l)?'Sent'+(cp?' to '+cp:''):'Paid'+(cp?' '+cp:'')}
+ let date=td();const d1=t.match(/(\d{4})-(\d{2})-(\d{2})/),d2=t.match(/\b(\d{1,2})[\/.-](\d{1,2})[\/.-](\d{4})\b/),dv=d1?d1[0]:d2?`${d2[3]}-${d2[2].padStart(2,'0')}-${d2[1].padStart(2,'0')}`:'';if(dv&&dv<=date&&!isNaN(new Date(dv)))date=dv;
+ return{type,amt:am?nm(am[1]):0,fee:fe?nm(fe[1]):0,acc:acc_,to,cat,desc,date,ref:((t.match(/(?:txn|transaction|trans\.?|tid|ref(?:erence)?)\s*(?:id|no\.?)?\s*[:#.\-]?\s*([A-Za-z0-9]{6,})/i)||[])[1])||''}}
+function smsFlow(t){const p=smsParse(t);if(!p.amt){alert('Could not find an amount in that message. Try typing it instead, for example: sent 20k to John.');return}
+ if(p.ref&&S.tx.some(x=>x.ref==p.ref)){alert('That transaction is already logged.');return}
+ const cv=n=>n?(xr()?(n/xr()).toFixed(2):n):'';
+ ask('Add from SMS',[{k:'type',l:'Type',o:['expense','income','transfer'],v:p.type},{k:'acc',l:'Account',o:AN(),v:p.acc},{k:'amt',l:'Amount',v:cv(p.amt),m:1},{k:'fee',l:'Fee (logged separately)',v:cv(p.fee),m:1},{k:'to',l:'Transfer to (transfers only)',o:AN(),v:p.to},{k:'cat',l:'Category / source',o:[...CATS,'Salary','Freelance','Business','Gift','Other'],v:p.cat},{k:'desc',l:'Note',v:p.desc},{k:'date',l:'Date',t:'date',v:p.date}],f=>{
+  const a=pa(f.amt),fe=pa(f.fee)||0;if(!a)return'Enter a valid amount';if(f.type=='transfer'&&f.to==f.acc)return'Pick two different accounts';
+  if(f.type!='income'&&acc(f.acc).b<a+fe)return`${f.acc} only has UGX ${F(acc(f.acc).b)}`;
+  addTx(f.type,a,f.acc,f.cat,f.desc,f.date,{to:f.to,...(p.ref?{ref:p.ref}:{})});if(fe)addTx('expense',fe,f.acc,'Others','Mobile Money fee',f.date);learn(f.desc,f.cat,f.type);save()})}
+function quickAdd(){const d=$('#dlg');d.innerHTML=`<form class=kf><div class=kh><h3>Quick add</h3><button type=button class=kx aria-label=Close onclick=dlg.close()>✕</button></div><div class=kb><label>What happened?<textarea id=qa-t rows=4 placeholder="spent 25k on lunch cash"></textarea></label><small class=kh2>Type it like a text, e.g. “received 500k client bank”, or paste an MTN or Airtel Money message.</small><div class=ke hidden></div></div><div class=row><button type=button onclick=dlg.close()>Cancel</button><button class=p>Add</button></div></form>`;
+ const fm_=d.querySelector('form'),ke=d.querySelector('.ke'),ta=d.querySelector('textarea');fm_.onsubmit=e=>{e.preventDefault();const t=ta.value.trim();if(!/\d/.test(t)){ke.textContent='Include an amount, e.g. spent 25k on lunch cash';ke.hidden=false;return}d.close();smsLike(t)?smsFlow(t):qk({t:{value:t}})};d.showModal();setTimeout(()=>ta.focus(),50)}
 </script></body></html>
