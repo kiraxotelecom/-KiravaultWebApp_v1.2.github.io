@@ -340,7 +340,7 @@ const $=s=>document.querySelector(s),K='kiravault.web.v1',E=s=>String(s??'').rep
  addD=(s,n)=>{const[y,m,d]=s.split('-').map(Number);return new Date(y,m-1,d+n).toLocaleDateString('sv')},
  dd=s=>s?Math.round((new Date(s+'T00:00')-new Date(td()+'T00:00'))/864e5):null;
 const KINDS=['Rent','Internet','Electricity','Debt','Subscription','Planned Purchase','Savings','Work Expense','Other'],
- CATS=['Food','Rent','Bills','Internet','Transport','Shopping','Entertainment','Work','Others'],
+ CATS=['Food','Rent','Bills','Internet','Transport','Shopping','Entertainment','Work','Charges','Others'],
  K2C={Rent:'Rent',Internet:'Internet',Electricity:'Bills',Debt:'Debt',Subscription:'Entertainment','Planned Purchase':'Shopping',Savings:'Savings','Work Expense':'Work',Other:'Others'},
  CW={Food:'lunch dinner breakfast supper food snack rolex groceries restaurant coffee tea juice meal',Transport:'boda taxi uber bolt safeboda fuel transport matatu fare parking petrol',Rent:'rent',Internet:'internet wifi data airtime',Bills:'electricity umeme water nwsc yaka bill tv',Shopping:'shopping clothes shoes shirt dress',Entertainment:'movie netflix party drinks beer game concert cinema',Work:'work equipment software tools'},
  LT={bg:'#F4F6FC',card:'#FFFFFF',text:'#161D35',muted:'#7683A3',green:'#16A56A',red:'#E5484D',amber:'#F59E0B',line:'#E5E9F4',blue:'#3B5BFF',gb:'#E3F7EC',rb:'#FFE5E7',ab:'#FFF3D6',teal:'#0FB5A0',tb:'#DAF6F1',pu:'#7C5CF5',pb:'#EEE9FF'},
@@ -360,8 +360,12 @@ const sh=n=>{if(HM)return'••••';if(xr())return shU(n/xr());const a=Math.
  KV=(a,b,c='')=>`<div class=top style="margin-top:4px"><small>${a}</small><span class="${c}">${F(b)}</span></div>`,
  UG=x=>typeof x=='string'&&x.startsWith('UGX ')?'<span class=cu>UGX</span> '+x.slice(4):x,
  BG=(c,x,s=22)=>`<b style="display:block;font-size:${s}px;color:var(--${c})">${UG(x)}</b>`;
-function addTx(type,amt,a,cat,desc,date,x={}){S.tx.unshift({id:id(),type,amt,acc:a,cat,desc,date:date||td(),...x});const A=acc(a);A.b+=type=='income'?amt:-amt;if(type=='transfer')acc(x.to).b+=amt}
-function delTx(t){const A=acc(t.acc);if(A)A.b+=t.type=='income'?-t.amt:t.amt;if(t.type=='transfer'&&acc(t.to))acc(t.to).b-=t.amt;
+function addTx(type,amt,a,cat,desc,date,x={}){const T={id:id(),type,amt,acc:a,cat,desc,date:date||td(),...x};S.tx.unshift(T);const A=acc(a);A.b+=type=='income'?amt:-amt;if(type=='transfer')acc(x.to).b+=amt;return T}
+/* v52: bank / mobile money charges, logged as their own linked expense (fo = parent id) */
+const FEEACC=['Bank','Mobile Money'],feeOk=a=>FEEACC.includes(a),feeLbl=a=>a=='Bank'?'Bank charge':'Mobile Money charge';
+function addFee(p,fe){if(fe>0&&feeOk(p.acc))addTx('expense',fe,p.acc,'Charges',feeLbl(p.acc),p.date,{fo:p.id})}
+function feeWire(){const d=$('#dlg'),a=d.querySelector('[name=acc]'),t=d.querySelector('[name=type]'),i=d.querySelector('[name=fee]');if(!a||!i)return;const lb=i.closest('label'),up=()=>{const ok=feeOk(a.value)&&(!t||t.value=='expense');lb.style.display=ok?'':'none';if(ok&&lb.firstChild)lb.firstChild.nodeValue=feeLbl(a.value)+' (optional)'};a.addEventListener('change',up);if(t)t.addEventListener('change',up);up()}
+function delTx(t){S.tx.filter(x=>x.fo&&x.fo==t.id).forEach(x=>delTx(x));const A=acc(t.acc);if(A)A.b+=t.type=='income'?-t.amt:t.amt;if(t.type=='transfer'&&acc(t.to))acc(t.to).b-=t.amt;
  if(t.cid){const c=S.cm.find(c=>c.id==t.cid);if(c){c.paid=Math.max(c.paid-t.amt,0);c.st='pending'}}
  if(t.gid){const g=S.gl.find(g=>g.id==t.gid);if(g)g.saved=Math.max(g.saved-t.amt,0)}
  if(t.pid){const p=S.pr.find(p=>p.id==t.pid);if(p)p.pay=p.pay.filter(x=>x.id!=t.pp)}S.tx=S.tx.filter(x=>x!==t)}
@@ -372,9 +376,9 @@ function ask(title,fs,ok){const d=$('#dlg'),H=fs.map(f=>!!(f.o||f.t=='date'||f.m
  const fm=d.querySelector('form'),ke=d.querySelector('.ke');fm.addEventListener('input',()=>{ke.hidden=true});
  fm.onsubmit=e=>{e.preventDefault();const r=ok(Object.fromEntries(new FormData(e.target)));if(r){ke.textContent=String(r);ke.hidden=false;ke.scrollIntoView&&ke.scrollIntoView({block:'nearest'})}else d.close()};d.showModal()}
 const AN=()=>S.acc.map(a=>a.id);
-function txForm(v={}){ask('Add transaction',[{k:'type',l:'Type',o:['expense','income'],v:v.type},{k:'acc',l:'Account',o:AN(),v:v.acc||'Cash'},{k:'amt',l:'Amount (25k, 1.5m, 150,000)',v:v.amt,m:1},{k:'cat',l:'Category / source',o:[...CATS,'Salary','Freelance','Business','Gift','Other'],v:v.cat},{k:'desc',l:'Note',v:v.desc},{k:'date',l:'Date',t:'date',v:v.date||td()},{k:'oo',l:'One-off? (skips averages)',o:['No','Yes'],v:v.oo?'Yes':'No'}],f=>{
- const a=pa(f.amt);if(!a)return'Enter a valid amount';if(f.type!='income'&&acc(f.acc).b<a)return`${f.acc} only has UGX ${F(acc(f.acc).b)}`;if(f.type=='transfer'&&f.to==f.acc)return'Pick two different accounts';
- addTx(f.type,a,f.acc,f.cat,f.desc,f.date,{to:f.to,...(f.oo=='Yes'&&f.type=='expense'?{oo:1}:{})});learn(f.desc,f.cat,f.type);save()})}
+function txForm(v={}){ask('Add transaction',[{k:'type',l:'Type',o:['expense','income'],v:v.type},{k:'acc',l:'Account',o:AN(),v:v.acc||'Cash'},{k:'amt',l:'Amount (25k, 1.5m, 150,000)',v:v.amt,m:1},{k:'fee',l:'Charge (optional)',m:1},{k:'cat',l:'Category / source',o:[...CATS,'Salary','Freelance','Business','Gift','Other'],v:v.cat},{k:'desc',l:'Note',v:v.desc},{k:'date',l:'Date',t:'date',v:v.date||td()},{k:'oo',l:'One-off? (skips averages)',o:['No','Yes'],v:v.oo?'Yes':'No'}],f=>{
+ const a=pa(f.amt),fe=f.type=='expense'&&feeOk(f.acc)?(pa(f.fee)||0):0;if(!a)return'Enter a valid amount';if(f.type!='income'&&acc(f.acc).b<a+fe)return`${f.acc} only has UGX ${F(acc(f.acc).b)}`;if(f.type=='transfer'&&f.to==f.acc)return'Pick two different accounts';
+ const T=addTx(f.type,a,f.acc,f.cat,f.desc,f.date,{to:f.to,...(f.oo=='Yes'&&f.type=='expense'?{oo:1}:{})});addFee(T,fe);learn(f.desc,f.cat,f.type);save()});feeWire()}
 function qk(f){const t=f.t.value,l=' '+t.toLowerCase()+' ',m=l.match(/(?<![\w.])(\d[\d,]*(?:\.\d+)?)\s*(k|m)?(?![a-z0-9])/);if(!m){alert('Include an amount, e.g. spent 25k on lunch cash');return false}
  let r=l.replace(m[0],' '),ac=/mobile|momo|mtn|airtel|\bmm\b/.test(r)?'Mobile Money':/\bbank\b/.test(r)?'Bank':/\bcash\b/.test(r)?'Cash':null,date=td();
  r=r.replace(/mobile money|momo|mtn|airtel money|airtel|mobile|\bmm\b|\bbank\b|\bcash\b/g,' ');if(/\byesterday\b/.test(r))date=addD(date,-1);
@@ -382,8 +386,8 @@ function qk(f){const t=f.t.value,l=' '+t.toLowerCase()+' ',m=l.match(/(?<![\w.])
  STOP=/^(spent|spend|paid|pay|bought|buy|purchased|gave|received|receive|got|earned|deposit|deposited|on|for|from|via|using|with|by|to|the|a|an|my|in|at|into|of|me|i|ugx|shs|today|yesterday)$/,
  D=W.filter(w=>!STOP.test(w)),cat=gs(D,inc);
  setTimeout(()=>txForm({type:inc?'income':'expense',amt:pa(m[1]+(m[2]||'')),acc:ac,cat,desc:D.join(' ').replace(/^./,c=>c.toUpperCase()),date}),0);return false}
-function payC(c){ask('Pay '+E(c.title),[{k:'amt',l:`Amount (UGX ${F(rem(c))} left)`,v:rem(c),m:1},{k:'acc',l:'From',o:AN(),v:c.acc}],f=>{const a=pa(f.amt);if(!a)return'Enter a valid amount';if(a>rem(c)+.5)return`Only UGX ${F(rem(c))} is owed`;if(acc(f.acc).b<a)return`${f.acc} only has UGX ${F(acc(f.acc).b)}`;
- addTx(c.kind=='Savings'?'saving':'expense',a,f.acc,K2C[c.kind]||'Others',c.title,td(),{cid:c.id});c.paid+=a;if(c.paid>=c.amt-.5){c.paid=c.amt;c.st='paid';if(c.rec=='Monthly'||c.rec=='Weekly')S.cm.push({...c,id:id(),paid:0,st:'pending',due:c.rec=='Monthly'?addM(c.due||td(),1):addD(c.due||td(),7)})}save()})}
+function payC(c){ask('Pay '+E(c.title),[{k:'amt',l:`Amount (UGX ${F(rem(c))} left)`,v:rem(c),m:1},{k:'acc',l:'From',o:AN(),v:c.acc},...(c.kind=='Savings'?[]:[{k:'fee',l:'Charge (optional)',m:1}])],f=>{const a=pa(f.amt),fe=c.kind!='Savings'&&feeOk(f.acc)?(pa(f.fee)||0):0;if(!a)return'Enter a valid amount';if(a>rem(c)+.5)return`Only UGX ${F(rem(c))} is owed`;if(acc(f.acc).b<a+fe)return`${f.acc} only has UGX ${F(acc(f.acc).b)}`;
+ const T=addTx(c.kind=='Savings'?'saving':'expense',a,f.acc,K2C[c.kind]||'Others',c.title,td(),{cid:c.id});addFee(T,fe);c.paid+=a;if(c.paid>=c.amt-.5){c.paid=c.amt;c.st='paid';if(c.rec=='Monthly'||c.rec=='Weekly')S.cm.push({...c,id:id(),paid:0,st:'pending',due:c.rec=='Monthly'?addM(c.due||td(),1):addD(c.due||td(),7)})}save()});feeWire()}
 function addC(){ask('New bill, debt or saving',[{k:'title',l:'Title'},{k:'amt',l:'Amount',m:1},{k:'kind',l:'Type',o:KINDS},{k:'acc',l:'Pay from',o:AN(),v:'Mobile Money'},{k:'due',l:'Due date',t:'date',v:td()},{k:'rec',l:'Repeats',o:['None','Monthly','Weekly']}],f=>{const a=pa(f.amt);if(!a)return'Enter a valid amount';S.cm.push({id:id(),title:f.title||f.kind,kind:f.kind,amt:a,paid:0,due:f.due,acc:f.acc,rec:f.rec,st:'pending'});save()})}
 function addP(){ask('New project',[{k:'title',l:'Project'},{k:'client',l:'Client'},{k:'amt',l:'Amount billed',m:1},{k:'dl',l:'Deadline',t:'date'}],f=>{if(!f.title)return'Give the project a name';S.pr.push({id:id(),title:f.title,client:f.client||'No client',amt:pa(f.amt),dl:f.dl,st:'Active',pay:[]});save()})}
 function payP(p){ask('Payment received: '+E(p.title),[{k:'amt',l:`Amount (UGX ${F(Math.max(p.amt-paid(p),0))} outstanding)`,m:1,v:Math.max(p.amt-paid(p),0)},{k:'acc',l:'Received into',o:AN(),v:'Mobile Money'}],f=>{const a=pa(f.amt);if(!a)return'Enter a valid amount';const pid=id();p.pay.push({id:pid,amt:a,date:td()});addTx('income',a,f.acc,'Freelance',p.title,td(),{pid:p.id,pp:pid});save()})}
@@ -568,22 +572,22 @@ function extraAt(){const o=[],a=bkAge();
 function txMenu(i){const t=S.tx.find(x=>x.id==i);if(!t)return;const d=$('#dlg');
  d.innerHTML=`<h3>${E(t.desc||t.cat||t.type)}</h3><small>${t.date} · ${E(t.acc)}${t.type=='transfer'?' → '+E(t.to):''} · UGX ${F(t.amt)}</small><div class=row style="justify-content:flex-start;flex-wrap:wrap"><button class=p onclick="dlg.close();editTx(${i})">Edit</button>${t.type=='expense'?`<button onclick="dlg.close();ooTog(${i})">${t.oo?'Not one-off':'Mark one-off'}</button>`:''}${t.type=='expense'?`<button onclick="dlg.close();rcOpen(${i})">📎 Receipt${t.rc?' ✓':''}</button>`:''}<button onclick="dlg.close();UD('Transaction deleted',()=>{const x=S.tx.find(x=>x.id==${i});if(x)delTx(x)})">Delete</button><button onclick=dlg.close()>Cancel</button></div>`;d.showModal()}
 function editTx(i){const t=S.tx.find(x=>x.id==i);if(!t)return;
- const tr=t.type=='transfer',lk=!!(t.cid||t.gid||t.pid),free=!tr&&!lk&&(t.type=='expense'||t.type=='income'),co=[...CATS,'Salary','Freelance','Business','Gift','Other'];
+ const tr=t.type=='transfer',lk=!!(t.cid||t.gid||t.pid),free=!tr&&!lk&&(t.type=='expense'||t.type=='income'),ft=S.tx.find(x=>x.fo==t.id),hf=!t.fo&&!tr&&(t.type=='expense'||free),co=[...CATS,'Salary','Freelance','Business','Gift','Other'];
  if(t.cat&&!co.includes(t.cat))co.unshift(t.cat);
- ask('Edit transaction',[...(free?[{k:'type',l:'Type',o:['expense','income'],v:t.type}]:[]),{k:'amt',l:'Amount (25k, 1.5m, 150,000)',v:t.amt,m:1},...(tr?[]:[{k:'acc',l:'Account',o:AN(),v:t.acc}]),...(tr||t.type=='saving'?[]:[{k:'cat',l:'Category (expense) / source (income)',o:co,v:t.cat}]),{k:'desc',l:'Note',v:t.desc},{k:'date',l:'Date',t:'date',v:t.date},...(t.type=='expense'||free?[{k:'oo',l:'One-off? (kept out of averages)',o:['No','Yes'],v:t.oo?'Yes':'No'}]:[])],f=>{
+ ask('Edit transaction',[...(free?[{k:'type',l:'Type',o:['expense','income'],v:t.type}]:[]),{k:'amt',l:'Amount (25k, 1.5m, 150,000)',v:t.amt,m:1},...(hf?[{k:'fee',l:'Charge (optional)',m:1,v:ft?ft.amt:''}]:[]),...(tr?[]:[{k:'acc',l:'Account',o:AN(),v:t.acc}]),...(tr||t.type=='saving'?[]:[{k:'cat',l:'Category (expense) / source (income)',o:co,v:t.cat}]),{k:'desc',l:'Note',v:t.desc},{k:'date',l:'Date',t:'date',v:t.date},...(t.type=='expense'||free?[{k:'oo',l:'One-off? (kept out of averages)',o:['No','Yes'],v:t.oo?'Yes':'No'}]:[])],f=>{
   const a=pa(f.amt);if(!a)return'Enter a valid amount';
   const nt=free?f.type:t.type,na=tr?t.acc:f.acc,ef=(y,m)=>y=='income'?m:-m,B={};
-  S.acc.forEach(x=>B[x.id]=x.b);B[t.acc]-=ef(t.type,t.amt);if(tr)B[t.to]-=t.amt;
-  const av=B[na];B[na]+=ef(nt,a);if(tr)B[t.to]+=a;
+  S.acc.forEach(x=>B[x.id]=x.b);B[t.acc]-=ef(t.type,t.amt);if(tr)B[t.to]-=t.amt;if(ft)B[ft.acc]+=ft.amt;
+  const av=B[na];B[na]+=ef(nt,a);if(tr)B[t.to]+=a;const nf=hf&&nt=='expense'&&feeOk(na)?(pa(f.fee)||0):0;B[na]-=nf;
   if(nt!='income'&&B[na]<0&&B[na]<acc(na).b)return`${na} only has UGX ${F(Math.max(av,0))}`;
   if(t.cid){const c=S.cm.find(x=>x.id==t.cid);if(c&&c.paid-t.amt+a>c.amt+.5)return`This bill is only UGX ${F(c.amt-c.paid+t.amt)}`}
   S.acc.forEach(x=>x.b=B[x.id]);const df=a-t.amt;
   if(t.cid){const c=S.cm.find(x=>x.id==t.cid);if(c){c.paid=Math.max(c.paid+df,0);c.st=c.paid>=c.amt-.5?'paid':'pending'}}
   if(t.gid){const g=g_(t.gid);if(g)g.saved=Math.max(g.saved+df,0)}
   if(t.pid){const p=p_(t.pid),y=p&&p.pay.find(x=>x.id==t.pp);if(y)y.amt=a}
-  Object.assign(t,{type:nt,amt:a,acc:na,desc:f.desc,date:f.date||t.date});
+  Object.assign(t,{type:nt,amt:a,acc:na,desc:f.desc,date:f.date||t.date});if(ft)S.tx=S.tx.filter(x=>x!==ft);if(nf)S.tx.unshift({id:id(),type:'expense',amt:nf,acc:t.acc,cat:'Charges',desc:feeLbl(t.acc),date:t.date,fo:t.id});
   if(!tr&&t.type!='saving'&&f.cat)t.cat=f.cat;
-  if(f.oo!==undefined){if(f.oo=='Yes'&&t.type=='expense')t.oo=1;else delete t.oo}learn(f.desc,t.cat,t.type);save()})}
+  if(f.oo!==undefined){if(f.oo=='Yes'&&t.type=='expense')t.oo=1;else delete t.oo}learn(f.desc,t.cat,t.type);save()});feeWire()}
 
 /* ---------- Smarter quick add: remember corrections ---------- */
 const norm=s=>(String(s||'').toLowerCase().match(/[a-z']+/g)||[]).filter(w=>!STOPRE.test(w));
@@ -1807,7 +1811,7 @@ function smsFlow(t){const p=smsParse(t);if(!p.amt){alert('Could not find an amou
  ask('Add from SMS',[{k:'type',l:'Type',o:['expense','income','transfer'],v:p.type},{k:'acc',l:'Account',o:AN(),v:p.acc},{k:'amt',l:'Amount',v:cv(p.amt),m:1},{k:'fee',l:'Fee (logged separately)',v:cv(p.fee),m:1},{k:'to',l:'Transfer to (transfers only)',o:AN(),v:p.to},{k:'cat',l:'Category / source',o:[...CATS,'Salary','Freelance','Business','Gift','Other'],v:p.cat},{k:'desc',l:'Note',v:p.desc},{k:'date',l:'Date',t:'date',v:p.date}],f=>{
   const a=pa(f.amt),fe=pa(f.fee)||0;if(!a)return'Enter a valid amount';if(f.type=='transfer'&&f.to==f.acc)return'Pick two different accounts';
   if(f.type!='income'&&acc(f.acc).b<a+fe)return`${f.acc} only has UGX ${F(acc(f.acc).b)}`;
-  addTx(f.type,a,f.acc,f.cat,f.desc,f.date,{to:f.to,...(p.ref?{ref:p.ref}:{})});if(fe)addTx('expense',fe,f.acc,'Others','Mobile Money fee',f.date);learn(f.desc,f.cat,f.type);save()})}
+  const T=addTx(f.type,a,f.acc,f.cat,f.desc,f.date,{to:f.to,...(p.ref?{ref:p.ref}:{})});if(fe)addTx('expense',fe,f.acc,'Charges',feeLbl(f.acc),f.date,{fo:T.id});learn(f.desc,f.cat,f.type);save()})}
 function quickAdd(){const d=$('#dlg');d.innerHTML=`<form class=kf><div class=kh><h3>Quick add</h3><button type=button class=kx aria-label=Close onclick=dlg.close()>✕</button></div><div class=kb><label>What happened?<textarea id=qa-t rows=4 placeholder="spent 25k on lunch cash"></textarea></label><small class=kh2>Type it like a text, e.g. “received 500k client bank”, or paste an MTN or Airtel Money message.</small><div class=ke hidden></div></div><div class=row><button type=button onclick=dlg.close()>Cancel</button><button class=p>Add</button></div></form>`;
  const fm_=d.querySelector('form'),ke=d.querySelector('.ke'),ta=d.querySelector('textarea');fm_.onsubmit=e=>{e.preventDefault();const t=ta.value.trim();if(!/\d/.test(t)){ke.textContent='Include an amount, e.g. spent 25k on lunch cash';ke.hidden=false;return}d.close();smsLike(t)?smsFlow(t):qk({t:{value:t}})};d.showModal();setTimeout(()=>ta.focus(),50)}
 </script></body></html>
