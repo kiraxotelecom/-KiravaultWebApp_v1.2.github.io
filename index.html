@@ -354,9 +354,27 @@ nav button:active{transform:scale(.9)}
 .cfw{position:fixed;left:50%;top:calc(36px + env(safe-area-inset-top));z-index:61;pointer-events:none}
 .cf{position:absolute;left:0;top:0;width:8px;height:12px;border-radius:2px;animation:cfly 1.2s cubic-bezier(.2,.7,.4,1) forwards}
 @keyframes cfly{0%{opacity:1;transform:translate(0,0) rotate(0)}35%{opacity:1;transform:translate(calc(var(--x)*.7),var(--u)) rotate(calc(var(--r)*.4))}100%{opacity:0;transform:translate(var(--x),var(--y)) rotate(var(--r))}}
+
+/* ===== v2.1.8: swipe rows, pull to sync, drawing charts ===== */
+html,body{overscroll-behavior-y:contain}
+.kvsw{position:relative;overflow:hidden;border-top:1px solid var(--line)}
+.kvsw:first-child{border-top:0}
+.kvsw>.k9txr{position:relative;z-index:1;background:var(--card);border-top:0!important;touch-action:pan-y;-webkit-user-select:none;user-select:none;will-change:transform}
+.kvsb{position:absolute;inset:0;display:flex;align-items:center;justify-content:space-between;padding:0 20px;font-weight:700;font-size:13px;color:#fff;background:#6b7385;opacity:0;transition:background-color .18s,opacity .12s}
+.kvsw.on .kvsb{opacity:1}
+.kvsw[data-dir=e] .kvsd,.kvsw[data-dir=d] .kvse{visibility:hidden}
+.kvsw[data-dir=e].past .kvsb{background:var(--blue)}
+.kvsw[data-dir=d].past .kvsb{background:var(--red)}
+.kvse,.kvsd{opacity:calc(var(--p,0)*1.3 - .3);transform:scale(calc(.85 + var(--p,0)*.15));transition:transform .15s}
+.kvsw.past .kvse,.kvsw.past .kvsd{transform:scale(1.12)}
+.kvhint{display:block;margin-top:6px;opacity:.8}
+#kvptr{position:fixed;left:50%;top:calc(env(safe-area-inset-top,0px) + 8px);z-index:9;width:42px;height:42px;margin-left:-21px;border-radius:50%;background:var(--card);color:var(--accent);border:1px solid var(--line);box-shadow:0 4px 16px #0004;display:flex;align-items:center;justify-content:center;transform:translateY(-70px);opacity:0;pointer-events:none}
+#kvptr svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+#kvptr.spin svg{animation:kvspin .8s linear infinite}
+@keyframes kvspin{to{transform:rotate(360deg)}}
 </style></head><body><header id=hd></header><main id=m></main><nav id=nav></nav><dialog id=dlg></dialog><div id=toast hidden></div><div id=lk hidden></div><button id=fab class=p onclick=quickAdd()>+</button><div id=sp><button class=gb onclick="sp.remove();sessionStorage.s=1;persist(1);if(lkS)lockNow();mvAnim()">Get Started</button><button id=sgl class=sgl onclick="sgOpen()">Already have an account? <b>Sign in</b></button></div>
 <script>
-const APP_VER='2.1.7'; /* bump by one on every change: 2.1.8, 2.1.9 ... */
+const APP_VER='2.1.8'; /* bump by one on every change: 2.1.8, 2.1.9 ... */
 let HM=0;
 const $=s=>document.querySelector(s),K='kiravault.web.v1',E=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])),xr=()=>S&&S.set&&S.set.cur=='USD'&&+S.set.rate>0?+S.set.rate:0,fu=v=>Math.abs(v)>=1000?Math.round(v).toLocaleString('en-US'):v.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}),F=n=>HM?'••••':(xr()?fu(n/xr()):Math.round(n).toLocaleString('en-US')),
  td=()=>new Date().toLocaleDateString('sv'),me=()=>{const d=new Date();return new Date(d.getFullYear(),d.getMonth()+1,0).toLocaleDateString('sv')},
@@ -891,7 +909,7 @@ function monthCard(){const ym=ym0(0),pm=ym0(-1),m=mtot(ym),n=+td().slice(8),cy=+
  pt=a=>a.map((v,i)=>`${i?'L':'M'}${i/(N-1)*300},${96-v/mx*90}`).join(''),pv=prv[Math.min(n,pl)-1],pc=pv?Math.round((cur[n-1]-pv)/pv*100):null,
  f=(l,v,c)=>`<div><small>${l}</small><b style="display:block;font-size:17px;color:var(--${c})">${sh(v)}</b></div>`;
  return C('green','',H('This month','green')+`<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:8px 0 12px">${f('Income',m.i,'green')}${f('Spent',m.e,'red')}${f('Net',m.i-m.e,m.i>=m.e?'green':'red')}</div>
- <small><b>Spending pace</b> · this month vs last</small><svg viewBox="0 0 300 100" width=100% height=100 preserveAspectRatio=none style="margin-top:6px"><path d="${pt(prv)}" fill=none stroke="var(--muted)" stroke-width=2 stroke-dasharray="5 4" vector-effect=non-scaling-stroke opacity=.7 /><path d="${pt(cur)}" fill=none stroke="var(--accent)" stroke-width=3 vector-effect=non-scaling-stroke /></svg>
+ <small><b>Spending pace</b> · this month vs last</small><svg class=kvd viewBox="0 0 300 100" width=100% height=100 preserveAspectRatio=none style="margin-top:6px"><path d="${pt(prv)}" fill=none stroke="var(--muted)" stroke-width=2 stroke-dasharray="5 4" vector-effect=non-scaling-stroke opacity=.7 /><path d="${pt(cur)}" fill=none stroke="var(--accent)" stroke-width=3 vector-effect=non-scaling-stroke /></svg>
  <small><span style="color:var(--accent)">━</span> this month · <span>╌</span> last month</small>${pc===null?'':`<p style="margin:8px 0 0"><b class="${pc<=0?'g':'r'}">${pc<=0?'▼':'▲'} ${Math.abs(pc)}%</b> <small>${pc<=0?'less':'more'} than this point last month</small></p>`}`)}
 function allowCard(){const s=sm(),t=td(),n=+t.slice(8),[y,mo]=t.split('-').map(Number),dl=dim(y,mo-1)-n+1,m=mtot(ym0(0)),al=s.safe/dl,avg=m.e/n,ok=avg<=al&&s.safe>0||!avg,lim=addD(t,7),
  out=S.cm.filter(c=>c.st=='pending'&&c.due&&c.due<=lim).reduce((a,c)=>a+rem(c),0),inn=S.ex.filter(x=>x.dt&&x.dt<=lim).reduce((a,x)=>a+x.amt,0)+riOcc(7).reduce((a,o)=>a+o.amt,0),af=s.av+inn-out,c=ok?'green':'red',
@@ -2047,7 +2065,7 @@ let clM=null;
 function cuRun(){
  if(RMq.matches)return;
  const L=[];
- document.querySelectorAll('#m .sc b,#m .hero b,#m .grid b').forEach(b=>{[...b.childNodes].forEach(n=>{
+ document.querySelectorAll('#m .sc b,#m .hero b,#m .grid b,#m .chs b').forEach(b=>{[...b.childNodes].forEach(n=>{
   if(n.nodeType!==3)return;
   const mt=n.nodeValue.match(/^(\s*)(-?)(\d[\d,]*(?:\.\d+)?)([KM]?)(\s*)$/);if(!mt)return;
   const v=parseFloat(mt[3].replace(/,/g,'')),d=(mt[3].split('.')[1]||'').length,c=mt[3].includes(',');
@@ -2089,5 +2107,134 @@ function clFire(msg){
  setTimeout(()=>d.classList.add('out'),2800);setTimeout(()=>d.remove(),3300)}
 clCheck();
 
+/* ===== v2.1.8: swipe a transaction, pull down to sync, charts that draw themselves ===== */
+const kvEase='cubic-bezier(.22,.8,.2,1)',kvSpring='cubic-bezier(.34,1.56,.64,1)', /* the spring overshoots a little, then settles */
+ kvBuzz=p=>{try{navigator.vibrate&&navigator.vibrate(p)}catch{}},
+ kvLocked=()=>document.body.classList.contains('locked')||!!document.querySelector('dialog[open]'),
+ kvNap=ms=>new Promise(r=>setTimeout(r,ms));
+
+/* --- 1. swipe a transaction: right = Edit, left = Delete (with Undo) --- */
+function kvWrap(h){
+ const t=document.createElement('template');t.innerHTML=h;
+ t.content.querySelectorAll('.k9txr').forEach(r=>{
+  const m=(r.getAttribute('onclick')||'').match(/txMenu\((\d+)\)/);if(!m)return;
+  const w=document.createElement('div');w.className='kvsw';w.dataset.id=m[1];
+  w.innerHTML='<div class=kvsb aria-hidden=true><span class=kvse>✎ Edit</span><span class=kvsd>Delete 🗑</span></div>';
+  r.replaceWith(w);w.appendChild(r)});
+ let seen=0;try{seen=localStorage.getItem('kvSwHint')}catch{}
+ const c=t.content.querySelector('.k9txl');
+ if(c&&!seen&&matchMedia('(pointer:coarse)').matches){const x=document.createElement('small');x.className='kvhint';x.textContent='Tip: swipe a row right to edit, left to delete';c.before(x)}
+ return t.innerHTML}
+{const hl1=hlHTML;hlHTML=function(){return kvWrap(hl1.apply(this,arguments))}}
+function kvHintDone(){try{localStorage.setItem('kvSwHint','1')}catch{}document.querySelectorAll('.kvhint').forEach(x=>x.remove())}
+function kvSnap(el,from,done){ /* spring back to rest */
+ el.style.transform='';
+ if(RMq.matches||!el.animate){done&&done();return}
+ const a=el.animate([{transform:`translateX(${from}px)`},{transform:'translateX(0)'}],{duration:460,easing:kvSpring});
+ a.onfinish=a.oncancel=()=>done&&done()}
+let kvSw=null,kvSwT=0;
+document.addEventListener('pointerdown',e=>{
+ if(kvSw||(e.pointerType=='mouse'&&e.button)||kvLocked())return;
+ const r=e.target.closest&&e.target.closest('.kvsw>.k9txr');if(!r)return;
+ kvSw={r,w:r.parentNode,id:+r.parentNode.dataset.id,x:e.clientX,y:e.clientY,pid:e.pointerId,lock:0,dx:0,eff:0,past:false,TH:Math.min(110,Math.max(76,r.offsetWidth*.26))}},{passive:true});
+document.addEventListener('pointermove',e=>{
+ const s=kvSw;if(!s||e.pointerId!==s.pid)return;
+ const dx=e.clientX-s.x,dy=e.clientY-s.y;
+ if(!s.lock){
+  if(Math.abs(dx)<9&&Math.abs(dy)<9)return;
+  if(Math.abs(dy)>Math.abs(dx)){kvSw=null;return}   /* it is a scroll, not a swipe */
+  s.lock=1;try{s.r.setPointerCapture(s.pid)}catch{}s.w.classList.add('on')}
+ s.dx=dx;const a=Math.abs(dx);
+ s.eff=Math.sign(dx)*(a<=s.TH?a:s.TH+(a-s.TH)*.3);   /* rubber band past the commit point */
+ s.r.style.transform=`translateX(${s.eff}px)`;
+ s.w.dataset.dir=dx>0?'e':'d';s.w.style.setProperty('--p',Math.min(a/s.TH,1).toFixed(3));
+ const past=a>=s.TH;if(past!==s.past){s.past=past;s.w.classList.toggle('past',past);if(past)kvBuzz(14)}},{passive:true});
+function kvSwEnd(e){
+ const s=kvSw;if(!s||e.pointerId!==s.pid)return;kvSw=null;
+ if(!s.lock)return;kvSwT=Date.now();
+ const commit=e.type=='pointerup'&&s.past;
+ s.w.classList.remove('on','past');
+ const reset=()=>{s.w.style.removeProperty('--p');delete s.w.dataset.dir};
+ if(!commit){kvSnap(s.r,s.eff,reset);return}
+ kvHintDone();
+ if(s.dx>0){kvSnap(s.r,s.eff,reset);editTx(s.id);return}
+ /* delete: slide out, close the gap, then delete with the normal 8 second Undo */
+ kvBuzz(22);
+ const go=()=>UD('Transaction deleted',()=>{const x=S.tx.find(x=>x.id==s.id);if(x)delTx(x)});
+ if(RMq.matches){go();return}
+ const W=s.w.offsetWidth,h=s.w.offsetHeight;
+ s.w.classList.add('on');s.w.dataset.dir='d';s.w.classList.add('past');
+ s.r.style.transition='transform .22s ease-in';s.r.style.transform=`translateX(${-W-40}px)`;
+ setTimeout(()=>{s.w.style.height=h+'px';void s.w.offsetHeight;s.w.style.transition='height .22s ease,opacity .22s';s.w.style.height='0';s.w.style.opacity='0'},200);
+ setTimeout(go,440)}
+document.addEventListener('pointerup',kvSwEnd);document.addEventListener('pointercancel',kvSwEnd);
+document.addEventListener('click',e=>{if(Date.now()-kvSwT<400){e.stopPropagation();e.preventDefault()}},true); /* a swipe must not also be a tap */
+
+/* --- 2. pull down to sync --- */
+const kvPT=58,kvPM=120,
+ kvIcArrow='<svg viewBox="0 0 24 24"><path d="M12 5v13M6.5 12.5 12 18l5.5-5.5"/></svg>',
+ kvIcSpin='<svg viewBox="0 0 24 24"><circle cx=12 cy=12 r=8 stroke-dasharray="38 14"/></svg>',
+ kvIcOk='<svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7"/></svg>',
+ kvIcNo='<svg viewBox="0 0 24 24"><path d="M12 6v7M12 17.5v.01"/></svg>';
+let kvPt=null,kvPtBusy=false;
+function kvPtEl(){let e=document.getElementById('kvptr');if(!e){e=document.createElement('div');e.id='kvptr';e.setAttribute('aria-hidden','true');e.innerHTML=kvIcArrow;document.body.appendChild(e)}return e}
+function kvPtPos(p,ease){ /* p = how far the indicator has been pulled, in px */
+ const e=kvPtEl(),f=Math.min(p/kvPT,1);
+ e.style.transition=ease?'transform .42s '+kvSpring+',opacity .25s':'none';
+ e.style.opacity=Math.min(p/22,1);
+ e.style.transform=`translateY(${p-70}px) scale(${(1-.1*f).toFixed(3)},${(1+.16*f).toFixed(3)})`;   /* stretches as you pull */
+ const sv=e.firstElementChild;if(sv&&!e.classList.contains('spin'))sv.style.transform=`rotate(${(f*180).toFixed(0)}deg)`}
+document.addEventListener('touchstart',e=>{
+ if(kvPtBusy||e.touches.length!=1||window.scrollY>0||kvLocked()||(e.target.closest&&e.target.closest('input,textarea,select,.chw')))return;
+ kvPt={x:e.touches[0].clientX,y:e.touches[0].clientY,on:0,p:0,past:false}},{passive:true});
+document.addEventListener('touchmove',e=>{
+ const s=kvPt;if(!s)return;
+ const dx=e.touches[0].clientX-s.x,dy=e.touches[0].clientY-s.y;
+ if(!s.on){
+  if(dy<0||window.scrollY>0||(Math.abs(dx)>10&&Math.abs(dx)>dy)){kvPt=null;return}
+  if(dy<12)return;s.on=1}
+ if(e.cancelable)e.preventDefault();
+ s.p=kvPM*(1-Math.exp(-(dy-12)/150));   /* resistance grows the further you pull */
+ kvPtPos(s.p);
+ const past=s.p>=kvPT;if(past!==s.past){s.past=past;if(past)kvBuzz(12)}},{passive:false});
+function kvPtEnd(){const s=kvPt;kvPt=null;if(!s||!s.on)return;if(s.p>=kvPT)kvPtGo();else kvPtPos(0,1)}
+document.addEventListener('touchend',kvPtEnd);document.addEventListener('touchcancel',kvPtEnd);
+function kvNote(m){const t=$('#toast');t.innerHTML='';const x=document.createElement('span');x.textContent=m;t.append(x);t.hidden=false;clearTimeout(tmr);tmr=setTimeout(hideT,4500)}
+async function kvPtGo(){
+ kvPtBusy=true;const e=kvPtEl(),t0=Date.now();let ok=true,msg='';
+ e.innerHTML=kvIcSpin;e.classList.add('spin');e.style.transition='transform .3s '+kvSpring;e.style.opacity=1;e.style.transform='translateY(14px)';
+ try{
+  if(!syOn()){ok=false;msg='Cloud sync is off. Turn it on in Settings › Cloud sync.'}
+  else if(syBusy){const w=Date.now();while(syBusy&&Date.now()-w<8000)await kvNap(150)}
+  else{syMsg='';await syRun(1);if(syMsg&&!/^Synced/.test(syMsg)&&syMsg!='Syncing…'){ok=false;msg=syMsg}}
+ }catch(err){ok=false;msg='Sync failed. Try again.'}
+ await kvNap(Math.max(0,650-(Date.now()-t0)));
+ e.classList.remove('spin');e.innerHTML=ok?kvIcOk:kvIcNo;
+ if(ok)showOk('Synced just now');else kvNote(msg);
+ await kvNap(ok?700:1000);kvPtPos(0,1);await kvNap(450);e.innerHTML=kvIcArrow;kvPtBusy=false}
+
+/* --- 3. charts that draw themselves (Insights). Plays when a chart first appears or its data changes --- */
+const kvDrawn=new Set();
+function kvDrawIn(svg){
+ const all=[...svg.querySelectorAll('path')],sig=all.map(p=>p.getAttribute('d')).join('|');
+ if(!sig||kvDrawn.has(sig)||!svg.animate)return;kvDrawn.add(sig);
+ const P=all.filter(p=>!p.closest('[id$="-x"]')),
+  lines=P.filter(p=>p.getAttribute('fill')==='none'&&!p.hasAttribute('stroke-dasharray')),
+  fills=P.filter(p=>/^url/.test(p.getAttribute('fill')||'')),
+  dashed=P.filter(p=>p.hasAttribute('stroke-dasharray')),
+  dots=[...svg.querySelectorAll(':scope>circle')];
+ if(lines.some(p=>p.hasAttribute('vector-effect'))){
+  /* stretched charts (forecast, pace): reveal left to right */
+  const els=[...svg.children].filter(n=>/^(path|circle)$/i.test(n.tagName));if(!els.length)return;
+  const g=document.createElementNS('http://www.w3.org/2000/svg','g');svg.insertBefore(g,els[0]);els.forEach(n=>g.appendChild(n));
+  g.animate([{clipPath:'inset(-4px 100% -4px -4px)'},{clipPath:'inset(-4px -4px -4px -4px)'}],{duration:1000,easing:kvEase,fill:'backwards'})}
+ else lines.forEach((p,i)=>{p.setAttribute('pathLength','1');
+  p.animate([{strokeDasharray:'1 1',strokeDashoffset:1},{strokeDasharray:'1 1',strokeDashoffset:0}],{duration:900,delay:i*140,easing:kvEase,fill:'backwards'})});
+ fills.concat(dashed).forEach(p=>p.animate([{opacity:0}],{duration:700,delay:350,easing:'ease-out',fill:'backwards'}));
+ dots.forEach(d=>{d.style.transformBox='fill-box';d.style.transformOrigin='center';
+  d.animate([{opacity:0,transform:'scale(.2)'},{opacity:1,transform:'scale(1)'}],{duration:380,delay:820,easing:kvSpring,fill:'backwards'})})}
+function kvDrawAll(){if(RMq.matches||tab!='ins')return;document.querySelectorAll('#m .chw svg,#m .fch svg,#m svg.kvd').forEach(kvDrawIn)}
+{const r2=render;render=function(){const o=r2.apply(this,arguments);if(tab=='ins')setTimeout(kvDrawAll,90);return o}}
+if(tab=='ins')setTimeout(kvDrawAll,90);
 
 </script></body></html>
