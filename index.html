@@ -423,7 +423,7 @@ const V={home(){const s=sm(),nm=S.set.name,hr=new Date().getHours(),gr=hr<12?'GO
  more(){const o=(k,l,v)=>`<label>${l}<select onchange="S.set.${k}=this.value;save()">${v.map(x=>`<option${S.set[k]==x?' selected':''}>${x}</option>`).join('')}</select></label>`;
  return`<h1>Settings</h1><div class=card><label>Your name<input value="${E(S.set.name||'')}" onchange="S.set.name=this.value;save()"></label>${o('mode','Theme',['auto','light','dark'])}${o('accent','Accent colour',Object.keys(AC))}</div>
  <h3>Opening balances</h3><div class=card><small>Set what you hold in each account right now.</small>${S.acc.map(a=>`<label>${a.id} (UGX)<input inputmode=decimal value="${a.b}" onchange="setBal('${a.id}',this.value)"></label>`).join('')}</div><h3>Backup</h3><div class=card><small>Everything lives on this device only. Last backup: ${bkTxt()}</small><div class=row style="justify-content:flex-start"><button class=p onclick=bak()>Share backup</button><button onclick="$('#imp').click()">Restore</button></div><input id=imp type=file accept=.json hidden onchange=imp(this)><small>Restore accepts backups from this web app and JSON backups from the Android app.</small></div>
- <h3>About KiraVault</h3><div class=card style="text-align:center"><img src=icon-192.png width=64 height=64 style="border-radius:16px"><br><b style="font-size:18px">KiraVault</b><br><small>Plan, Work, Grow: your finances and work in one place.</small></div><div class=card><small>KiraVault answers one question: <b>how much can I safely spend?</b> It tracks Bank, Mobile Money and Cash, counts bills, debts and savings as commitments, and never counts client money until it is actually received.</small><ul><li><b>Finance:</b> accounts, transactions, bills &amp; debts and savings goals</li><li><b>Work:</b> projects, tasks, clients and payments</li><li><b>Calendar:</b> colour-coded workload and bills due</li><li><b>Insights:</b> budgets, spending and a 30-day cash forecast</li><li><b>Private and offline:</b> your data stays on this device</li></ul></div><div class=card><small>Developed by</small><br><b>Kirabo Isa Bilal</b><br><small>Version 2.0 · Clarity</small></div><h3>Data</h3><button onclick="if(confirm('Erase ALL data on this device?')){localStorage.removeItem(K);localStorage.removeItem(LK);localStorage.removeItem(FK);location.reload()}">Erase everything</button>`}};
+ <h3>About KiraVault</h3><div class=card style="text-align:center"><img src=icon-192.png width=64 height=64 style="border-radius:16px"><br><b style="font-size:18px">KiraVault</b><br><small>Plan, Work, Grow: your finances and work in one place.</small></div><div class=card><small>KiraVault answers one question: <b>how much can I safely spend?</b> It tracks Bank, Mobile Money and Cash, counts bills, debts and savings as commitments, and never counts client money until it is actually received.</small><ul><li><b>Finance:</b> accounts, transactions, bills &amp; debts and savings goals</li><li><b>Work:</b> projects, tasks, clients and payments</li><li><b>Calendar:</b> colour-coded workload and bills due</li><li><b>Insights:</b> budgets, spending and a 30-day cash forecast</li><li><b>Private by default:</b> works offline and stays on this device unless you turn on Cloud sync in Settings</li></ul></div><div class=card><small>Developed by</small><br><b>Kirabo Isa Bilal</b><br><small>Version 2.0 · Clarity</small></div><h3>Data</h3><button onclick="if(confirm('Erase ALL data on this device?')){localStorage.removeItem(K);localStorage.removeItem(LK);localStorage.removeItem(FK);location.reload()}">Erase everything</button>`}};
 function setBal(n,v){acc(n).b=pa(v);save()}
 V.mo=V.money;V.money=()=>{const M={a:'Overview',t:'Transactions',p:'Plan Month',b:'Commitments',s:'Savings Goals'};
  return`<div class=stabs>${Object.entries(M).map(([k,v])=>`<button class="${mv==k?'on':''}" onclick="mv='${k}';render()">${v}</button>`).join('')}</div>`+(mv=='a'?V.ov():mv=='t'?V.hist():mv=='p'?V.plan():mv=='b'?V.bills():V.sav())};
@@ -1471,7 +1471,7 @@ const STG={profile:['Profile & Preferences',o=>profPg()+(o['Kind of work (option
 V.more=()=>{const o=stSects();
  if(stg&&STG[stg])return`<div class=top style="margin-bottom:12px"><button class=s onclick="stGo('')">‹ Settings</button><b>${STG[stg][0]}</b><span style="width:70px"></span></div>`+STG[stg][1](o);
  const nm=(S.set.name||'').trim(),on=navigator.onLine,sw=!!(navigator.serviceWorker&&navigator.serviceWorker.controller),
- R=[['cur','c','Currency',S.set.cur=='USD'?'USD':'UGX'],['acc','w','Accounts & balances',''],['home','h','Screen layouts',''],['sec','l','Security & PIN',lkS?'On':'Off'],['bak','b','Backup & Export',bkTxt()],['about','i','About KiraVault','']];
+ R=[['cur','c','Currency',S.set.cur=='USD'?'USD':'UGX'],['acc','w','Accounts & balances',''],['home','h','Screen layouts',''],['sec','l','Security & PIN',lkS?'On':'Off'],['bak','b','Backup & Export',bkTxt()],['sync','b','Cloud sync',syTxt()],['about','i','About KiraVault','']];
  return`<h1>Settings</h1>${bkBanner()}<div class="card pf" onclick="stGo('profile')"><div class=av>${E((nm[0]||'K').toUpperCase())}</div><div style="flex:1"><b style="font-size:17px">${E(nm||'Your name')}</b><br><small>Profile &amp; preferences</small></div><em>›</em></div>`
  +`<div class="card stp">${R.map(([k,i,l,v])=>`<div class=sr onclick="stGo('${k}')"><i><svg viewBox="0 0 24 24">${SI2[i]}</svg></i><b>${l}</b><small ${k=='cur'?'data-nocur=1':''}>${v}</small><em>›</em></div>`).join('')}</div>`
  +`<div class="card offc"><div class=top><b>${on?'🟢 Online':'🟠 Offline'} · works either way</b></div><small>Everything is saved on this device and nothing is sent anywhere.${sw?' The app is stored for offline use.':' Open it once online to store it for offline use.'}</small></div>`};
@@ -1879,4 +1879,101 @@ function lTop(s,i){const o=lList(s);lSet(s,[o[i],...o.filter((_,x)=>x!=i)])}
 function lHide(s,i){const k=lList(s)[i];S.set.lh=S.set.lh||{};const h=S.set.lh[s]||[];S.set.lh[s]=h.includes(k)?h.filter(x=>x!=k):[...h,k];save()}
 function lReset(s){if(S.set.lo)delete S.set.lo[s];if(S.set.lh)delete S.set.lh[s];save()}
 function lCfg(s,t){const o=lList(s),h=(S.set.lh||{})[s]||[];return`<h3>${t}</h3><div class=card><small>Move cards up or down, or send one straight to the top. Hidden cards stay off this screen.</small>${o.map((k,i)=>`<div class=top style="padding:8px 0;border-top:1px solid var(--line);margin-top:6px;opacity:${h.includes(k)?.5:1}"><b>${E(k)}</b><span><button class=s onclick="lTop('${s}',${i})"${i?'':' disabled'}>Top</button> <button class=s onclick="lMove('${s}',${i},-1)"${i?'':' disabled'}>▲</button> <button class=s onclick="lMove('${s}',${i},1)"${i<o.length-1?'':' disabled'}>▼</button> <button class=s onclick="lHide('${s}',${i})">${h.includes(k)?'Show':'Hide'}</button></span></div>`).join('')}<div class=row style="justify-content:flex-start;margin-top:8px"><button class=s onclick="lReset('${s}')">Reset order</button></div></div>`}
+/* ===== v57: Cloud sync (Firebase Auth + Firestore, free Spark plan) ===== */
+const KV_FB={apiKey:'',authDomain:'',projectId:'',appId:''}, /* paste your Firebase web app config here once, then re-publish */
+ SYM='kiravault.sync.meta',SYC='kiravault.sync.cfg',SYB='kiravault.web.before-sync',FBV='10.14.1';
+let syM=(()=>{try{return JSON.parse(localStorage.getItem(SYM))||{}}catch{return{}}})(),syFb=null,syApp=false,syT=null,syBusy=false,syMsg='',syEm='',syTry=0;
+const syCfg=()=>{if(KV_FB.apiKey&&KV_FB.projectId)return KV_FB;try{const c=JSON.parse(localStorage.getItem(SYC));return c&&c.apiKey&&c.projectId?c:null}catch{return null}},
+ syMeta=()=>{try{localStorage.setItem(SYM,JSON.stringify(syM))}catch{}},
+ syOn=()=>!!(syM.uid&&syCfg()),
+ syDev=()=>{const u=navigator.userAgent||'';return/Android/.test(u)?'Android':/iPhone|iPad/.test(u)?'iPhone/iPad':/Windows/.test(u)?'Windows':/Mac/.test(u)?'Mac':'Browser'},
+ syHash=s=>{let h=5381;for(let i=0;i<s.length;i++)h=((h<<5)+h+s.charCodeAt(i))|0;return h+':'+s.length},
+ syQ=()=>{if(!syOn())return;clearTimeout(syT);syT=setTimeout(()=>syRun(),4000)},
+ syEdit=()=>!!(document.querySelector('dialog[open]')||/^(INPUT|TEXTAREA|SELECT)$/.test((document.activeElement||{}).tagName||'')),
+ syUi=()=>{if(tab=='more'&&stg=='sync')render()},
+ syErr=e=>{const c=(e&&e.code)||'',M={'auth/invalid-credential':'Wrong email or password.','auth/wrong-password':'Wrong email or password.','auth/user-not-found':'Wrong email or password.','auth/email-already-in-use':'That email already has an account. Tap Sign in instead.','auth/weak-password':'Use a password of at least 6 characters.','auth/invalid-email':'That email address does not look right.','auth/network-request-failed':'No connection. Try again when you are online.','unavailable':'No connection. KiraVault will try again later.','auth/too-many-requests':'Too many tries. Wait a few minutes and try again.','auth/operation-not-allowed':'Email/password sign-in is not switched on in Firebase yet.','permission-denied':'Firestore is refusing access. Check the security rules in the Firebase console.','not-found':'The Firestore database has not been created in Firebase yet.','kv/big':'Your data is too big to sync ('+(e&&e.kb)+' KB). Export a backup and ask the developer.'};return M[c]||'Sync problem: '+((e&&e.message)||c||String(e))};
+Storage.prototype.setItem=(o=>function(k,v){o.call(this,k,v);if(this===localStorage&&k===K&&!syApp&&syM.acct){const h=syHash(String(v));if(h===syM.h)return;syM.dirty=1;syM.lt=Date.now();syMeta();syQ()}})(Storage.prototype.setItem);
+async function syLoad(){
+ if(syFb)return syFb;
+ const c=syCfg();if(!c)throw new Error('Cloud sync is not set up yet.');
+ const b='https://www.gstatic.com/firebasejs/'+FBV+'/',[A,Au,Fs]=await Promise.all([import(b+'firebase-app.js'),import(b+'firebase-auth.js'),import(b+'firebase-firestore.js')]),
+  app=A.getApps().length?A.getApp():A.initializeApp(c);
+ return syFb={A,Au,Fs,app,auth:Au.getAuth(app),db:Fs.getFirestore(app)}}
+function syApply(cl){
+ try{localStorage.setItem(SYB,JSON.stringify(S))}catch{}
+ const d=JSON.parse(cl.data);if(!d||!d.acc)throw new Error('The cloud copy is not valid KiraVault data.');
+ const s=JSON.stringify(d);
+ syApp=true;try{S=d;mig();localStorage.setItem(K,JSON.stringify(S))}finally{syApp=false}
+ syM.base=cl.ts;syM.dirty=0;syM.last=Date.now();syM.h=syHash(JSON.stringify(S));syMeta();render()}
+async function syPush(f,ref,force){
+ const lt=syM.lt||0,data=JSON.stringify(S);
+ if(data.length>900000)throw{code:'kv/big',kb:Math.round(data.length/1024)};
+ const ts=Date.now();
+ await f.Fs.runTransaction(f.db,async t=>{const s=await t.get(ref);if(!force&&s.exists()&&s.data().ts!==(syM.base||0))throw{code:'kv/conflict'};t.set(ref,{data,ts,dev:syDev()})});
+ syM.base=ts;syM.last=ts;syM.h=syHash(data);if((syM.lt||0)===lt)syM.dirty=0;else syQ();syMeta()}
+async function syRun(manual){
+ if(syBusy||!syOn())return;
+ if(!navigator.onLine){if(manual){syMsg='You are offline. KiraVault will sync when you are back online.';syUi()}return}
+ syBusy=true;if(manual){syMsg='Syncing…';syUi()}
+ let again=false;
+ try{
+  const f=await syLoad();await f.auth.authStateReady();
+  if(!f.auth.currentUser||f.auth.currentUser.uid!==syM.uid){syM.uid=0;syMeta();syMsg='Your session ended. Please sign in again to keep syncing.';syUi();return}
+  const ref=f.Fs.doc(f.db,'users',syM.uid),snap=await f.Fs.getDoc(ref),cl=snap.exists()?snap.data():null,base=syM.base||0,empty=!hasData();
+  if(!cl){if(!empty)await syPush(f,ref,1);else{syM.last=Date.now();syMeta()}}
+  else if(cl.ts===base){if(syM.dirty)await syPush(f,ref);else{syM.last=Date.now();syMeta()}}
+  else if(!syM.dirty&&(base||empty)){if(!manual&&syEdit())return;syApply(cl)}
+  else{
+   if(!manual&&syEdit())return;
+   const when=new Date(cl.ts).toLocaleString();
+   if(confirm('The cloud copy ('+when+', from '+(cl.dev||'another device')+') is different from the data on this device.\n\nOK = use the cloud copy (replaces this device\'s data; the old copy is kept so you can put it back).\nCancel = keep this device\'s data and overwrite the cloud copy.'))syApply(cl);else await syPush(f,ref,1)}
+  syTry=0;syMsg=manual?'Synced ✓':'';syUi()
+ }catch(e){
+  if(e&&e.code=='kv/conflict'&&syTry<2){syTry++;again=true}
+  else{syTry=0;syMsg=syErr(e);syUi()}
+ }finally{syBusy=false}
+ if(again)return syRun(manual)}
+async function syAuth(mode){
+ const e=(($('#sye')||{}).value||'').trim(),p=($('#syp')||{}).value||'';syEm=e;
+ if(!e||!p){syMsg='Enter your email and password.';return render()}
+ if(!navigator.onLine){syMsg='You need to be online to sign in.';return render()}
+ syMsg=mode=='up'?'Creating account…':'Signing in…';render();
+ try{
+  const f=await syLoad(),u=(mode=='up'?await f.Au.createUserWithEmailAndPassword(f.auth,e,p):await f.Au.signInWithEmailAndPassword(f.auth,e,p)).user;
+  if(syM.acct!==u.uid){syM.base=0;syM.dirty=0;syM.h=''}
+  syM.uid=syM.acct=u.uid;syM.email=u.email;syMeta();syMsg='';syEm='';
+  await syRun(1)
+ }catch(x){syMsg=syErr(x);render()}}
+async function syForgot(){
+ const e=(($('#sye')||{}).value||'').trim();syEm=e;
+ if(!e){syMsg='Type your email first, then tap Forgot password.';return render()}
+ try{const f=await syLoad();await f.Au.sendPasswordResetEmail(f.auth,e);syMsg='If that email has an account, a reset link is on its way.'}catch(x){syMsg=syErr(x)}render()}
+async function syOut(){
+ if(!confirm('Sign out of cloud sync? Your data stays on this device.'))return;
+ if(syM.dirty)await syRun(1);
+ try{const f=await syLoad();await f.Au.signOut(f.auth)}catch{}
+ syM.uid=0;syMeta();syMsg='Signed out.';render()}
+function syCfgSave(){
+ const t=($('#syc')||{}).value||'',c={};
+ t.replace(/["']?(\w+)["']?\s*:\s*["']([^"']+)["']/g,(m,k,v)=>{c[k]=v});
+ if(!c.apiKey||!c.projectId){syMsg='Could not find apiKey and projectId in that text. Paste the whole firebaseConfig block.';return render()}
+ try{localStorage.setItem(SYC,JSON.stringify(c))}catch{}
+ syFb=null;syMsg='Saved. Now create your account or sign in.';render()}
+function syUndo(){
+ const b=localStorage.getItem(SYB);
+ if(!b||!confirm('Put back the data this device had before the last cloud update? This will also replace the cloud copy.'))return;
+ try{S=JSON.parse(b);mig();localStorage.removeItem(SYB);syM.dirty=1;syMeta();save()}catch{syMsg='Could not put the old data back.';render()}}
+const syTxt=()=>!syCfg()?'Set up':syOn()?(syBusy?'Syncing…':syM.dirty?'Waiting':'On'):'Off';
+function syPg(){
+ const c=syCfg(),m=syMsg?`<small style="display:block;margin-top:10px"><b>${E(syMsg)}</b></small>`:'',
+  note='<small style="display:block;margin-top:10px">Your data is stored in your own Firebase project on Google servers (not end-to-end encrypted). Receipt photos stay on the device they were taken on. KiraVault still works offline and syncs when you are back online.</small>';
+ if(!c)return`<div class=card><small><b>One-time setup.</b> In the Firebase console (free Spark plan): create a project, add a Web app, switch on Email/Password under Authentication, create a Firestore database, then paste the Web app's <b>firebaseConfig</b> here.</small><label>firebaseConfig<textarea id=syc rows=6 style="width:100%;padding:10px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--text);font:inherit;margin-top:4px" placeholder="apiKey: &quot;...&quot;, authDomain: &quot;...&quot;, projectId: &quot;...&quot;, appId: &quot;...&quot;"></textarea></label><button class=p onclick="syCfgSave()">Save</button>${m}${note}</div>`;
+ if(!syOn())return`<div class=card><small>Sign in with the same account on every device to keep your data in step.</small><label>Email<input id=sye type=email autocomplete=email value="${E(syEm||syM.email||'')}"></label><label>Password<input id=syp type=password autocomplete=current-password></label><div class=row style="justify-content:flex-start;gap:8px;flex-wrap:wrap"><button class=p onclick="syAuth('in')">Sign in</button><button onclick="syAuth('up')">Create account</button><button class=s onclick="syForgot()">Forgot password</button></div>${m}${note}</div>`;
+ return`<div class=card><b>${E(syM.email||'')}</b><br><small>${syBusy?'Syncing…':syM.dirty?'Changes waiting to sync':'Up to date'}${syM.last?' · last synced '+E(new Date(syM.last).toLocaleString()):''}</small><div class=row style="justify-content:flex-start;gap:8px;margin-top:10px"><button class=p onclick="syRun(1)">Sync now</button><button onclick="syOut()">Sign out</button></div>${m}${note}</div>`+(localStorage.getItem(SYB)?`<div class=card><small>The last time the cloud copy replaced this device's data, the old copy was kept.</small><div style="margin-top:8px"><button onclick="syUndo()">Put back previous data</button></div></div>`:'')}
+STG.sync=['Cloud sync',()=>syPg()];
+addEventListener('online',()=>syRun());
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)syRun()});
+setInterval(()=>{if(!document.hidden)syRun()},90000);
+if(syOn())setTimeout(()=>syRun(),1500);
+
 </script></body></html>
