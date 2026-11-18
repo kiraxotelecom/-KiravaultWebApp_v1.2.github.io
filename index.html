@@ -342,8 +342,21 @@ nav button:active{transform:scale(.9)}
 #m.bf .bar i{transform-origin:left center;animation:barIn .8s cubic-bezier(.22,.8,.2,1) .15s backwards}
 ::view-transition-old(root),::view-transition-new(root){animation-duration:.32s}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.001ms!important;animation-delay:0s!important;animation-iteration-count:1!important;transition-duration:.001ms!important;scroll-behavior:auto!important}}
+
+/* ===== v61: count-up + celebration ===== */
+#m .sc b,#m .hero b,#m .grid b{font-variant-numeric:tabular-nums}
+.cel{position:fixed;left:50%;top:calc(14px + env(safe-area-inset-top));transform:translateX(-50%);z-index:60;display:flex;align-items:center;gap:10px;background:var(--text);color:var(--bg);padding:10px 18px 10px 12px;border-radius:30px;box-shadow:0 8px 28px #0005;max-width:92vw;animation:celIn .45s cubic-bezier(.2,1.2,.3,1) both;transition:opacity .4s}
+.cel.out{opacity:0}.cel svg{color:var(--green);flex:none}
+.cel circle{stroke-dasharray:63;stroke-dashoffset:63;animation:celDraw .5s .1s ease-out forwards}
+.cel path{stroke-dasharray:20;stroke-dashoffset:20;animation:celDraw .35s .45s ease-out forwards}
+@keyframes celIn{from{opacity:0;transform:translate(-50%,-30px) scale(.9)}to{opacity:1;transform:translate(-50%,0) scale(1)}}
+@keyframes celDraw{to{stroke-dashoffset:0}}
+.cfw{position:fixed;left:50%;top:calc(36px + env(safe-area-inset-top));z-index:61;pointer-events:none}
+.cf{position:absolute;left:0;top:0;width:8px;height:12px;border-radius:2px;animation:cfly 1.2s cubic-bezier(.2,.7,.4,1) forwards}
+@keyframes cfly{0%{opacity:1;transform:translate(0,0) rotate(0)}35%{opacity:1;transform:translate(calc(var(--x)*.7),var(--u)) rotate(calc(var(--r)*.4))}100%{opacity:0;transform:translate(var(--x),var(--y)) rotate(var(--r))}}
 </style></head><body><header id=hd></header><main id=m></main><nav id=nav></nav><dialog id=dlg></dialog><div id=toast hidden></div><div id=lk hidden></div><button id=fab class=p onclick=quickAdd()>+</button><div id=sp><button class=gb onclick="sp.remove();sessionStorage.s=1;persist(1);if(lkS)lockNow();mvAnim()">Get Started</button><button id=sgl class=sgl onclick="sgOpen()">Already have an account? <b>Sign in</b></button></div>
 <script>
+const APP_VER='2.1.7'; /* bump by one on every change: 2.1.8, 2.1.9 ... */
 let HM=0;
 const $=s=>document.querySelector(s),K='kiravault.web.v1',E=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])),xr=()=>S&&S.set&&S.set.cur=='USD'&&+S.set.rate>0?+S.set.rate:0,fu=v=>Math.abs(v)>=1000?Math.round(v).toLocaleString('en-US'):v.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}),F=n=>HM?'••••':(xr()?fu(n/xr()):Math.round(n).toLocaleString('en-US')),
  td=()=>new Date().toLocaleDateString('sv'),me=()=>{const d=new Date();return new Date(d.getFullYear(),d.getMonth()+1,0).toLocaleDateString('sv')},
@@ -436,7 +449,7 @@ const V={home(){const s=sm(),nm=S.set.name,hr=new Date().getHours(),gr=hr<12?'GO
  more(){const o=(k,l,v)=>`<label>${l}<select onchange="S.set.${k}=this.value;save()">${v.map(x=>`<option${S.set[k]==x?' selected':''}>${x}</option>`).join('')}</select></label>`;
  return`<h1>Settings</h1><div class=card><label>Your name<input value="${E(S.set.name||'')}" onchange="S.set.name=this.value;save()"></label>${o('mode','Theme',['auto','light','dark'])}${o('accent','Accent colour',Object.keys(AC))}</div>
  <h3>Opening balances</h3><div class=card><small>Set what you hold in each account right now.</small>${S.acc.map(a=>`<label>${a.id} (UGX)<input inputmode=decimal value="${a.b}" onchange="setBal('${a.id}',this.value)"></label>`).join('')}</div><h3>Backup</h3><div class=card><small>Everything lives on this device only. Last backup: ${bkTxt()}</small><div class=row style="justify-content:flex-start"><button class=p onclick=bak()>Share backup</button><button onclick="$('#imp').click()">Restore</button></div><input id=imp type=file accept=.json hidden onchange=imp(this)><small>Restore accepts backups from this web app and JSON backups from the Android app.</small></div>
- <h3>About KiraVault</h3><div class=card style="text-align:center"><img src=icon-192.png width=64 height=64 style="border-radius:16px"><br><b style="font-size:18px">KiraVault</b><br><small>Plan, Work, Grow: your finances and work in one place.</small></div><div class=card><small>KiraVault answers one question: <b>how much can I safely spend?</b> It tracks Bank, Mobile Money and Cash, counts bills, debts and savings as commitments, and never counts client money until it is actually received.</small><ul><li><b>Finance:</b> accounts, transactions, bills &amp; debts and savings goals</li><li><b>Work:</b> projects, tasks, clients and payments</li><li><b>Calendar:</b> colour-coded workload and bills due</li><li><b>Insights:</b> budgets, spending and a 30-day cash forecast</li><li><b>Private by default:</b> works offline and stays on this device unless you turn on Cloud sync in Settings</li></ul></div><div class=card><small>Developed by</small><br><b>Kirabo Isa Bilal</b><br><small>Version 2.0 · Clarity</small></div><h3>Data</h3><button onclick="if(confirm('Erase ALL data on this device?')){localStorage.removeItem(K);localStorage.removeItem(LK);localStorage.removeItem(FK);location.reload()}">Erase everything</button>`}};
+ <h3>About KiraVault</h3><div class=card style="text-align:center"><img src=icon-192.png width=64 height=64 style="border-radius:16px"><br><b style="font-size:18px">KiraVault</b><br><small>Plan, Work, Grow: your finances and work in one place.</small></div><div class=card><small>KiraVault answers one question: <b>how much can I safely spend?</b> It tracks Bank, Mobile Money and Cash, counts bills, debts and savings as commitments, and never counts client money until it is actually received.</small><ul><li><b>Finance:</b> accounts, transactions, bills &amp; debts and savings goals</li><li><b>Work:</b> projects, tasks, clients and payments</li><li><b>Calendar:</b> colour-coded workload and bills due</li><li><b>Insights:</b> budgets, spending and a 30-day cash forecast</li><li><b>Private by default:</b> works offline and stays on this device unless you turn on Cloud sync in Settings</li></ul></div><div class=card><small>Developed by</small><br><b>Kirabo Isa Bilal</b><br><small>Version ${APP_VER} · Clarity</small></div><h3>Data</h3><button onclick="if(confirm('Erase ALL data on this device?')){localStorage.removeItem(K);localStorage.removeItem(LK);localStorage.removeItem(FK);location.reload()}">Erase everything</button>`}};
 function setBal(n,v){acc(n).b=pa(v);save()}
 V.mo=V.money;V.money=()=>{const M={a:'Overview',t:'Transactions',p:'Plan Month',b:'Commitments',s:'Savings Goals'};
  return`<div class=stabs>${Object.entries(M).map(([k,v])=>`<button class="${mv==k?'on':''}" onclick="mv='${k}';render()">${v}</button>`).join('')}</div>`+(mv=='a'?V.ov():mv=='t'?V.hist():mv=='p'?V.plan():mv=='b'?V.bills():V.sav())};
@@ -1484,7 +1497,7 @@ const STG={profile:['Profile & Preferences',o=>profPg()+(o['Kind of work (option
 V.more=()=>{const o=stSects();
  if(stg&&STG[stg])return`<div class=top style="margin-bottom:12px"><button class=s onclick="stGo('')">‹ Settings</button><b>${STG[stg][0]}</b><span style="width:70px"></span></div>`+STG[stg][1](o);
  const nm=(S.set.name||'').trim(),on=navigator.onLine,sw=!!(navigator.serviceWorker&&navigator.serviceWorker.controller),
- R=[['cur','c','Currency',S.set.cur=='USD'?'USD':'UGX'],['acc','w','Accounts & balances',''],['home','h','Screen layouts',''],['sec','l','Security & PIN',lkS?'On':'Off'],['bak','b','Backup & Export',bkTxt()],['sync','b','Cloud sync',syTxt()],['about','i','About KiraVault','']];
+ R=[['cur','c','Currency',S.set.cur=='USD'?'USD':'UGX'],['acc','w','Accounts & balances',''],['home','h','Screen layouts',''],['sec','l','Security & PIN',lkS?'On':'Off'],['bak','b','Backup & Export',bkTxt()],['sync','b','Cloud sync',syTxt()],['about','i','About KiraVault','v'+APP_VER]];
  return`<h1>Settings</h1>${bkBanner()}<div class="card pf" onclick="stGo('profile')"><div class=av>${E((nm[0]||'K').toUpperCase())}</div><div style="flex:1"><b style="font-size:17px">${E(nm||'Your name')}</b><br><small>Profile &amp; preferences</small></div><em>›</em></div>`
  +`<div class="card stp">${R.map(([k,i,l,v])=>`<div class=sr onclick="stGo('${k}')"><i><svg viewBox="0 0 24 24">${SI2[i]}</svg></i><b>${l}</b><small ${k=='cur'?'data-nocur=1':''}>${v}</small><em>›</em></div>`).join('')}</div>`
  +`<div class="card offc"><div class=top><b>${on?'🟢 Online':'🟠 Offline'} · works either way</b></div><small>Everything is saved on this device and nothing is sent anywhere.${sw?' The app is stored for offline use.':' Open it once online to store it for offline use.'}</small></div>`};
@@ -1918,7 +1931,7 @@ function syApply(cl){
  const d=JSON.parse(cl.data);if(!d||!d.acc)throw new Error('The cloud copy is not valid KiraVault data.');
  const s=JSON.stringify(d);
  syApp=true;try{S=d;mig();localStorage.setItem(K,JSON.stringify(S))}finally{syApp=false}
- syM.base=cl.ts;syM.dirty=0;syM.last=Date.now();syM.h=syHash(JSON.stringify(S));syMeta();render()}
+ syM.base=cl.ts;syM.dirty=0;syM.last=Date.now();syM.h=syHash(JSON.stringify(S));syMeta();clM=null;render()}
 async function syPush(f,ref,force){
  const lt=syM.lt||0,data=JSON.stringify(S);
  if(data.length>900000)throw{code:'kv/big',kb:Math.round(data.length/1024)};
@@ -1979,7 +1992,7 @@ function syCfgSave(){
 function syUndo(){
  const b=localStorage.getItem(SYB);
  if(!b||!confirm('Put back the data this device had before the last cloud update? This will also replace the cloud copy.'))return;
- try{S=JSON.parse(b);mig();localStorage.removeItem(SYB);syM.dirty=1;syMeta();save()}catch{syMsg='Could not put the old data back.';render()}}
+ try{S=JSON.parse(b);mig();localStorage.removeItem(SYB);syM.dirty=1;syMeta();clM=null;save()}catch{syMsg='Could not put the old data back.';render()}}
 const syTxt=()=>!syCfg()?'Set up':syOn()?(syBusy?'Syncing…':syM.dirty?'Waiting':'On'):'Off';
 function syPg(){
  const c=syCfg(),m=syMsg?`<small style="display:block;margin-top:10px"><b>${E(syMsg)}</b></small>`:'',
@@ -2018,16 +2031,63 @@ function mvAnim(){
  m.classList.remove('mv','bf');void m.offsetWidth;
  if(tab=='home'){const els=[];[...m.children].forEach(c=>{if(c.classList&&c.classList.contains('hcs'))els.push(...c.children);else els.push(c)});els.slice(0,14).forEach((el,i)=>{el.style.animationDelay=i*45+'ms';el.classList.add('ci')})}
  else m.classList.add('mv');
- m.classList.add('bf');clearTimeout(mvT);
+ m.classList.add('bf');try{cuRun()}catch{}clearTimeout(mvT);
  mvT=setTimeout(()=>{m.classList.remove('bf','mv');m.querySelectorAll('.ci').forEach(e=>{e.classList.remove('ci');e.style.animationDelay=''})},1200)}
 {const go0=go;go=function(t){const ch=t!==tab;go0.apply(this,arguments);if(ch)mvAnim()};
  const sg0=stGo;stGo=function(){const p=stg;sg0.apply(this,arguments);if(stg!==p)mvAnim()};
  const un0=unlockNow;unlockNow=function(){un0.apply(this,arguments);mvAnim()};
  const r0=render;let thP=null;
  render=function(){const d=S.set.mode=='dark'||(S.set.mode=='auto'&&matchMedia('(prefers-color-scheme:dark)').matches),k=d+'|'+S.set.accent;
-  if(thP!==null&&k!==thP&&document.startViewTransition&&!RMq.matches){thP=k;try{document.startViewTransition(()=>r0());return}catch{}}
-  thP=k;r0()}}
+  if(thP!==null&&k!==thP&&document.startViewTransition&&!RMq.matches){thP=k;try{document.startViewTransition(()=>{r0();clCheck()});return}catch{}}
+  thP=k;r0();clCheck()}}
 document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('button');if(!b||b.disabled||!navigator.vibrate||b.closest('.kp'))return;const t=(b.textContent||'').trim();if(/^(delete|remove|erase|clear all|reset)/i.test(t))navigator.vibrate([22,40,22]);else if(b.classList.contains('p')||/^(save|add|pay|record|mark|done|create|confirm|received|apply|log)\b/i.test(t))navigator.vibrate(12)},true);
+
+/* ===== v61: count-up numbers + goal/bill celebration ===== */
+let clM=null;
+function cuRun(){
+ if(RMq.matches)return;
+ const L=[];
+ document.querySelectorAll('#m .sc b,#m .hero b,#m .grid b').forEach(b=>{[...b.childNodes].forEach(n=>{
+  if(n.nodeType!==3)return;
+  const mt=n.nodeValue.match(/^(\s*)(-?)(\d[\d,]*(?:\.\d+)?)([KM]?)(\s*)$/);if(!mt)return;
+  const v=parseFloat(mt[3].replace(/,/g,'')),d=(mt[3].split('.')[1]||'').length,c=mt[3].includes(',');
+  if(!isFinite(v)||v<=0)return;
+  L.push({n,o:n.nodeValue,v,f:x=>mt[1]+mt[2]+(c?x.toLocaleString('en-US',{minimumFractionDigits:d,maximumFractionDigits:d}):x.toFixed(d))+mt[4]+mt[5]})})});
+ if(!L.length)return;
+ L.forEach(i=>{i.n.nodeValue=i.f(0)});
+ const t0=performance.now()+120,D=750,st=t=>{let live=false;L.forEach(i=>{if(!i.n.isConnected)return;const p=Math.min(Math.max((t-t0)/D,0),1);i.n.nodeValue=p>=1?i.o:i.f(i.v*(1-Math.pow(1-p,3)));if(p<1)live=true});if(live)requestAnimationFrame(st)};
+ requestAnimationFrame(st)}
+function clMap(){
+ const o={};
+ (S.gl||[]).forEach(g=>{if(g.target>0)o['g'+g.id]=g.saved>=g.target});
+ (S.cm||[]).forEach(c=>{if(c.amt>0)o['b'+c.id]=c.st=='paid'||c.paid>=c.amt});
+ (S.pr||[]).forEach(p=>{try{if(p.src!='Job'&&p.amt>0)o['p'+p.id]=paid(p)>=p.amt}catch{}});
+ return o}
+function clLabel(k){
+ const i=k.slice(1);
+ if(k[0]=='g'){const g=S.gl.find(x=>x.id==i);return g?'Goal reached: '+g.name:''}
+ if(k[0]=='b'){const c=S.cm.find(x=>x.id==i);return c?(c.kind=='Savings'?'Saved in full: ':'Paid in full: ')+c.title:''}
+ const p=S.pr.find(x=>x.id==i);return p?'Fully paid: '+p.title:''}
+function clCheck(){
+ let n;try{n=clMap()}catch{return}
+ const o=clM;clM=n;if(!o)return;
+ const hit=Object.keys(n).filter(k=>n[k]&&o[k]===false);
+ if(!hit.length)return;
+ let t='';try{t=clLabel(hit[0])}catch{}
+ if(t)clFire(t+(hit.length>1?'  +'+(hit.length-1)+' more':''))}
+function clFire(msg){
+ try{navigator.vibrate&&navigator.vibrate([30,50,30,50,90])}catch{}
+ const d=document.createElement('div');d.className='cel';
+ d.innerHTML='<svg viewBox="0 0 24 24" width="26" height="26"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2"/><path d="M7 12.5l3.2 3.2L17 9" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg><b>'+E(msg)+'</b>';
+ document.body.appendChild(d);
+ if(!RMq.matches){
+  const w=document.createElement('div');w.className='cfw';const CL=['#5CF0B0','#3D5AFE','#F59E0B','#E5484D','#7C5CF5','#0FB5A0'];
+  for(let i=0;i<28;i++){const e=document.createElement('i');e.className='cf';const s=e.style;
+   s.setProperty('--x',(Math.random()*300-150).toFixed(0)+'px');s.setProperty('--u',(-60-Math.random()*90).toFixed(0)+'px');s.setProperty('--y',(90+Math.random()*190).toFixed(0)+'px');s.setProperty('--r',(Math.random()*720-360).toFixed(0)+'deg');
+   s.background=CL[i%CL.length];s.animationDelay=(Math.random()*.12).toFixed(2)+'s';w.appendChild(e)}
+  document.body.appendChild(w);setTimeout(()=>w.remove(),1500)}
+ setTimeout(()=>d.classList.add('out'),2800);setTimeout(()=>d.remove(),3300)}
+clCheck();
 
 
 </script></body></html>
