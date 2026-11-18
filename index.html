@@ -16,7 +16,7 @@ dialog{border:0;border-radius:18px;background:var(--card);color:var(--text);widt
 .bar{height:6px;background:var(--line);border-radius:4px;margin:8px 0 2px}.bar i{display:block;height:100%;background:var(--green);border-radius:4px}
 .tabs{display:flex;gap:8px;margin-bottom:10px}.tabs .on{background:var(--accent);color:#fff}.top{display:flex;justify-content:space-between;align-items:center}
 nav button{font-size:12px}.gb{background:linear-gradient(#5CF0B0,#1FB36B);color:#06331f;font-weight:700;padding:14px 46px;border-radius:30px;font-size:17px}
-#sp{position:fixed;inset:0;z-index:9;background:#0a2a8f url(intro.jpg) center/cover no-repeat;display:flex;align-items:flex-end;justify-content:center;padding-bottom:14vh}@media(min-aspect-ratio:1/1){#sp{background-size:contain}}
+#sp{position:fixed;inset:0;z-index:9;background:#0a2a8f url(intro.jpg) center/cover no-repeat;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:16px;padding-bottom:12vh}.sgl{background:rgba(0,0,0,.42);color:#fff;border-radius:22px;padding:9px 18px;font-size:14px;font-weight:400}.sgl b{color:#5CF0B0}@media(min-aspect-ratio:1/1){#sp{background-size:contain}}
 .gb{}#hd{display:flex;align-items:center;gap:8px;max-width:640px;margin:auto;padding:10px 14px 0;font-size:17px}#hd img{width:30px;height:30px;border-radius:8px}
 i{display:block}.cg{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center}.dy{padding:6px 0;border-radius:10px;cursor:pointer}.dy.on{background:var(--accent);color:#fff}.dy i{height:10px;line-height:10px;font-style:normal}
 ul{padding-left:18px;margin:8px 0}li{margin:4px 0;font-size:13px}#fab{position:fixed;right:18px;bottom:calc(72px + env(safe-area-inset-bottom));width:54px;height:54px;border-radius:50%;font-size:28px;padding:0;box-shadow:0 4px 14px #0004;z-index:5}
@@ -329,7 +329,7 @@ nav .brand .bl{flex:none;margin-left:auto;width:36px;height:36px;padding:0;borde
 .igi .pc.g{color:var(--green);background:color-mix(in srgb,var(--green) 16%,transparent)}.igi .pc.r{color:var(--red);background:color-mix(in srgb,var(--red) 16%,transparent)}
 @media(max-width:560px){.ig.igi{gap:8px}.igi .sc{padding:11px 10px;gap:6px}.igi .sc>small{font-size:10.5px;letter-spacing:.04em}.igi .cu{display:none}.igi .iv{flex-wrap:wrap;gap:4px 6px}.igi .iv b{flex:none;font-size:18px}.igi .pc{font-size:10.5px;padding:2px 6px}}
 textarea{width:100%;padding:10px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--text);font:inherit;resize:vertical;margin-top:4px}
-</style></head><body><header id=hd></header><main id=m></main><nav id=nav></nav><dialog id=dlg></dialog><div id=toast hidden></div><div id=lk hidden></div><button id=fab class=p onclick=quickAdd()>+</button><div id=sp><button class=gb onclick="sp.remove();sessionStorage.s=1;persist(1);if(lkS)lockNow()">Get Started</button></div>
+</style></head><body><header id=hd></header><main id=m></main><nav id=nav></nav><dialog id=dlg></dialog><div id=toast hidden></div><div id=lk hidden></div><button id=fab class=p onclick=quickAdd()>+</button><div id=sp><button class=gb onclick="sp.remove();sessionStorage.s=1;persist(1);if(lkS)lockNow()">Get Started</button><button id=sgl class=sgl onclick="sgOpen()">Already have an account? <b>Sign in</b></button></div>
 <script>
 let HM=0;
 const $=s=>document.querySelector(s),K='kiravault.web.v1',E=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])),xr=()=>S&&S.set&&S.set.cur=='USD'&&+S.set.rate>0?+S.set.rate:0,fu=v=>Math.abs(v)>=1000?Math.round(v).toLocaleString('en-US'):v.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}),F=n=>HM?'••••':(xr()?fu(n/xr()):Math.round(n).toLocaleString('en-US')),
@@ -1890,7 +1890,8 @@ const syCfg=()=>{if(KV_FB.apiKey&&KV_FB.projectId)return KV_FB;try{const c=JSON.
  syHash=s=>{let h=5381;for(let i=0;i<s.length;i++)h=((h<<5)+h+s.charCodeAt(i))|0;return h+':'+s.length},
  syQ=()=>{if(!syOn())return;clearTimeout(syT);syT=setTimeout(()=>syRun(),4000)},
  syEdit=()=>!!(document.querySelector('dialog[open]')||/^(INPUT|TEXTAREA|SELECT)$/.test((document.activeElement||{}).tagName||'')),
- syUi=()=>{if(tab=='more'&&stg=='sync')render()},
+ syUi=()=>{const o=$('#sgm');if(o)o.textContent=syMsg;if(tab=='more'&&stg=='sync')render()},
+ syNote=()=>{const o=$('#sgm');if(o)o.textContent=syMsg;else render()},
  syErr=e=>{const c=(e&&e.code)||'',M={'auth/invalid-credential':'Wrong email or password.','auth/wrong-password':'Wrong email or password.','auth/user-not-found':'Wrong email or password.','auth/email-already-in-use':'That email already has an account. Tap Sign in instead.','auth/weak-password':'Use a password of at least 6 characters.','auth/invalid-email':'That email address does not look right.','auth/network-request-failed':'No connection. Try again when you are online.','unavailable':'No connection. KiraVault will try again later.','auth/too-many-requests':'Too many tries. Wait a few minutes and try again.','auth/operation-not-allowed':'Email/password sign-in is not switched on in Firebase yet.','permission-denied':'Firestore is refusing access. Check the security rules in the Firebase console.','not-found':'The Firestore database has not been created in Firebase yet.','kv/big':'Your data is too big to sync ('+(e&&e.kb)+' KB). Export a backup and ask the developer.'};return M[c]||'Sync problem: '+((e&&e.message)||c||String(e))};
 Storage.prototype.setItem=(o=>function(k,v){o.call(this,k,v);if(this===localStorage&&k===K&&!syApp&&syM.acct){const h=syHash(String(v));if(h===syM.h)return;syM.dirty=1;syM.lt=Date.now();syMeta();syQ()}})(Storage.prototype.setItem);
 async function syLoad(){
@@ -1933,21 +1934,24 @@ async function syRun(manual){
   else{syTry=0;syMsg=syErr(e);syUi()}
  }finally{syBusy=false}
  if(again)return syRun(manual)}
-async function syAuth(mode){
- const e=(($('#sye')||{}).value||'').trim(),p=($('#syp')||{}).value||'';syEm=e;
- if(!e||!p){syMsg='Enter your email and password.';return render()}
- if(!navigator.onLine){syMsg='You need to be online to sign in.';return render()}
- syMsg=mode=='up'?'Creating account…':'Signing in…';render();
+async function syAuth(mode,pre){
+ pre=pre||'sy';
+ const e=(($('#'+pre+'e')||{}).value||'').trim(),p=($('#'+pre+'p')||{}).value||'';syEm=e;
+ if(!e||!p){syMsg='Enter your email and password.';return syNote()}
+ if(!navigator.onLine){syMsg='You need to be online to sign in.';return syNote()}
+ syMsg=mode=='up'?'Creating account…':'Signing in…';syNote();
  try{
   const f=await syLoad(),u=(mode=='up'?await f.Au.createUserWithEmailAndPassword(f.auth,e,p):await f.Au.signInWithEmailAndPassword(f.auth,e,p)).user;
   if(syM.acct!==u.uid){syM.base=0;syM.dirty=0;syM.h=''}
   syM.uid=syM.acct=u.uid;syM.email=u.email;syMeta();syMsg='';syEm='';
-  await syRun(1)
- }catch(x){syMsg=syErr(x);render()}}
-async function syForgot(){
- const e=(($('#sye')||{}).value||'').trim();syEm=e;
- if(!e){syMsg='Type your email first, then tap Forgot password.';return render()}
- try{const f=await syLoad();await f.Au.sendPasswordResetEmail(f.auth,e);syMsg='If that email has an account, a reset link is on its way.'}catch(x){syMsg=syErr(x)}render()}
+  await syRun(1);
+  if(pre=='sg'&&syOn()&&syMsg=='Synced ✓')sgDone()
+ }catch(x){syMsg=syErr(x);syNote()}}
+async function syForgot(pre){
+ pre=pre||'sy';
+ const e=(($('#'+pre+'e')||{}).value||'').trim();syEm=e;
+ if(!e){syMsg='Type your email first, then tap Forgot password.';return syNote()}
+ try{const f=await syLoad();await f.Au.sendPasswordResetEmail(f.auth,e);syMsg='If that email has an account, a reset link is on its way.'}catch(x){syMsg=syErr(x)}syNote()}
 async function syOut(){
  if(!confirm('Sign out of cloud sync? Your data stays on this device.'))return;
  if(syM.dirty)await syRun(1);
@@ -1970,10 +1974,28 @@ function syPg(){
  if(!c)return`<div class=card><small><b>One-time setup.</b> In the Firebase console (free Spark plan): create a project, add a Web app, switch on Email/Password under Authentication, create a Firestore database, then paste the Web app's <b>firebaseConfig</b> here.</small><label>firebaseConfig<textarea id=syc rows=6 style="width:100%;padding:10px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--text);font:inherit;margin-top:4px" placeholder="apiKey: &quot;...&quot;, authDomain: &quot;...&quot;, projectId: &quot;...&quot;, appId: &quot;...&quot;"></textarea></label><button class=p onclick="syCfgSave()">Save</button>${m}${note}</div>`;
  if(!syOn())return`<div class=card><small>Sign in with the same account on every device to keep your data in step.</small><label>Email<input id=sye type=email autocomplete=email value="${E(syEm||syM.email||'')}"></label><label>Password<input id=syp type=password autocomplete=current-password></label><div class=row style="justify-content:flex-start;gap:8px;flex-wrap:wrap"><button class=p onclick="syAuth('in')">Sign in</button><button onclick="syAuth('up')">Create account</button><button class=s onclick="syForgot()">Forgot password</button></div>${m}${note}</div>`;
  return`<div class=card><b>${E(syM.email||'')}</b><br><small>${syBusy?'Syncing…':syM.dirty?'Changes waiting to sync':'Up to date'}${syM.last?' · last synced '+E(new Date(syM.last).toLocaleString()):''}</small><div class=row style="justify-content:flex-start;gap:8px;margin-top:10px"><button class=p onclick="syRun(1)">Sync now</button><button onclick="syOut()">Sign out</button></div>${m}${note}</div>`+(localStorage.getItem(SYB)?`<div class=card><small>The last time the cloud copy replaced this device's data, the old copy was kept.</small><div style="margin-top:8px"><button onclick="syUndo()">Put back previous data</button></div></div>`:'')}
+function sgOpen(){
+ if($('#sgo'))return;
+ const d=document.createElement('div');d.id='sgo';
+ d.style.cssText='position:fixed;inset:0;z-index:10;background:var(--bg,#F4F6FC);color:var(--text,#161D35);overflow:auto;padding:max(24px,env(safe-area-inset-top)) 18px 24px';
+ d.innerHTML=`<div style="max-width:420px;margin:5vh auto 0"><h1>Sign in</h1><small>Use the same account on every device to keep your data in step. New here? Choose Create account.</small><div class=card style="margin-top:14px"><label>Email<input id=sge type=email autocomplete=email value="${E(syEm||syM.email||'')}"></label><label>Password<input id=sgp type=password autocomplete=current-password></label><div class=row style="justify-content:flex-start;gap:8px;flex-wrap:wrap"><button class=p onclick="syAuth('in','sg')">Sign in</button><button onclick="syAuth('up','sg')">Create account</button><button class=s onclick="syForgot('sg')">Forgot password</button></div><small id=sgm style="display:block;margin-top:10px;font-weight:700"></small></div><button class=s onclick="sgClose()">‹ Back</button><small style="display:block;margin-top:14px">Signing in is optional. Your data is stored in your own Firebase project on Google servers (not end-to-end encrypted). Receipt photos stay on this device.</small></div>`;
+ document.body.appendChild(d)}
+const sgClose=()=>{const o=$('#sgo');if(o)o.remove()};
+function sgDone(){sgClose();const s=$('#sp');if(s){s.remove();try{sessionStorage.s=1}catch{}try{persist(1)}catch{}}render()}
+const syHide=()=>{try{localStorage.setItem('kiravault.sync.hide','1')}catch{}render()},
+ syCard=()=>{
+  if(!syCfg())return'';
+  const go="tab='more';stg='sync';render()";
+  if(syOn())return`<div class=card style="padding:9px 14px;cursor:pointer" onclick="${go}"><small>☁ ${syBusy?'Syncing…':syM.dirty?'Waiting to sync':'Synced'}${syM.last&&!syBusy&&!syM.dirty?' · '+E(new Date(syM.last).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})):''}</small></div>`;
+  if(localStorage.getItem('kiravault.sync.hide'))return'';
+  return`<div class=card style="border-left:5px solid var(--blue);cursor:pointer" onclick="${go}"><b>☁ Sync across devices</b><br><small>Sign in to keep your data on all your devices.</small><div style="margin-top:8px"><button class=s onclick="event.stopPropagation();syHide()">Not now</button></div></div>`};
+const syHome=V.home;
+V.home=()=>{const x=syHome(),c=syCard();if(!c)return x;const a=x.indexOf('<div class=pg>'),b=a<0?-1:x.indexOf('</small></div></div>',a);return b<0?c+x:x.slice(0,b+20)+c+x.slice(b+20)};
 STG.sync=['Cloud sync',()=>syPg()];
 addEventListener('online',()=>syRun());
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)syRun()});
 setInterval(()=>{if(!document.hidden)syRun()},90000);
 if(syOn())setTimeout(()=>syRun(),1500);
+(()=>{const l=$('#sgl');if(l&&(lkS||syOn()||!syCfg()))l.remove()})();
 
 </script></body></html>
