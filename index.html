@@ -372,9 +372,21 @@ html,body{overscroll-behavior-y:contain}
 #kvptr svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
 #kvptr.spin svg{animation:kvspin .8s linear infinite}
 @keyframes kvspin{to{transform:rotate(360deg)}}
+
+.kvsy{display:flex;align-items:center;gap:6px;width:max-content;max-width:100%;margin:-4px 2px 10px;font-size:11.5px;color:var(--muted);opacity:.8;cursor:pointer}
+.kvsy i{width:6px;height:6px;border-radius:50%;background:var(--green);flex:none}
+.kvsy.wait i{background:var(--amber)}
+.kvsy.ing i{background:var(--accent);animation:kvpulse 1s ease-in-out infinite}
+@keyframes kvpulse{50%{opacity:.25}}
+.kvtg{width:38px;height:22px;border-radius:11px;background:var(--line);position:relative;flex:none;transition:background .2s}
+.kvtg::after{content:'';position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:#fff;box-shadow:0 1px 3px #0004;transition:transform .2s}
+.kvtg.on{background:var(--accent)}.kvtg.on::after{transform:translateX(16px)}
+body.kvoff *,body.kvoff *::before,body.kvoff *::after{animation-duration:.001ms!important;animation-delay:0s!important;animation-iteration-count:1!important;transition-duration:.001ms!important}
+body.kvoff #kvptr.spin svg,body.kvoff .kvsy.ing i{animation-duration:.8s!important;animation-iteration-count:infinite!important}
+@media (prefers-reduced-motion:reduce){#kvptr.spin svg{animation-duration:.8s!important;animation-iteration-count:infinite!important}}
 </style></head><body><header id=hd></header><main id=m></main><nav id=nav></nav><dialog id=dlg></dialog><div id=toast hidden></div><div id=lk hidden></div><button id=fab class=p onclick=quickAdd()>+</button><div id=sp><button class=gb onclick="sp.remove();sessionStorage.s=1;persist(1);if(lkS)lockNow();mvAnim()">Get Started</button><button id=sgl class=sgl onclick="sgOpen()">Already have an account? <b>Sign in</b></button></div>
 <script>
-const APP_VER='2.1.8'; /* bump by one on every change: 2.1.8, 2.1.9 ... */
+const APP_VER='2.1.9'; /* bump by one on every change: 2.1.8, 2.1.9 ... */
 let HM=0;
 const $=s=>document.querySelector(s),K='kiravault.web.v1',E=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])),xr=()=>S&&S.set&&S.set.cur=='USD'&&+S.set.rate>0?+S.set.rate:0,fu=v=>Math.abs(v)>=1000?Math.round(v).toLocaleString('en-US'):v.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}),F=n=>HM?'••••':(xr()?fu(n/xr()):Math.round(n).toLocaleString('en-US')),
  td=()=>new Date().toLocaleDateString('sv'),me=()=>{const d=new Date();return new Date(d.getFullYear(),d.getMonth()+1,0).toLocaleDateString('sv')},
@@ -504,11 +516,11 @@ const g_=i=>S.gl.find(g=>g.id==i),PAL=['blue','amber','pu','teal','red','green']
  mtot=y=>{const t=S.tx.filter(x=>x.date.startsWith(y)),sp=k=>t.filter(x=>x.type==k).reduce((a,x)=>a+x.amt,0);return{i:sp('income'),e:sp('expense'),s:sp('saving'),t}},
  gp=(t,f)=>{const o={};t.forEach(x=>{const k=f(x);o[k]=(o[k]||0)+x.amt});return Object.entries(o).sort((a,b)=>b[1]-a[1])},
  ym0=k=>{const d=new Date();d.setDate(1);d.setMonth(d.getMonth()+k);return d.toLocaleDateString('sv').slice(0,7)},
- dn=(a,z=110)=>{const t=a.reduce((s,x)=>s+x[1],0)||1,c=2*Math.PI*45;let o=0;return`<svg viewBox="0 0 120 120" width=${z} height=${z}><circle cx=60 cy=60 r=45 fill=none stroke="var(--line)" stroke-width=18 />${a.map(([,v,cl])=>{const l=v/t*c,e=`<circle cx=60 cy=60 r=45 fill=none stroke="var(--${cl})" stroke-width=18 stroke-dasharray="${l} ${c-l}" stroke-dashoffset=${-o} transform="rotate(-90 60 60)"/>`;o+=l;return e}).join('')}</svg>`},
+ dn=(a,z=110)=>{const t=a.reduce((s,x)=>s+x[1],0)||1,c=2*Math.PI*45;let o=0;return`<svg class=kvdn viewBox="0 0 120 120" width=${z} height=${z}><circle cx=60 cy=60 r=45 fill=none stroke="var(--line)" stroke-width=18 />${a.map(([,v,cl])=>{const l=v/t*c,e=`<circle cx=60 cy=60 r=45 fill=none stroke="var(--${cl})" stroke-width=18 stroke-dasharray="${l} ${c-l}" stroke-dashoffset=${-o} transform="rotate(-90 60 60)"/>`;o+=l;return e}).join('')}</svg>`},
  lg=a=>a.map(([l,v,c,g])=>`<div class=top style="margin:4px 0${g?';cursor:pointer':''}"${g?` data-c="${E(l)}" onclick="catGo(this.dataset.c,'${g}')"`:''}><small><span style="color:var(--${c})">●</span> ${E(l)}</small><b>${sh(v)}</b></div>`).join(''),
  dc=a=>a.length?`<div style="display:flex;gap:12px;align-items:center;margin-top:8px">${dn(a)}<div style="flex:1">${lg(a)}</div></div>`:'<br><small>No data yet.</small>',
- ln=(p,cl)=>{const w=300,hh=80,mn=Math.min(...p),mx=Math.max(...p),rg=mx-mn||1,d=p.map((v,i)=>`${i?'L':'M'}${i/(p.length-1)*w},${hh-(v-mn)/rg*(hh-10)-5}`).join('');return`<svg viewBox="0 0 ${w} ${hh}" width=100% height=80 preserveAspectRatio=none><path d="${d}L${w},${hh}L0,${hh}Z" fill="var(--${cl})" opacity=.15 /><path d="${d}" fill=none stroke="var(--${cl})" stroke-width=2.5 vector-effect=non-scaling-stroke /></svg>`},
- bars=(v,cl,lb,hi=-1)=>{const mx=Math.max(...v,1);return`<div style="display:flex;gap:${v.length>12?2:6}px;align-items:flex-end;height:80px;margin-top:8px">${v.map((x,i)=>`<i style="flex:1;height:${Math.max(x/mx*100,2)}%;background:var(--${i==hi?'red':cl});border-radius:3px"></i>`).join('')}</div>${lb?`<div style="display:flex;gap:6px">${lb.map(l=>`<small style="flex:1;text-align:center;font-size:10px">${l}</small>`).join('')}</div>`:''}`},
+ ln=(p,cl)=>{const w=300,hh=80,mn=Math.min(...p),mx=Math.max(...p),rg=mx-mn||1,d=p.map((v,i)=>`${i?'L':'M'}${i/(p.length-1)*w},${hh-(v-mn)/rg*(hh-10)-5}`).join('');return`<svg class=kvd viewBox="0 0 ${w} ${hh}" width=100% height=80 preserveAspectRatio=none><path d="${d}L${w},${hh}L0,${hh}Z" fill="var(--${cl})" opacity=.15 /><path d="${d}" fill=none stroke="var(--${cl})" stroke-width=2.5 vector-effect=non-scaling-stroke /></svg>`},
+ bars=(v,cl,lb,hi=-1)=>{const mx=Math.max(...v,1);return`<div class=kvb style="display:flex;gap:${v.length>12?2:6}px;align-items:flex-end;height:80px;margin-top:8px">${v.map((x,i)=>`<i style="flex:1;height:${Math.max(x/mx*100,2)}%;background:var(--${i==hi?'red':cl});border-radius:3px"></i>`).join('')}</div>${lb?`<div style="display:flex;gap:6px">${lb.map(l=>`<small style="flex:1;text-align:center;font-size:10px">${l}</small>`).join('')}</div>`:''}`},
  hist=n=>{const t=S.acc.reduce((a,x)=>a+x.b,0),o=[];for(let k=n-1;k>=0;k--){const d=addD(td(),-k);o.push(t-S.tx.filter(x=>x.date>d).reduce((s,x)=>s+(x.type=='income'?x.amt:x.type=='transfer'?0:-x.amt),0))}return o},
  vs=(a,b,up)=>b?`<br><small class="${(a>=b)==up?'g':'r'}">${a>=b?'▲':'▼'} ${Math.abs(Math.round((a-b)/Math.abs(b)*100))}% vs last month</small>`:'';
 let im=0;
@@ -2030,7 +2042,7 @@ const syHide=()=>{try{localStorage.setItem('kiravault.sync.hide','1')}catch{}ren
  syCard=()=>{
   if(!syCfg())return'';
   const go="tab='more';stg='sync';render()";
-  if(syOn())return`<div class=card style="padding:9px 14px;cursor:pointer" onclick="${go}"><small>☁ ${syBusy?'Syncing…':syM.dirty?'Waiting to sync':'Synced'}${syM.last&&!syBusy&&!syM.dirty?' · '+E(new Date(syM.last).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})):''}</small></div>`;
+  if(syOn())return`<div class="kvsy ${syBusy?'ing':syM.dirty?'wait':'ok'}" onclick="${go}" role=button aria-label="Sync status"><i></i><span>${syBusy?'Syncing…':syM.dirty?'Waiting to sync':'Synced'}${syM.last&&!syBusy&&!syM.dirty?' · '+E(new Date(syM.last).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})):''}</span></div>`;
   if(localStorage.getItem('kiravault.sync.hide'))return'';
   return`<div class=card style="border-left:5px solid var(--blue);cursor:pointer" onclick="${go}"><b>☁ Sync across devices</b><br><small>Sign in to keep your data on all your devices.</small><div style="margin-top:8px"><button class=s onclick="event.stopPropagation();syHide()">Not now</button></div></div>`};
 const syHome=V.home;
@@ -2044,7 +2056,7 @@ if(syOn())setTimeout(()=>syRun(),1500);
 /* ===== v60: motion ===== */
 const RMq=matchMedia('(prefers-reduced-motion:reduce)');let mvT=null;
 function mvAnim(){
- if(RMq.matches)return;
+ if(kvOff())return;
  const m=$('#m');if(!m)return;
  m.classList.remove('mv','bf');void m.offsetWidth;
  if(tab=='home'){const els=[];[...m.children].forEach(c=>{if(c.classList&&c.classList.contains('hcs'))els.push(...c.children);else els.push(c)});els.slice(0,14).forEach((el,i)=>{el.style.animationDelay=i*45+'ms';el.classList.add('ci')})}
@@ -2056,14 +2068,14 @@ function mvAnim(){
  const un0=unlockNow;unlockNow=function(){un0.apply(this,arguments);mvAnim()};
  const r0=render;let thP=null;
  render=function(){const d=S.set.mode=='dark'||(S.set.mode=='auto'&&matchMedia('(prefers-color-scheme:dark)').matches),k=d+'|'+S.set.accent;
-  if(thP!==null&&k!==thP&&document.startViewTransition&&!RMq.matches){thP=k;try{document.startViewTransition(()=>{r0();clCheck()});return}catch{}}
+  if(thP!==null&&k!==thP&&document.startViewTransition&&!kvOff()){thP=k;try{document.startViewTransition(()=>{r0();clCheck()});return}catch{}}
   thP=k;r0();clCheck()}}
 document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('button');if(!b||b.disabled||!navigator.vibrate||b.closest('.kp'))return;const t=(b.textContent||'').trim();if(/^(delete|remove|erase|clear all|reset)/i.test(t))navigator.vibrate([22,40,22]);else if(b.classList.contains('p')||/^(save|add|pay|record|mark|done|create|confirm|received|apply|log)\b/i.test(t))navigator.vibrate(12)},true);
 
 /* ===== v61: count-up numbers + goal/bill celebration ===== */
 let clM=null;
 function cuRun(){
- if(RMq.matches)return;
+ if(kvOff())return;
  const L=[];
  document.querySelectorAll('#m .sc b,#m .hero b,#m .grid b,#m .chs b').forEach(b=>{[...b.childNodes].forEach(n=>{
   if(n.nodeType!==3)return;
@@ -2098,7 +2110,7 @@ function clFire(msg){
  const d=document.createElement('div');d.className='cel';
  d.innerHTML='<svg viewBox="0 0 24 24" width="26" height="26"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2"/><path d="M7 12.5l3.2 3.2L17 9" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg><b>'+E(msg)+'</b>';
  document.body.appendChild(d);
- if(!RMq.matches){
+ if(!kvOff()){
   const w=document.createElement('div');w.className='cfw';const CL=['#5CF0B0','#3D5AFE','#F59E0B','#E5484D','#7C5CF5','#0FB5A0'];
   for(let i=0;i<28;i++){const e=document.createElement('i');e.className='cf';const s=e.style;
    s.setProperty('--x',(Math.random()*300-150).toFixed(0)+'px');s.setProperty('--u',(-60-Math.random()*90).toFixed(0)+'px');s.setProperty('--y',(90+Math.random()*190).toFixed(0)+'px');s.setProperty('--r',(Math.random()*720-360).toFixed(0)+'deg');
@@ -2129,7 +2141,7 @@ function kvWrap(h){
 function kvHintDone(){try{localStorage.setItem('kvSwHint','1')}catch{}document.querySelectorAll('.kvhint').forEach(x=>x.remove())}
 function kvSnap(el,from,done){ /* spring back to rest */
  el.style.transform='';
- if(RMq.matches||!el.animate){done&&done();return}
+ if(kvOff()||!el.animate){done&&done();return}
  const a=el.animate([{transform:`translateX(${from}px)`},{transform:'translateX(0)'}],{duration:460,easing:kvSpring});
  a.onfinish=a.oncancel=()=>done&&done()}
 let kvSw=null,kvSwT=0;
@@ -2161,7 +2173,7 @@ function kvSwEnd(e){
  /* delete: slide out, close the gap, then delete with the normal 8 second Undo */
  kvBuzz(22);
  const go=()=>UD('Transaction deleted',()=>{const x=S.tx.find(x=>x.id==s.id);if(x)delTx(x)});
- if(RMq.matches){go();return}
+ if(kvOff()){go();return}
  const W=s.w.offsetWidth,h=s.w.offsetHeight;
  s.w.classList.add('on');s.w.dataset.dir='d';s.w.classList.add('past');
  s.r.style.transition='transform .22s ease-in';s.r.style.transform=`translateX(${-W-40}px)`;
@@ -2233,8 +2245,32 @@ function kvDrawIn(svg){
  fills.concat(dashed).forEach(p=>p.animate([{opacity:0}],{duration:700,delay:350,easing:'ease-out',fill:'backwards'}));
  dots.forEach(d=>{d.style.transformBox='fill-box';d.style.transformOrigin='center';
   d.animate([{opacity:0,transform:'scale(.2)'},{opacity:1,transform:'scale(1)'}],{duration:380,delay:820,easing:kvSpring,fill:'backwards'})})}
-function kvDrawAll(){if(RMq.matches||tab!='ins')return;document.querySelectorAll('#m .chw svg,#m .fch svg,#m svg.kvd').forEach(kvDrawIn)}
-{const r2=render;render=function(){const o=r2.apply(this,arguments);if(tab=='ins')setTimeout(kvDrawAll,90);return o}}
-if(tab=='ins')setTimeout(kvDrawAll,90);
+/* donut: slices sweep round clockwise, one after another */
+function kvDrawDonut(svg){
+ const C=[...svg.querySelectorAll('circle[stroke-dasharray]')],sig='dn|'+C.map(c=>c.getAttribute('stroke-dasharray')+'@'+c.getAttribute('stroke-dashoffset')).join('|');
+ if(!C.length||kvDrawn.has(sig)||!svg.animate)return;kvDrawn.add(sig);
+ const T=900;
+ C.forEach(c=>{const [l,r]=c.getAttribute('stroke-dasharray').split(' ').map(Number),tot=l+r,o=-parseFloat(c.getAttribute('stroke-dashoffset')||0);
+  if(!(l>0)||!(tot>0))return;
+  c.animate([{strokeDasharray:'0 '+tot},{strokeDasharray:l+' '+(tot-l)}],{duration:Math.max(120,T*l/tot),delay:T*(o||0)/tot,easing:'linear',fill:'backwards'})})}
+/* bar charts: bars grow up from the baseline, slightly staggered */
+function kvDrawBars(el){
+ const B=[...el.children].filter(n=>n.tagName=='I'),sig='br|'+B.map(b=>b.getAttribute('style')).join('|');
+ if(!B.length||kvDrawn.has(sig)||!el.animate)return;kvDrawn.add(sig);
+ B.forEach((b,i)=>{b.style.transformOrigin='bottom';b.animate([{transform:'scaleY(0)'},{transform:'scaleY(1)'}],{duration:620,delay:i*55,easing:kvSpring,fill:'backwards'})})}
+function kvDrawAll(){
+ if(kvOff())return;
+ document.querySelectorAll('#m .chw svg,#m .fch svg,#m svg.kvd').forEach(kvDrawIn);
+ document.querySelectorAll('#m svg.kvdn').forEach(kvDrawDonut);
+ document.querySelectorAll('#m .dac,#m .kvb').forEach(kvDrawBars)}
+{const r2=render;render=function(){const o=r2.apply(this,arguments);document.body.classList.toggle('kvoff',S.set.anim===false);setTimeout(kvDrawAll,90);return o}}
+document.body.classList.toggle('kvoff',S.set.anim===false);setTimeout(kvDrawAll,90);
+
+/* --- Animations switch (Settings) --- */
+function kvOff(){return RMq.matches||S.set.anim===false}
+function kvAnimTog(){S.set.anim=S.set.anim===false;save();showOk('Animations '+(S.set.anim===false?'off':'on'))}
+{const mo7=V.more;V.more=()=>{const h=mo7();if(stg)return h;
+ const on=S.set.anim!==false,row=`<div class=sr onclick="kvAnimTog()" role=switch aria-checked="${on}"><i><svg viewBox="0 0 24 24"><path d="M3 12c2.5-6 5.5-6 9 0s6.5 6 9 0"/></svg></i><b>Animations</b><small>${on?'On':'Off'}</small><span class="kvtg${on?' on':''}"></span></div>`;
+ return h.replace('<div class=sr onclick="stGo(\'about\')">',row+'<div class=sr onclick="stGo(\'about\')">')}}
 
 </script></body></html>

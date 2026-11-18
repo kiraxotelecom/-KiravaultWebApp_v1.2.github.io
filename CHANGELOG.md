@@ -2,6 +2,16 @@
 
 Newest version first. Bump `APP_VER` in `index.html` and the cache name in `sw.js` together on every release, then add a block here.
 
+## 2.1.9 · 19 Nov 2026
+
+### New
+- **Animations switch.** Settings now has an **Animations** on/off switch. Off turns off every animation in the app: charts, count-ups, screen transitions, swipe motion and celebrations. The pull-to-sync spinner still spins so you can see it working. It is saved with your settings and backups. The device's "reduce motion" setting still applies on its own.
+- **Donut sweeps in.** The My accounts donut draws its slices round clockwise, one after another.
+- **Finance overview charts animate.** The Total available line draws in, the Daily allowance bars grow up from the baseline, and the Spending pace line draws in. Like the Insights charts, they play on first appearance or when their data changes.
+
+### Improved
+- **Quieter sync status on Home.** After signing in, the large "Synced" card is now one small muted line with a status dot (green synced, amber waiting, pulsing blue syncing). Tap it to open Cloud sync settings. The "Sync across devices" prompt for signed-out users is unchanged.
+
 ## 2.1.8 · 19 Nov 2026
 
 ### New

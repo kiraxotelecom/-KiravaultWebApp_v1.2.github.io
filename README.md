@@ -4,9 +4,14 @@ Plan, Work, Grow: your finances and work in one place. KiraVault answers one que
 
 It tracks Bank, Mobile Money and Cash, counts bills, debts and savings as commitments, and never counts client money until it is actually received.
 
-**Current version: 2.1.8** · see [CHANGELOG.md](CHANGELOG.md)
+**Current version: 2.1.9** · see [CHANGELOG.md](CHANGELOG.md)
 
-## What's new in 2.1.8
+## What's new in 2.1.9
+- Animations on/off switch in Settings
+- Donut and Finance overview charts animate
+- Quieter sync status on Home
+
+## Also in 2.1.8
 - Swipe a transaction right to edit, left to delete (with Undo)
 - Pull down to sync
 - Insights charts that draw themselves
