@@ -329,7 +329,20 @@ nav .brand .bl{flex:none;margin-left:auto;width:36px;height:36px;padding:0;borde
 .igi .pc.g{color:var(--green);background:color-mix(in srgb,var(--green) 16%,transparent)}.igi .pc.r{color:var(--red);background:color-mix(in srgb,var(--red) 16%,transparent)}
 @media(max-width:560px){.ig.igi{gap:8px}.igi .sc{padding:11px 10px;gap:6px}.igi .sc>small{font-size:10.5px;letter-spacing:.04em}.igi .cu{display:none}.igi .iv{flex-wrap:wrap;gap:4px 6px}.igi .iv b{flex:none;font-size:18px}.igi .pc{font-size:10.5px;padding:2px 6px}}
 textarea{width:100%;padding:10px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--text);font:inherit;resize:vertical;margin-top:4px}
-</style></head><body><header id=hd></header><main id=m></main><nav id=nav></nav><dialog id=dlg></dialog><div id=toast hidden></div><div id=lk hidden></div><button id=fab class=p onclick=quickAdd()>+</button><div id=sp><button class=gb onclick="sp.remove();sessionStorage.s=1;persist(1);if(lkS)lockNow()">Get Started</button><button id=sgl class=sgl onclick="sgOpen()">Already have an account? <b>Sign in</b></button></div>
+
+/* ===== v60: motion ===== */
+button,.card[onclick],.sr,.dy,.pf{transition:transform .14s ease}
+button:active:not(:disabled),.card[onclick]:active,.sr:active,.dy:active,.pf:active{transform:scale(.96)}
+nav button:active{transform:scale(.9)}
+@keyframes mvIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@keyframes ciIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+@keyframes barIn{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+#m.mv{animation:mvIn .22s ease-out}
+#m .ci{animation:ciIn .4s cubic-bezier(.22,.8,.2,1) backwards}
+#m.bf .bar i{transform-origin:left center;animation:barIn .8s cubic-bezier(.22,.8,.2,1) .15s backwards}
+::view-transition-old(root),::view-transition-new(root){animation-duration:.32s}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.001ms!important;animation-delay:0s!important;animation-iteration-count:1!important;transition-duration:.001ms!important;scroll-behavior:auto!important}}
+</style></head><body><header id=hd></header><main id=m></main><nav id=nav></nav><dialog id=dlg></dialog><div id=toast hidden></div><div id=lk hidden></div><button id=fab class=p onclick=quickAdd()>+</button><div id=sp><button class=gb onclick="sp.remove();sessionStorage.s=1;persist(1);if(lkS)lockNow();mvAnim()">Get Started</button><button id=sgl class=sgl onclick="sgOpen()">Already have an account? <b>Sign in</b></button></div>
 <script>
 let HM=0;
 const $=s=>document.querySelector(s),K='kiravault.web.v1',E=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])),xr=()=>S&&S.set&&S.set.cur=='USD'&&+S.set.rate>0?+S.set.rate:0,fu=v=>Math.abs(v)>=1000?Math.round(v).toLocaleString('en-US'):v.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}),F=n=>HM?'••••':(xr()?fu(n/xr()):Math.round(n).toLocaleString('en-US')),
@@ -1981,7 +1994,7 @@ function sgOpen(){
  d.innerHTML=`<div style="max-width:420px;margin:5vh auto 0"><h1>Sign in</h1><small>Use the same account on every device to keep your data in step. New here? Choose Create account.</small><div class=card style="margin-top:14px"><label>Email<input id=sge type=email autocomplete=email value="${E(syEm||syM.email||'')}"></label><label>Password<input id=sgp type=password autocomplete=current-password></label><div class=row style="justify-content:flex-start;gap:8px;flex-wrap:wrap"><button class=p onclick="syAuth('in','sg')">Sign in</button><button onclick="syAuth('up','sg')">Create account</button><button class=s onclick="syForgot('sg')">Forgot password</button></div><small id=sgm style="display:block;margin-top:10px;font-weight:700"></small></div><button class=s onclick="sgClose()">‹ Back</button><small style="display:block;margin-top:14px">Signing in is optional. Your data is stored in your own Firebase project on Google servers (not end-to-end encrypted). Receipt photos stay on this device.</small></div>`;
  document.body.appendChild(d)}
 const sgClose=()=>{const o=$('#sgo');if(o)o.remove()};
-function sgDone(){sgClose();const s=$('#sp');if(s){s.remove();try{sessionStorage.s=1}catch{}try{persist(1)}catch{}}render()}
+function sgDone(){sgClose();const s=$('#sp');if(s){s.remove();try{sessionStorage.s=1}catch{}try{persist(1)}catch{}}render();try{mvAnim()}catch{}}
 const syHide=()=>{try{localStorage.setItem('kiravault.sync.hide','1')}catch{}render()},
  syCard=()=>{
   if(!syCfg())return'';
@@ -1997,5 +2010,24 @@ document.addEventListener('visibilitychange',()=>{if(!document.hidden)syRun()});
 setInterval(()=>{if(!document.hidden)syRun()},90000);
 if(syOn())setTimeout(()=>syRun(),1500);
 (()=>{const l=$('#sgl');if(l&&(lkS||syOn()||!syCfg()))l.remove()})();
+/* ===== v60: motion ===== */
+const RMq=matchMedia('(prefers-reduced-motion:reduce)');let mvT=null;
+function mvAnim(){
+ if(RMq.matches)return;
+ const m=$('#m');if(!m)return;
+ m.classList.remove('mv','bf');void m.offsetWidth;
+ if(tab=='home'){const els=[];[...m.children].forEach(c=>{if(c.classList&&c.classList.contains('hcs'))els.push(...c.children);else els.push(c)});els.slice(0,14).forEach((el,i)=>{el.style.animationDelay=i*45+'ms';el.classList.add('ci')})}
+ else m.classList.add('mv');
+ m.classList.add('bf');clearTimeout(mvT);
+ mvT=setTimeout(()=>{m.classList.remove('bf','mv');m.querySelectorAll('.ci').forEach(e=>{e.classList.remove('ci');e.style.animationDelay=''})},1200)}
+{const go0=go;go=function(t){const ch=t!==tab;go0.apply(this,arguments);if(ch)mvAnim()};
+ const sg0=stGo;stGo=function(){const p=stg;sg0.apply(this,arguments);if(stg!==p)mvAnim()};
+ const un0=unlockNow;unlockNow=function(){un0.apply(this,arguments);mvAnim()};
+ const r0=render;let thP=null;
+ render=function(){const d=S.set.mode=='dark'||(S.set.mode=='auto'&&matchMedia('(prefers-color-scheme:dark)').matches),k=d+'|'+S.set.accent;
+  if(thP!==null&&k!==thP&&document.startViewTransition&&!RMq.matches){thP=k;try{document.startViewTransition(()=>r0());return}catch{}}
+  thP=k;r0()}}
+document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('button');if(!b||b.disabled||!navigator.vibrate||b.closest('.kp'))return;const t=(b.textContent||'').trim();if(/^(delete|remove|erase|clear all|reset)/i.test(t))navigator.vibrate([22,40,22]);else if(b.classList.contains('p')||/^(save|add|pay|record|mark|done|create|confirm|received|apply|log)\b/i.test(t))navigator.vibrate(12)},true);
+
 
 </script></body></html>
