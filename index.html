@@ -1745,8 +1745,8 @@ function ntRecap(rd){const a=addD(rd,-6),z=addD(rd,-7),b0=addD(rd,-13),W=S.tx.fi
  if(!W.length&&!due.length)return null;if(S.set.hide)return'Your week is ready. Open KiraVault to see it.';
  const ch=ps?Math.round((sp-ps)/ps*100):null,o=['Spent '+sh(sp)+(ch===null?'':` (${ch>0?'▲':'▼'} ${Math.abs(ch)}% on last week)`)];
  if(inc)o.push('Income '+sh(inc));if(sv)o.push('Saved '+sh(sv));if(top)o.push('Top: '+top[0]);if(due.length)o.push(due.length+' due next week');return o.join(' · ')}
-const ntNext=()=>{const c=nfc();if(!c.wr)return[];const rd=addD(rcDate(c.wd,td()),7);return[{k:'w:'+rd,d:rd,t:'Your weekly recap',b:'Open KiraVault to see how your week went.'}]};
-function ntPush(n){if(!ntOk())return;const o={body:n.b,icon:'icon-192.png',badge:'icon-192.png',tag:n.k},f=()=>{try{new Notification(n.t,o)}catch{}};
+const ntNext=()=>{const c=nfc();if(!c.wr)return[];const rd=addD(rcDate(c.wd,td()),7);return[{k:'w:'+rd,d:rd,t:'Your weekly recap',b:'Tap to see your week: spending, income, bills due and work progress.'}]};
+function ntPush(n){if(!ntOk())return;const o={body:n.b,icon:'icon-192.png',badge:'icon-192.png',tag:n.k,data:{k:n.k}},f=()=>{try{new Notification(n.t,o)}catch{}};
  navigator.serviceWorker&&navigator.serviceWorker.ready?navigator.serviceWorker.ready.then(r=>r.showNotification(n.t,o)).catch(f):f()}
 function ntScan(){const c=nfc();if(!c.on&&!c.ph)return 0;S.nt=S.nt||[];S.nk=S.nk||[];const it=ntItems(),live=new Set(it.map(x=>x.k)),have=new Set(S.nk),t=td(),nw=[];
  it.forEach(x=>{if(x.d<=t&&!have.has(x.k)){const n={k:x.k,t:x.t,b:x.b,c:x.c,a:x.a,i:x.i,ts:Date.now(),r:0};S.nt.unshift(n);S.nk.push(x.k);nw.push(n)}});
@@ -1763,7 +1763,40 @@ function ntOpen(){const d=$('#dlg'),L=(S.nt||[]).slice(0,40),ic={r:['rb','red','
 function ntMark(){(S.nt||[]).forEach(n=>n.r=1);ntSave();ntOpen()}
 function ntClear(){S.nt=[];ntSave();ntOpen()}
 function ntGo(k){const n=(S.nt||[]).find(x=>x.k==k);if(!n)return;n.r=1;ntSave();dlg.close();
- if(n.a=='p'&&p_(n.i)){pj=n.i;go('work')}else if(n.a=='w'){go('ins')}else if(n.a=='x'||n.a=='g'){mv='p';go('money')}else{mv='b';go('money')}}
+ if(n.a=='p'&&p_(n.i)){pj=n.i;go('work')}else if(n.a=='w'){wkOpen(n.k.slice(2))}else if(n.a=='x'||n.a=='g'){mv='p';go('money')}else{mv='b';go('money')}}
+function wkOpen(rd){const d=$('#dlg'),T=S.tx,a=addD(rd,-6),z=addD(rd,-7),b0=addD(rd,-13),W=T.filter(x=>x.date>=a&&x.date<=rd),P=T.filter(x=>x.date>=b0&&x.date<=z),
+ sm_=(L,k)=>L.filter(x=>x.type==k).reduce((q,x)=>q+x.amt,0),sp=sm_(W,'expense'),ps=sm_(P,'expense'),inc=sm_(W,'income'),sv=sm_(W,'saving'),net=inc-sp,ch=ps?Math.round((sp-ps)/ps*100):null,
+ EX=W.filter(x=>x.type=='expense'),cats=gp(EX,x=>x.cat||'Others').slice().sort((x,y)=>y[1]-x[1]).slice(0,5),
+ days=[...Array(7)].map((_,i)=>{const dt=addD(a,i);return{dt,v:EX.filter(x=>x.date==dt).reduce((q,x)=>q+x.amt,0)}}),mx=Math.max(1,...days.map(x=>x.v)),nsd=days.filter(x=>!x.v).length,
+ big=EX.slice().sort((x,y)=>y.amt-x.amt)[0],pays=W.filter(x=>x.type=='income'&&x.pid),got=pays.reduce((q,x)=>q+x.amt,0),
+ ym=rd.slice(0,7),mtd=Object.fromEntries(gp(T.filter(x=>x.type=='expense'&&x.date.startsWith(ym)&&x.date<=rd),x=>x.cat||'Others')),
+ bd=Object.entries(bdOf(ym)).filter(([k,l])=>l>0&&(mtd[k]||0)>=l*.8).sort((x,y)=>mtd[y[0]]/y[1]-mtd[x[0]]/x[1]),
+ due=S.cm.filter(c=>c.st=='pending'&&c.due>rd&&c.due<=addD(rd,7)).sort((x,y)=>x.due<y.due?-1:1),dueT=due.reduce((q,c)=>q+rem(c),0),
+ od=S.cm.filter(c=>c.st=='pending'&&cst(c)=='od'),tdn=S.pr.reduce((q,p)=>q+p.tk.filter(k=>k.d&&k.dt&&k.dt>=a&&k.dt<=rd).length,0),mv=S.pr.filter(p=>p.up&&p.up>=a&&p.up<=rd),
+ lp=S.pr.filter(p=>late(p)),owed=S.pr.filter(p=>p.src!='Job'&&p.st!='Cancelled'&&p.amt>paid(p)),owedT=owed.reduce((q,p)=>q+p.amt-paid(p),0),gl=S.gl.filter(g=>g.saved<g.target),
+ U=n=>'UGX '+sh(n),
+ tile=(l,v,c)=>`<div style="flex:1;min-width:0;padding:10px 12px;border-radius:12px;background:color-mix(in srgb,var(--text) 5%,transparent)"><small>${l}</small><b style="display:block;font-size:16px;margin-top:2px;color:var(--${c||'text'})">${v}</b></div>`,
+ sec=(t,b)=>b?`<div style="margin-top:18px"><small><b>${t}</b></small>${b}</div>`:'',
+ row=(l,r,sb)=>`<div class=top style="margin-top:8px;align-items:baseline"><span style="min-width:0"><b>${l}</b>${sb?`<small style="display:block">${sb}</small>`:''}</span><b>${r}</b></div>`,
+ fx=od.length?[`Pay ${od.length} overdue bill${od.length>1?'s':''}`,U(od.reduce((q,c)=>q+rem(c),0))+' is past due.','red']:bd.length?[`Watch ${E(bd[0][0])}`,Math.round(mtd[bd[0][0]]/bd[0][1]*100)+'% of its budget is used this month.','amber']:owed.length?[`Collect from ${E(owed[0].client||'your clients')}`,U(owedT)+' is still unpaid.','teal']:lp.length?[`Finish or reschedule ${E(lp[0].title)}`,'Its deadline has passed.','red']:!sv&&gl.length?[`Move something into ${E(gl[0].name)}`,'Nothing went to savings this week.','green']:['Nothing urgent','Keep your momentum going.','green'],
+ n0=(S.nt||[]).find(x=>x.k=='w:'+rd);if(n0&&!n0.r){n0.r=1;ntSave()}
+ let h=`<div class=kh><h3>Weekly recap</h3><button type=button class=kx aria-label=Close onclick=dlg.close()>✕</button></div><small class=kh2>${fm(a)} to ${fm(rd)}</small>`;
+ if(!W.length&&!due.length&&!mv.length)h+=`<div class=card style="margin-top:12px"><small>Nothing was recorded this week. Add income and expenses as they happen and your recap will fill in.</small></div>`;
+ else{
+  h+=`<div style="margin-top:12px;padding:14px;border-radius:16px;background:color-mix(in srgb,var(--${net>=0?'green':'red'}) 14%,transparent)"><small>${net>=0?'You kept':'You overspent by'}</small><b style="display:block;font-size:26px;letter-spacing:-.02em;color:var(--${net>=0?'green':'red'})">${U(Math.abs(net))}</b><small>${net>=0?'more came in than went out this week':'more went out than came in this week'}</small></div>`
+  +`<div style="display:flex;gap:8px;margin-top:10px">${tile('Income',U(inc),'green')}${tile('Spent',U(sp),'red')}${tile('Saved',U(sv))}</div>`
+  +`<small style="display:block;margin-top:8px">${ps?(ch==0?'Spending was the same as the week before.':`Spending was ${Math.abs(ch)}% ${ch>0?'higher':'lower'} than the week before (${U(ps)}).`):'No spending recorded the week before to compare with.'}${nsd?` You had ${nsd} no-spend day${nsd>1?'s':''}.`:''}</small>`
+  +sec('Spending by day',EX.length?`<div style="display:flex;gap:6px;align-items:flex-end;height:66px;margin-top:8px">${days.map(x=>`<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;height:100%;justify-content:flex-end"><i style="width:100%;border-radius:6px;height:${Math.max(x.v/mx*46,x.v?4:2)}px;background:var(--${x.v?'accent':'line'})"></i><small style="font-size:11px">${new Date(x.dt+'T00:00').toLocaleDateString('en',{weekday:'narrow'})}</small></div>`).join('')}</div>`:'')
+  +sec('Where it went',cats.map(([k,v])=>`<div style="margin-top:10px"><div class=top><b>${E(k)}</b><span><b>${sh(v)}</b> <small>${sp?Math.round(v/sp*100):0}%</small></span></div><div class=bar style="margin:5px 0 0"><i style="width:${sp?v/sp*100:0}%;background:var(--accent)"></i></div></div>`).join('')+(big?`<small style="display:block;margin-top:10px">Biggest single expense: <b>${U(big.amt)}</b> · ${E(big.desc||big.cat||'Expense')} on ${fm(big.date)}</small>`:''))
+  +sec('Budgets to watch',bd.slice(0,4).map(([k,l])=>{const f=(mtd[k]||0)/l;return row(E(k),Math.round(f*100)+'%',f>=1?'Over by '+U(mtd[k]-l)+' this month':U(l-mtd[k])+' left this month')}).join(''))
+  +sec('Money in',(got||inc)?row('Client payments',U(got),pays.length?pays.length+' payment'+(pays.length>1?'s':''):'None')+(inc-got>0?row('Other income',U(inc-got)):''):'')
+  +sec('Work',(tdn||mv.length||lp.length||owedT)?(tdn?row('Tasks completed',tdn):'')+(mv.length?row('Projects moved',mv.length,mv.slice(0,3).map(q=>E(q.title)+' '+q.pg+'%').join(' · ')):'')+(lp.length?row('Overdue projects',lp.length,lp.slice(0,2).map(q=>E(q.title)).join(' · ')):'')+(owedT?row('Still to collect',U(owedT),owed.length+' project'+(owed.length>1?'s':'')+' with a balance'):''):'')
+  +sec('Due in the next 7 days',(due.length?due.slice(0,5).map(c=>row(E(c.title),U(rem(c)),E(c.kind||'Bill')+' · '+fm(c.due))).join('')+(due.length>5?`<small style="display:block;margin-top:6px">and ${due.length-5} more</small>`:'')+row('Total',U(dueT)):''))
+  +sec('Savings goals',gl.slice(0,3).map(g=>row(E(g.name),Math.round(g.saved/g.target*100)+'%',U(g.saved)+' of '+U(g.target))).join(''))
+  +`<div style="margin-top:18px;padding:12px;border-radius:14px;background:color-mix(in srgb,var(--${fx[2]}) 14%,transparent)"><small><b>One thing to focus on next week</b></small><div style="margin-top:4px"><b>${fx[0]}</b></div><small>${fx[1]}</small></div>`}
+ h+=`<div class=row style="justify-content:space-between;margin-top:16px"><button type=button class=s onclick="wkOpen('${addD(rd,-7)}')">‹ Earlier</button>${addD(rd,7)<=td()?`<button type=button class=s onclick="wkOpen('${addD(rd,7)}')">Later ›</button>`:''}<button type=button class=s onclick="dlg.close();go('ins')">Insights</button><button type=button class=p onclick=dlg.close()>Done</button></div>`;
+ d.innerHTML=h;if(!d.open)d.showModal()}
+function ntDeep(k){let t=0;const iv=setInterval(()=>{const lk=document.body.classList.contains('locked');if(lk&&++t<600)return;clearInterval(iv);if(lk)return;ntScan();if(k.startsWith('w:'))wkOpen(k.slice(2));else{const n=(S.nt||[]).find(x=>x.k==k);if(n)ntGo(k);else ntOpen()}},500)}
 function ntTest(){if(!ntOk()){alert('Turn on phone notifications first and allow them when asked.');return}ntPush({k:'kv-test'+Date.now(),t:'KiraVault test',b:'Phone notifications are working.'})}
 /* settings pages */
 const sw=(l,s,v,f)=>`<div class=swr><div><b>${l}</b>${s?`<small style="display:block">${s}</small>`:''}</div><input type=checkbox ${v?'checked':''} onchange="${f}"></div>`;
@@ -1777,7 +1810,7 @@ async function nfPhone(el){if(!el.checked){nfSet('ph',0);return}
 function nfPg(){const c=nfc(),pm=typeof Notification!='undefined'?Notification.permission:'none',
  st=pm=='granted'?'Allowed on this device.':pm=='denied'?'Blocked. Allow notifications for this app in your phone or browser settings.':pm=='none'?'Not supported here. On iPhone, add the app to your Home Screen first.':'You will be asked to allow them.';
  return`<div class=card>${sw('In-app alerts','Show a bell with bills, deadlines and expected income.',c.on,"nfSet('on',this.checked)")}${sw('Phone notifications','Also send alerts as notifications. '+st,c.ph,'nfPhone(this)')}</div>
- <h3>What to alert me about</h3><div class=card>${sw('Bills, debts and savings','',c.b,"nfSet('b',this.checked)")}${sw('Project deadlines','',c.w,"nfSet('w',this.checked)")}${sw('Expected income','',c.i,"nfSet('i',this.checked)")}${sw('Budget alerts','When a category reaches 80% and 100% of its budget.',c.g,"nfSet('g',this.checked)")}${sw('Weekly recap','A short summary of your week.',c.wr,"nfSet('wr',this.checked)")}${c.wr?`<label>Recap day<select onchange="nfSet('wd',+this.value)">${WD.map((d,i)=>`<option value=${i}${c.wd==i?' selected':''}>${d}</option>`).join('')}</select></label>`:''}<label>Remind me<select onchange="nfSet('lead',+this.value)">${[[0,'On the day'],[1,'1 day before'],[2,'2 days before'],[3,'3 days before']].map(([v,l])=>`<option value=${v}${c.lead==v?' selected':''}>${l}</option>`).join('')}</select></label>
+ <h3>What to alert me about</h3><div class=card>${sw('Bills, debts and savings','',c.b,"nfSet('b',this.checked)")}${sw('Project deadlines','',c.w,"nfSet('w',this.checked)")}${sw('Expected income','',c.i,"nfSet('i',this.checked)")}${sw('Budget alerts','When a category reaches 80% and 100% of its budget.',c.g,"nfSet('g',this.checked)")}${sw('Weekly recap','A short summary of your week.',c.wr,"nfSet('wr',this.checked)")}${c.wr?`<label>Recap day<select onchange="nfSet('wd',+this.value)">${WD.map((d,i)=>`<option value=${i}${c.wd==i?' selected':''}>${d}</option>`).join('')}</select></label><button type=button class=s style="margin:8px 0" onclick="wkOpen(rcDate(${c.wd},td()))">View this week's recap</button>`:''}<label>Remind me<select onchange="nfSet('lead',+this.value)">${[[0,'On the day'],[1,'1 day before'],[2,'2 days before'],[3,'3 days before']].map(([v,l])=>`<option value=${v}${c.lead==v?' selected':''}>${l}</option>`).join('')}</select></label>
  ${c.ph?'<div class=row style="justify-content:flex-start"><button class=s onclick=ntTest()>Send a test notification</button></div>':''}</div>
  <small>KiraVault has no server, so phone notifications are best effort: they appear when you open the app and, on Android Chrome with the app installed, from a background check that runs about once a day. They are not guaranteed while the app is closed. For guaranteed reminders, use "Add bill reminders to my calendar" under Commitments. With balances hidden, amounts are left out of notifications.</small>`}
 function aiSet(k,v){S.set.ai={...aic(),[k]:v};save()}
@@ -1800,6 +1833,8 @@ const hd0=hdr;hdr=function(){hd0();ntIns()};
 setInterval(()=>{if(!document.body.classList.contains('locked')&&ntScan())ntBadge()},6e4);
 document.addEventListener('visibilitychange',()=>{if(!document.hidden&&ntScan())ntBadge()});
 render();
+if(navigator.serviceWorker)navigator.serviceWorker.addEventListener('message',e=>{if(e.data&&e.data.nt)ntDeep(e.data.nt)});
+{const hm=/#nt=(.+)$/.exec(location.hash);if(hm){try{history.replaceState(null,'',location.pathname)}catch(e){}ntDeep(decodeURIComponent(hm[1]))}}
 
 function igc(c,l,v,b,up){const a=v,ch=b?(a-b)/Math.abs(b):null,pc=ch===null||!isFinite(ch)?'':`<span class="pc ${(ch>=0)==up?'g':'r'}">${ch>=0?'▲':'▼'} ${Math.abs(Math.round(ch*100))}%</span>`;return`<div class="sc ${c}"><small>${l}</small><div class=iv><b><span class=cu>UGX</span> ${sh(v)}</b>${pc}</div></div>`}
 
