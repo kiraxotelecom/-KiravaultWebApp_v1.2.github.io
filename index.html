@@ -386,7 +386,7 @@ body.kvoff #kvptr.spin svg,body.kvoff .kvsy.ing i{animation-duration:.8s!importa
 @media (prefers-reduced-motion:reduce){#kvptr.spin svg{animation-duration:.8s!important;animation-iteration-count:infinite!important}}
 </style></head><body><header id=hd></header><main id=m></main><nav id=nav></nav><dialog id=dlg></dialog><div id=toast hidden></div><div id=lk hidden></div><button id=fab class=p onclick=quickAdd()>+</button><div id=sp><button class=gb onclick="sp.remove();sessionStorage.s=1;persist(1);if(lkS)lockNow();mvAnim()">Get Started</button><button id=sgl class=sgl onclick="sgOpen()">Already have an account? <b>Sign in</b></button></div>
 <script>
-const APP_VER='2.1.9'; /* bump by one on every change: 2.1.8, 2.1.9 ... */
+const APP_VER='2.1.10'; /* bump by one on every change: 2.1.8, 2.1.9 ... */
 let HM=0;
 const $=s=>document.querySelector(s),K='kiravault.web.v1',E=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])),xr=()=>S&&S.set&&S.set.cur=='USD'&&+S.set.rate>0?+S.set.rate:0,fu=v=>Math.abs(v)>=1000?Math.round(v).toLocaleString('en-US'):v.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}),F=n=>HM?'••••':(xr()?fu(n/xr()):Math.round(n).toLocaleString('en-US')),
  td=()=>new Date().toLocaleDateString('sv'),me=()=>{const d=new Date();return new Date(d.getFullYear(),d.getMonth()+1,0).toLocaleDateString('sv')},
@@ -2222,55 +2222,79 @@ async function kvPtGo(){
  }catch(err){ok=false;msg='Sync failed. Try again.'}
  await kvNap(Math.max(0,650-(Date.now()-t0)));
  e.classList.remove('spin');e.innerHTML=ok?kvIcOk:kvIcNo;
- if(ok)showOk('Synced just now');else kvNote(msg);
+ if(ok){showOk('Synced just now');kvDrawAll(true)}else kvNote(msg);
  await kvNap(ok?700:1000);kvPtPos(0,1);await kvNap(450);e.innerHTML=kvIcArrow;kvPtBusy=false}
 
-/* --- 3. charts that draw themselves (Insights). Plays when a chart first appears or its data changes --- */
-const kvDrawn=new Set();
-function kvDrawIn(svg){
- const all=[...svg.querySelectorAll('path')],sig=all.map(p=>p.getAttribute('d')).join('|');
- if(!sig||kvDrawn.has(sig)||!svg.animate)return;kvDrawn.add(sig);
- const P=all.filter(p=>!p.closest('[id$="-x"]')),
+/* --- 3. charts that draw themselves. They play when first seen, when scrolled into view, when you come back after a while, and after a sync --- */
+const kvSeen=new Map(),kvPlayed=new Map(),KV_AWAY=30000,
+ kvTargets=()=>[...document.querySelectorAll('#m .chw svg,#m .fch svg,#m svg.kvd,#m svg.kvdn,#m .dac,#m .kvb')],
+ kvSig=el=>{ /* a fingerprint of the chart's data, so "new data" can be told from "same data" */
+  if(el.matches('svg.kvdn')){const C=[...el.querySelectorAll('circle[stroke-dasharray]')];return C.length?'dn|'+C.map(c=>c.getAttribute('stroke-dasharray')+'@'+c.getAttribute('stroke-dashoffset')).join('|'):''}
+  if(el.matches('.dac,.kvb')){const B=[...el.children].filter(n=>n.tagName=='I');return B.length?'br|'+B.map(b=>b.getAttribute('style')).join('|'):''}
+  const d=[...el.querySelectorAll('path')].map(p=>p.getAttribute('d')).join('|');return d?'ln|'+d:''},
+ kvInView=el=>{const r=el.getBoundingClientRect();return r.height>0&&r.top<innerHeight-24&&r.bottom>24},
+ kvIO='IntersectionObserver' in window?new IntersectionObserver(es=>es.forEach(x=>{
+  if(!x.isIntersecting)return;kvIO.unobserve(x.target);
+  if(kvOff()||!x.target.isConnected)return;
+  const sg=kvSig(x.target);if(!sg)return;kvSeen.set(sg,Date.now());kvPlayed.set(sg,Date.now());kvPlay(x.target)}),{threshold:.25}):null;
+function kvAnimLine(svg){
+ if(!svg.animate)return;
+ const P=[...svg.querySelectorAll('path')].filter(p=>!p.closest('[id$="-x"]')),
   lines=P.filter(p=>p.getAttribute('fill')==='none'&&!p.hasAttribute('stroke-dasharray')),
   fills=P.filter(p=>/^url/.test(p.getAttribute('fill')||'')),
   dashed=P.filter(p=>p.hasAttribute('stroke-dasharray')),
-  dots=[...svg.querySelectorAll(':scope>circle')];
+  dots=[...svg.querySelectorAll('circle')].filter(c=>!c.closest('[id$="-x"]'));
  if(lines.some(p=>p.hasAttribute('vector-effect'))){
-  /* stretched charts (forecast, pace): reveal left to right */
-  const els=[...svg.children].filter(n=>/^(path|circle)$/i.test(n.tagName));if(!els.length)return;
-  const g=document.createElementNS('http://www.w3.org/2000/svg','g');svg.insertBefore(g,els[0]);els.forEach(n=>g.appendChild(n));
+  /* stretched charts (forecast, pace, total available): reveal left to right */
+  let g=svg.querySelector(':scope>g.kvg');
+  if(!g){const els=[...svg.children].filter(n=>/^(path|circle)$/i.test(n.tagName));if(!els.length)return;
+   g=document.createElementNS('http://www.w3.org/2000/svg','g');g.setAttribute('class','kvg');svg.insertBefore(g,els[0]);els.forEach(n=>g.appendChild(n))}
   g.animate([{clipPath:'inset(-4px 100% -4px -4px)'},{clipPath:'inset(-4px -4px -4px -4px)'}],{duration:1000,easing:kvEase,fill:'backwards'})}
  else lines.forEach((p,i)=>{p.setAttribute('pathLength','1');
   p.animate([{strokeDasharray:'1 1',strokeDashoffset:1},{strokeDasharray:'1 1',strokeDashoffset:0}],{duration:900,delay:i*140,easing:kvEase,fill:'backwards'})});
  fills.concat(dashed).forEach(p=>p.animate([{opacity:0}],{duration:700,delay:350,easing:'ease-out',fill:'backwards'}));
  dots.forEach(d=>{d.style.transformBox='fill-box';d.style.transformOrigin='center';
   d.animate([{opacity:0,transform:'scale(.2)'},{opacity:1,transform:'scale(1)'}],{duration:380,delay:820,easing:kvSpring,fill:'backwards'})})}
-/* donut: slices sweep round clockwise, one after another */
-function kvDrawDonut(svg){
- const C=[...svg.querySelectorAll('circle[stroke-dasharray]')],sig='dn|'+C.map(c=>c.getAttribute('stroke-dasharray')+'@'+c.getAttribute('stroke-dashoffset')).join('|');
- if(!C.length||kvDrawn.has(sig)||!svg.animate)return;kvDrawn.add(sig);
- const T=900;
- C.forEach(c=>{const [l,r]=c.getAttribute('stroke-dasharray').split(' ').map(Number),tot=l+r,o=-parseFloat(c.getAttribute('stroke-dashoffset')||0);
+function kvAnimDonut(svg){ /* slices sweep round clockwise, one after another */
+ if(!svg.animate)return;const T=900;
+ svg.querySelectorAll('circle[stroke-dasharray]').forEach(c=>{
+  const [l,r]=c.getAttribute('stroke-dasharray').split(' ').map(Number),tot=l+r,o=-parseFloat(c.getAttribute('stroke-dashoffset')||0);
   if(!(l>0)||!(tot>0))return;
   c.animate([{strokeDasharray:'0 '+tot},{strokeDasharray:l+' '+(tot-l)}],{duration:Math.max(120,T*l/tot),delay:T*(o||0)/tot,easing:'linear',fill:'backwards'})})}
-/* bar charts: bars grow up from the baseline, slightly staggered */
-function kvDrawBars(el){
- const B=[...el.children].filter(n=>n.tagName=='I'),sig='br|'+B.map(b=>b.getAttribute('style')).join('|');
- if(!B.length||kvDrawn.has(sig)||!el.animate)return;kvDrawn.add(sig);
- B.forEach((b,i)=>{b.style.transformOrigin='bottom';b.animate([{transform:'scaleY(0)'},{transform:'scaleY(1)'}],{duration:620,delay:i*55,easing:kvSpring,fill:'backwards'})})}
-function kvDrawAll(){
- if(kvOff())return;
- document.querySelectorAll('#m .chw svg,#m .fch svg,#m svg.kvd').forEach(kvDrawIn);
- document.querySelectorAll('#m svg.kvdn').forEach(kvDrawDonut);
- document.querySelectorAll('#m .dac,#m .kvb').forEach(kvDrawBars)}
+function kvAnimBars(el){ /* bars grow up from the baseline, slightly staggered */
+ if(!el.animate)return;
+ [...el.children].filter(n=>n.tagName=='I').forEach((b,i)=>b.animate([{transform:'scaleY(0)',transformOrigin:'bottom'},{transform:'scaleY(1)',transformOrigin:'bottom'}],{duration:620,delay:i*55,easing:kvSpring,fill:'backwards'}))}
+function kvPlay(el){if(el.matches('svg.kvdn'))kvAnimDonut(el);else if(el.matches('.dac,.kvb'))kvAnimBars(el);else kvAnimLine(el)}
+/* kvDrawAll(): the normal pass after every render. kvDrawAll(true): replay what is on screen right now */
+function kvDrawAll(force){
+ if(kvOff())return;const now=Date.now();
+ kvTargets().forEach(el=>{
+  const sg=kvSig(el);if(!sg)return;const last=kvSeen.get(sg),vis=kvInView(el);
+  if(force){if(vis&&now-(kvPlayed.get(sg)||0)>1500){kvSeen.set(sg,now);kvPlayed.set(sg,now);kvPlay(el)}return}
+  if(last!==undefined&&now-last<KV_AWAY){if(vis)kvSeen.set(sg,now);return}   /* same data, seen recently: stay still */
+  if(vis||!kvIO){kvSeen.set(sg,now);kvPlayed.set(sg,now);kvPlay(el)}
+  else kvIO.observe(el)})}                                                    /* below the fold: draw when scrolled into view */
+function kvTouchSeen(){const now=Date.now();kvTargets().forEach(el=>{const sg=kvSig(el);if(sg&&kvSeen.has(sg)&&kvInView(el))kvSeen.set(sg,now)})}
 {const r2=render;render=function(){const o=r2.apply(this,arguments);document.body.classList.toggle('kvoff',S.set.anim===false);setTimeout(kvDrawAll,90);return o}}
 document.body.classList.toggle('kvoff',S.set.anim===false);setTimeout(kvDrawAll,90);
+/* coming back: replay if you were away for 30 s or more (screen change or app in the background) */
+['pointerdown','keydown','touchstart'].forEach(t=>addEventListener(t,()=>{kvLoopN=0;kvTouchSeen()},{passive:true,capture:true}));
+document.addEventListener('visibilitychange',()=>{if(document.hidden)kvTouchSeen();else setTimeout(kvDrawAll,120)});
+/* optional: replay what is on screen every 10 s (Settings). Pauses for dialogs, typing, gestures; stops after 5 repeats until you touch the screen */
+let kvLoopN=0;
+setInterval(()=>{
+ if(S.set.loop!==true||kvOff()||document.hidden||kvLocked()||kvPtBusy||kvSw||kvPt||kvLoopN>=5)return;
+ const a=document.activeElement;if(a&&/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName))return;
+ kvLoopN++;kvDrawAll(true)},10000);
 
-/* --- Animations switch (Settings) --- */
+/* --- Animations switch + optional 10 s repeat (Settings) --- */
 function kvOff(){return RMq.matches||S.set.anim===false}
 function kvAnimTog(){S.set.anim=S.set.anim===false;save();showOk('Animations '+(S.set.anim===false?'off':'on'))}
+function kvLoopTog(){S.set.loop=S.set.loop!==true;kvLoopN=0;save();showOk('Repeat every 10 s '+(S.set.loop?'on':'off'))}
 {const mo7=V.more;V.more=()=>{const h=mo7();if(stg)return h;
- const on=S.set.anim!==false,row=`<div class=sr onclick="kvAnimTog()" role=switch aria-checked="${on}"><i><svg viewBox="0 0 24 24"><path d="M3 12c2.5-6 5.5-6 9 0s6.5 6 9 0"/></svg></i><b>Animations</b><small>${on?'On':'Off'}</small><span class="kvtg${on?' on':''}"></span></div>`;
- return h.replace('<div class=sr onclick="stGo(\'about\')">',row+'<div class=sr onclick="stGo(\'about\')">')}}
-
+ const on=S.set.anim!==false,lp=S.set.loop===true,
+  row=(fn,ic,l,v,o)=>`<div class=sr onclick="${fn}" role=switch aria-checked="${o}"><i><svg viewBox="0 0 24 24">${ic}</svg></i><b>${l}</b><small>${v}</small><span class="kvtg${o?' on':''}"></span></div>`,
+  r1=row('kvAnimTog()','<path d="M3 12c2.5-6 5.5-6 9 0s6.5 6 9 0"/>','Animations',on?'On':'Off',on),
+  r2=on?row('kvLoopTog()','<path d="M4 12a8 8 0 0 1 14-5.3L20 9M20 4v5h-5M20 12a8 8 0 0 1-14 5.3L4 15M4 20v-5h5"/>','Repeat every 10 s',lp?'On':'Off',lp):'';
+ return h.replace('<div class=sr onclick="stGo(\'about\')">',r1+r2+'<div class=sr onclick="stGo(\'about\')">')}}
 </script></body></html>

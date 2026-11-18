@@ -4,9 +4,13 @@ Plan, Work, Grow: your finances and work in one place. KiraVault answers one que
 
 It tracks Bank, Mobile Money and Cash, counts bills, debts and savings as commitments, and never counts client money until it is actually received.
 
-**Current version: 2.1.9** · see [CHANGELOG.md](CHANGELOG.md)
+**Current version: 2.1.10** · see [CHANGELOG.md](CHANGELOG.md)
 
-## What's new in 2.1.9
+## What's new in 2.1.10
+- Charts replay when scrolled into view, when you return after 30 s+, and after a sync
+- Optional "Repeat every 10 s" switch in Settings (off by default)
+
+## Also in 2.1.9
 - Animations on/off switch in Settings
 - Donut and Finance overview charts animate
 - Quieter sync status on Home

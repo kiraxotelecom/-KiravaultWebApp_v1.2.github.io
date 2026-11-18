@@ -2,6 +2,19 @@
 
 Newest version first. Bump `APP_VER` in `index.html` and the cache name in `sw.js` together on every release, then add a block here.
 
+## 2.1.10 · 19 Nov 2026
+
+### New
+- **Charts replay at sensible moments** (instead of only once):
+  - when you **scroll** a chart into view (charts below the fold used to animate where you couldn't see them);
+  - when you **come back** to a screen or reopen the app after being away for 30 seconds or more (shorter trips stay still);
+  - after a successful **pull-down sync**.
+  Charts with the same data you just looked at never replay on a plain redraw.
+- **Repeat every 10 s (optional).** A new switch in Settings, under Animations, replays the charts currently on screen every 10 seconds. It is **off by default**. It pauses while a popup is open, while you are typing, during swipe or pull gestures, and when the app is in the background or locked. It stops after 5 repeats until you touch the screen again. It only shows while Animations is on.
+
+### Fixed
+- Bar charts no longer alter their own markup while animating, so they can be recognised as "already seen".
+
 ## 2.1.9 · 19 Nov 2026
 
 ### New
