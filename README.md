@@ -4,9 +4,14 @@ Plan, Work, Grow: your finances and work in one place. KiraVault answers one que
 
 It tracks Bank, Mobile Money and Cash, counts bills, debts and savings as commitments, and never counts client money until it is actually received.
 
-**Current version: 2.1.10** · see [CHANGELOG.md](CHANGELOG.md)
+**Current version: 2.2.0** · see [CHANGELOG.md](CHANGELOG.md)
 
-## What's new in 2.1.10
+## What's new in 2.2.0
+- Tap Safe to spend to see the arithmetic ("Why this number?")
+- Undo (8 seconds) for edits, not only deletes
+- Gentle Safe-to-spend alerts, a one-line Install bar, "Same as last time" chips, Android share target for SMS, one-tap backup file
+
+## Also in 2.1.10
 - Charts replay when scrolled into view, when you return after 30 s+, and after a sync
 - Optional "Repeat every 10 s" switch in Settings (off by default)
 

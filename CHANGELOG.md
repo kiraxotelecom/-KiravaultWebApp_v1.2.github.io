@@ -2,6 +2,23 @@
 
 Newest version first. Bump `APP_VER` in `index.html` and the cache name in `sw.js` together on every release, then add a block here.
 
+## 2.2.0 · 19 Nov 2026
+
+### New
+- **Why this number?** Tap **Safe to spend** (Home card or Finance) to see the sum: money you have, minus bills, debts, savings commitments and goal reserves, with the list of items being set aside. If commitments exceed your money it says by how much.
+- **Undo for edits.** Any Edit dialog (transaction, bill/debt, goal, project) now shows the same Undo bar as delete. The bar has a shrinking line so you can see the 8 seconds running out. Saving with no change shows nothing.
+- **Safe-to-spend alerts.**
+  - While adding a transaction or SMS, a hint appears if the amount is more than Safe to spend.
+  - After saving any new expense that pushes you under zero, a notice appears with a **Why?** button. Paying a bill does not trigger it.
+  - Needs attention lists a bill that is due today or overdue when your accounts (or its pay-from account) cannot cover it.
+- **Same as last time.** Quick add shows chips for expenses you repeat (two or more times in 90 days, e.g. Fuel, Lunch). One tap logs it with the same amount, account, category and charge, with Undo. If the account is short it opens the Add form instead.
+- **Share an SMS to KiraVault (Android).** After the installed app updates, KiraVault appears in the Share menu. A shared Mobile Money SMS opens Add from SMS; other text opens Quick add. It waits for the PIN lock and the welcome screen.
+- **One-tap file backup.** The Home reminder and the Settings **Back up now** button now save the backup file straight to Downloads and confirm it. Share backup and Save as file remain in Settings.
+
+### Improved
+- The Install card is one line with **Install** (or **How**) and an ✕ that dismisses it for good.
+- The toast no longer hides a newer message early.
+
 ## 2.1.10 · 19 Nov 2026
 
 ### New

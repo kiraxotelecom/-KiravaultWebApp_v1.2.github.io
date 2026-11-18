@@ -384,9 +384,19 @@ html,body{overscroll-behavior-y:contain}
 body.kvoff *,body.kvoff *::before,body.kvoff *::after{animation-duration:.001ms!important;animation-delay:0s!important;animation-iteration-count:1!important;transition-duration:.001ms!important}
 body.kvoff #kvptr.spin svg,body.kvoff .kvsy.ing i{animation-duration:.8s!important;animation-iteration-count:infinite!important}
 @media (prefers-reduced-motion:reduce){#kvptr.spin svg{animation-duration:.8s!important;animation-iteration-count:infinite!important}}
+
+/* v2.2.0 */
+#toast{overflow:hidden}#toast.ud::after{content:"";position:absolute;left:0;bottom:0;height:3px;width:100%;background:currentColor;opacity:.35;animation:udbar var(--ud,8s) linear forwards}@keyframes udbar{to{width:0}}
+.ilm{display:flex;align-items:center;gap:8px;margin:6px 0;padding:4px 4px 4px 12px;border-radius:12px;background:var(--card);border-left:4px solid var(--blue);font-size:13px;min-height:44px}
+.ilm span{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.ilm button{padding:6px 12px;min-height:36px;white-space:nowrap}
+.ilm .ilx{background:none;border:0;box-shadow:none;color:var(--muted);min-width:40px;padding:6px 8px}
+.ksa{margin-top:12px;padding:9px 12px;border-radius:12px;background:var(--ab);color:var(--text);border-left:4px solid var(--amber);font-size:13px}.ksa[hidden]{display:none}
+.rpt{grid-column:1/-1;margin-bottom:2px}.rpc{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}.rpc button{display:flex;flex-direction:column;align-items:flex-start;gap:0;padding:6px 12px;min-height:44px;border-radius:12px;text-align:left}.rpc button small{opacity:.8}
+.why .top{align-items:flex-start;gap:12px}.why .tot{margin-top:12px;padding-top:10px;border-top:2px solid var(--line)}.why .mu{color:var(--muted)}
+.why ul{list-style:none;margin:6px 0 0;padding:0}.why li{display:flex;justify-content:space-between;gap:12px;padding:5px 0;border-bottom:1px solid var(--line);font-size:13px}
 </style></head><body><header id=hd></header><main id=m></main><nav id=nav></nav><dialog id=dlg></dialog><div id=toast hidden></div><div id=lk hidden></div><button id=fab class=p onclick=quickAdd()>+</button><div id=sp><button class=gb onclick="sp.remove();sessionStorage.s=1;persist(1);if(lkS)lockNow();mvAnim()">Get Started</button><button id=sgl class=sgl onclick="sgOpen()">Already have an account? <b>Sign in</b></button></div>
 <script>
-const APP_VER='2.1.10'; /* bump by one on every change: 2.1.8, 2.1.9 ... */
+const APP_VER='2.2.0'; /* bump by one on every change: 2.1.8, 2.1.9 ... */
 let HM=0;
 const $=s=>document.querySelector(s),K='kiravault.web.v1',E=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])),xr=()=>S&&S.set&&S.set.cur=='USD'&&+S.set.rate>0?+S.set.rate:0,fu=v=>Math.abs(v)>=1000?Math.round(v).toLocaleString('en-US'):v.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}),F=n=>HM?'••••':(xr()?fu(n/xr()):Math.round(n).toLocaleString('en-US')),
  td=()=>new Date().toLocaleDateString('sv'),me=()=>{const d=new Date();return new Date(d.getFullYear(),d.getMonth()+1,0).toLocaleDateString('sv')},
@@ -404,7 +414,8 @@ const KINDS=['Rent','Internet','Electricity','Debt','Subscription','Planned Purc
  AC={Blue:['#3D5AFE','#6673F5'],Green:['#22A559','#3FD08F'],Purple:['#7C4DFF','#A07BFF'],Orange:['#F57C00','#FFA040']};
 let S;try{S=JSON.parse(localStorage.getItem(K))}catch{}
 S=S||{n:1,acc:['Bank','Mobile Money','Cash'].map(id=>({id,b:0})),tx:[],cm:[],pr:[],set:{mode:'auto',accent:'Blue'},bk:null};const mig=()=>{S.set=S.set||{mode:'auto',accent:'Blue'};S.ri=S.ri||[];S.cr=S.cr||{};S.gl=S.gl||[];S.bd=S.bd||{};S.bm=S.bm||{};S.ex=S.ex||[];S.pr.forEach(p=>{p.tk=p.tk||[];p.pg=p.pg||0;p.pri=p.pri||'Medium';p.src=p.src||'Freelance';p.wt=p.wt||'';if(p.st=='Active')p.st='In Progress'})};mig();
-const id=()=>S.n++,save=()=>{hideT();try{localStorage.setItem(K,JSON.stringify(S))}catch(e){alert('Could not save: browser storage is full or blocked. Export a backup now.')}render()},acc=n=>S.acc.find(a=>a.id===n),rem=c=>c.amt-c.paid,
+let pendWarn='';
+const id=()=>S.n++,save=()=>{hideT();try{localStorage.setItem(K,JSON.stringify(S))}catch(e){alert('Could not save: browser storage is full or blocked. Export a backup now.')}render();if(pendWarn){const w=pendWarn;pendWarn='';showT(w,whyNum,'Why?')}},acc=n=>S.acc.find(a=>a.id===n),rem=c=>c.amt-c.paid,
  paid=p=>p.pay.reduce((a,x)=>a+x.amt,0),
  cst=c=>{if(c.st=='paid')return'paid';const n=dd(c.due);return n===null?'up':n<0?'od':n<=3?'soon':'up'},
  dtx=c=>{if(c.st=='paid')return'Paid';const n=dd(c.due);return n===null?'No due date':n<0?`${-n} day${n==-1?'':'s'} overdue`:n==0?'Due today':n==1?'Due tomorrow':`Due in ${n} days`};
@@ -416,7 +427,7 @@ const sh=n=>{if(HM)return'••••';if(xr())return shU(n/xr());const a=Math.
  KV=(a,b,c='')=>`<div class=top style="margin-top:4px"><small>${a}</small><span class="${c}">${F(b)}</span></div>`,
  UG=x=>typeof x=='string'&&x.startsWith('UGX ')?'<span class=cu>UGX</span> '+x.slice(4):x,
  BG=(c,x,s=22)=>`<b style="display:block;font-size:${s}px;color:var(--${c})">${UG(x)}</b>`;
-function addTx(type,amt,a,cat,desc,date,x={}){const T={id:id(),type,amt,acc:a,cat,desc,date:date||td(),...x};S.tx.unshift(T);const A=acc(a);A.b+=type=='income'?amt:-amt;if(type=='transfer')acc(x.to).b+=amt;return T}
+function addTx(type,amt,a,cat,desc,date,x={}){const sp0=type=='expense'&&!x.cid&&!x.fo?rawS():null;const T={id:id(),type,amt,acc:a,cat,desc,date:date||td(),...x};S.tx.unshift(T);const A=acc(a);A.b+=type=='income'?amt:-amt;if(type=='transfer')acc(x.to).b+=amt;if(sp0!==null){const w=spendWarn(sp0);if(w)pendWarn=w}return T}
 /* v52: bank / mobile money charges, logged as their own linked expense (fo = parent id) */
 const FEEACC=['Bank','Mobile Money'],feeOk=a=>FEEACC.includes(a),feeLbl=a=>a=='Bank'?'Bank charge':'Mobile Money charge';
 function addFee(p,fe){if(fe>0&&feeOk(p.acc))addTx('expense',fe,p.acc,'Charges',feeLbl(p.acc),p.date,{fo:p.id})}
@@ -430,7 +441,7 @@ function ask(title,fs,ok){const d=$('#dlg'),H=fs.map(f=>!!(f.o||f.t=='date'||f.m
  const bt=/^(new|add|quick|expected)/i.test(title)?'Add':'Save';
  d.innerHTML=`<form class=kf><div class=kh><h3>${title}</h3><button type=button class=kx aria-label=Close onclick=dlg.close()>✕</button></div><div class=kb>${fs.map((f,i)=>`<label class="${hw[i]?'hf':''}">${f.l}${f.o?`<select name=${f.k}>${f.o.map(o=>`<option${o==f.v?' selected':''}>${E(o)}</option>`).join('')}</select>`:`<input name=${f.k} type=${f.t||'text'} value="${E(f.m&&xr()&&typeof f.v=='number'?+(f.v/xr()).toFixed(2):f.v??'')}" autocomplete=off ${f.m?'inputmode=decimal':''}${f.ph?` placeholder="${E(f.ph)}"`:''}${fs.length==1?' autofocus':''}>`}${f.h?`<small style="display:block;margin-top:6px;font-weight:400">${f.h}</small>`:''}</label>`).join('')}</div><div class=ke hidden></div><div class=row><button type=button onclick=dlg.close()>Cancel</button><button class=p>${bt}</button></div></form>`;
  const fm=d.querySelector('form'),ke=d.querySelector('.ke');fm.addEventListener('input',()=>{ke.hidden=true});
- fm.onsubmit=e=>{e.preventDefault();const r=ok(Object.fromEntries(new FormData(e.target)));if(r){ke.textContent=String(r);ke.hidden=false;ke.scrollIntoView&&ke.scrollIntoView({block:'nearest'})}else d.close()};d.showModal()}
+ fm.onsubmit=e=>{e.preventDefault();const ed=/^edit\b/i.test(title),sn=ed?JSON.stringify(S):'',sk=()=>JSON.stringify(S,(k,v)=>k=='cr'?undefined:v),s0=ed?sk():'';const r=ok(Object.fromEntries(new FormData(e.target)));if(r){ke.textContent=String(r);ke.hidden=false;ke.scrollIntoView&&ke.scrollIntoView({block:'nearest'})}else{d.close();if(ed&&sk()!==s0)showT('Changes saved',udRestore(sn))}};d.showModal();if(/^(add transaction|add from sms)/i.test(title))saHint(fm,ke)}
 const AN=()=>S.acc.map(a=>a.id);
 function txForm(v={}){ask('Add transaction',[{k:'type',l:'Type',o:['expense','income'],v:v.type},{k:'acc',l:'Account',o:AN(),v:v.acc||'Cash'},{k:'amt',l:'Amount (25k, 1.5m, 150,000)',v:v.amt,m:1},{k:'fee',l:'Charge (optional)',m:1},{k:'cat',l:'Category / source',o:[...CATS,'Salary','Freelance','Business','Gift','Other'],v:v.cat},{k:'desc',l:'Note',v:v.desc},{k:'date',l:'Date',t:'date',v:v.date||td()},{k:'oo',l:'One-off? (skips averages)',o:['No','Yes'],v:v.oo?'Yes':'No'}],f=>{
  const a=pa(f.amt),fe=f.type=='expense'&&feeOk(f.acc)?(pa(f.fee)||0):0;if(!a)return'Enter a valid amount';if(f.type!='income'&&acc(f.acc).b<a+fe)return`${f.acc} only has UGX ${F(acc(f.acc).b)}`;if(f.type=='transfer'&&f.to==f.acc)return'Pick two different accounts';
@@ -459,7 +470,7 @@ const V={home(){const s=sm(),nm=S.set.name,hr=new Date().getHours(),gr=hr<12?'GO
  ${at.length?attCard(at):''}
  ${C('blue','',H('Total available','blue')+BG('text','UGX '+F(s.av),28)+S.acc.map(a=>KV(a.id,a.b,a.b<0?'r':'')).join(''))}
  ${C('amber','',H('Committed','amber')+BG('amber','UGX '+F(s.cm))+KV('Bills',s.g.Bills)+KV('Debt',s.g.Debt)+KV('Savings target',s.g.Savings))}
- ${C(neg?'red':'green',neg?'rb':'gb',H('Safe to spend',neg?'red':'green')+BG(neg?'red':'green','UGX '+F(s.safe),36)+'<small>Available money minus everything you\'ve already promised this month.</small>')}
+ ${C(neg?'red':'green',neg?'rb':'gb',H('Safe to spend',neg?'red':'green')+BG(neg?'red':'green','UGX '+F(s.safe),36)+'<small>Available money minus everything you\'ve already promised this month. Tap to see why.</small>','onclick="whyNum()"')}
  <div class=grid>${C('teal','tb',H('Expected income','teal')+BG('teal',sh(s.aw),20)+'<small>Not counted until received</small>')}${C('pu','pb',H('Pending bills','pu')+BG('pu',sh(s.pb),20)+`<small>${s.pn} unpaid</small>`)}</div>
  ${C('green','',H('Savings','green')+BG('green','UGX '+F(s.sv),20),"onclick=\"mv='s';go('money')\"")}
  ${C('pu','',H('Work','pu')+`<b style="display:block;font-size:16px">${S.pr.filter(p=>!DONE.includes(p.st)).length} active | ${wk} due within 7 days</b><small>UGX ${F(s.pw)} still unpaid by clients (not counted until received)</small>`,"onclick=\"go('work')\"")}`},
@@ -587,7 +598,8 @@ const LK='kiravault.web.lock',FK='kiravault.web.fail',INCS=['Salary','Freelance'
 /* ---------- Undo (snapshot based, like the Android app) ---------- */
 let tmr;
 function hideT(){clearTimeout(tmr);const t=$('#toast');if(t)t.hidden=true}
-function showT(msg,undo){const t=$('#toast');t.innerHTML='';const s=document.createElement('span');s.textContent=msg;const b=document.createElement('button');b.textContent='Undo';b.className='p s';b.onclick=()=>{hideT();undo()};t.append(s,b);t.hidden=false;tmr=setTimeout(hideT,8000)}
+function showT(msg,undo,lbl){const t=$('#toast');t.innerHTML='';const s=document.createElement('span');s.textContent=msg;const b=document.createElement('button');b.textContent=lbl||'Undo';b.className='p s';b.onclick=()=>{hideT();undo()};t.append(s,b);const ms=lbl?10000:8000;t.style.setProperty('--ud',ms+'ms');t.classList.remove('ud');void t.offsetWidth;t.classList.add('ud');t.hidden=false;clearTimeout(tmr);tmr=setTimeout(hideT,ms)}
+const udRestore=snap=>()=>{const set=S.set;S=JSON.parse(snap);S.set=set;mig();save()};
 function UD(msg,fn){const snap=JSON.stringify(S);fn();save();showT(msg,()=>{const set=S.set;S=JSON.parse(snap);S.set=set;mig();save()})}
 
 /* ---------- Backup reminder + persistent storage ---------- */
@@ -597,12 +609,12 @@ const bkAge=()=>S.bk?-dd(S.bk):null,
  hasData=()=>S.tx.length||S.cm.length||S.pr.length||S.gl.length;
 async function persist(ask){try{if(navigator.storage&&navigator.storage.persisted){pst=await navigator.storage.persisted();if(!pst&&ask&&navigator.storage.persist)pst=await navigator.storage.persist()}}catch(e){}if(tab=='more')render()}
 function bkBanner(){const a=bkAge();
- if(hasData()&&(a===null||a>=7))return C('amber','ab',H('Back up your data','amber')+`<b style="display:block;font-size:16px;margin:4px 0">${a===null?'You have never backed up':'Last backup '+a+' days ago, back up now'}</b><small>Everything lives in this browser. Clearing site data or losing this phone erases it.</small><div class=row style="justify-content:flex-start"><button class=p onclick=bak()>Back up now</button></div>`);
+ if(hasData()&&(a===null||a>=7))return C('amber','ab',H('Back up your data','amber')+`<b style="display:block;font-size:16px;margin:4px 0">${a===null?'You have never backed up':'Last backup '+a+' days ago, back up now'}</b><small>Everything lives in this browser. Clearing site data or losing this phone erases it.</small><div class=row style="justify-content:flex-start"><button class=p onclick=bak(1)>Back up now</button></div>`);
  return C('green','gb',H('Backup','green')+`<b style="display:block;font-size:16px;margin-top:4px">Last backup ${bkTxt()}</b>`)}
-async function bak(force){const name=`kiravault-${td()}.json`,text=JSON.stringify({...S,bk:td()}),f=new File([text],name,{type:'application/json'});
- try{if(!force&&navigator.canShare&&navigator.canShare({files:[f]}))await navigator.share({files:[f],title:'KiraVault backup'});else dl(name,text,'application/json')}
+async function bak(force){const name=`kiravault-${td()}.json`,text=JSON.stringify({...S,bk:td()}),f=new File([text],name,{type:'application/json'});let how='file';
+ try{if(!force&&navigator.canShare&&navigator.canShare({files:[f]})){await navigator.share({files:[f],title:'KiraVault backup'});how='shared'}else dl(name,text,'application/json')}
  catch(e){if(e&&e.name=='AbortError')return;dl(name,text,'application/json')}
- S.bk=td();save()}
+ S.bk=td();save();showOk(how=='shared'?'Backup shared':'Backup saved. Look in your Downloads folder.')}
 function dl(name,text,type){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([text],{type}));a.download=name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),5000)}
 const pstTxt=()=>pst===true?'<small class=g><b>✓ Protected.</b> This browser has marked KiraVault data as persistent, so it will not be cleared automatically when the phone runs low on space.</small>':pst===false?'<small class=a><b>Not protected yet.</b> The browser may clear this data when space runs low. Add KiraVault to your home screen, then ask again.</small><div class=row style="justify-content:flex-start"><button class=s onclick="persist(1)">Ask browser to protect my data</button></div>':'<small>This browser cannot mark storage as persistent. Keep regular backups.</small>';
 
@@ -617,6 +629,7 @@ function smartAt(o){const t=td(),s=sm(),ym=ym0(0),n=+t.slice(8),dl=dim(+t.slice(
  const ad=avgDaily(45);if(s.safe>0&&ad>0){const run=Math.floor(s.safe/ad);if(run<=Math.min(7,dl-1))o.push([`At your usual spending of UGX ${sh(ad)} a day, safe-to-spend runs out in about ${run} day${run==1?'':'s'}.`,run<=2?'r':'a',"mv='b';go('money')"])}
  const lim=addD(t,7),due7=S.cm.filter(c=>c.st=='pending'&&c.due&&c.due>=t&&c.due<=lim).reduce((a,c)=>a+rem(c),0);
  if(due7>s.av&&due7>0)o.push([`Bills due in the next 7 days (UGX ${sh(due7)}) are more than the UGX ${sh(s.av)} you have. Plan how to cover them.`,'r',"mv='b';go('money')"]);
+ S.cm.filter(c=>c.st=='pending'&&c.due&&c.due<=t&&rem(c)>0).sort((a,b)=>a.due.localeCompare(b.due)).slice(0,3).forEach(c=>{const r=rem(c),A=acc(c.acc),od=c.due<t?'overdue':'due today';if(r>s.av)o.push([`${c.title} (UGX ${sh(r)}) is ${od}, but all your accounts together hold only UGX ${sh(s.av)}.`,'r',"mv='b';go('money')"]);else if(A&&A.b<r)o.push([`${c.title} (UGX ${sh(r)}) is ${od}. ${c.acc} has UGX ${sh(A.b)}, so move money there first.`,'a',"mv='b';go('money')"])});
  const y=addD(t,-1),big=S.tx.filter(x=>x.type=='expense'&&!x.oo&&(x.date==t||x.date==y));
  big.forEach(x=>{const hist=S.tx.filter(h=>h.type=='expense'&&h.cat==x.cat&&h.id!=x.id&&h.date<y).map(h=>h.amt).sort((a,b)=>a-b);if(hist.length>=4){const med=hist[Math.floor(hist.length/2)];if(x.amt>=med*3&&x.amt>=50000)o.push([`${x.desc||x.cat}: UGX ${sh(x.amt)} is about ${Math.round(x.amt/med)}x your usual ${x.cat} spend. Mark it one-off if it was a one-time cost.`,'a',`txMenu(${x.id})`])}});
  S.pr.filter(p=>!DONE.includes(p.st)&&p.dl&&dd(p.dl)>=0&&dd(p.dl)<=3&&p.pg<50).forEach(p=>o.push([`${p.title} is due in ${dd(p.dl)} day${dd(p.dl)==1?'':'s'} but only ${p.pg}% done.`,'r',`pj=${p.id};go('work')`]));
@@ -627,7 +640,7 @@ function extraAt(){const o=[],a=bkAge();
  riOcc(0).forEach(x=>o.push([`${x.title} (${sh(x.amt)}) ${x.date<td()?'was expected '+fm(x.date):'is expected today'}: tap when received`,'g',`riRecv(${x.r.id},'${x.ym}')`]));
  S.ex.filter(x=>x.dt&&x.dt<=td()).forEach(x=>o.push([`${x.project||x.client||'Expected income'} ${x.dt<td()?'was expected '+fm(x.dt):'is expected today'}: tap when received`,'g',`recv(${x.id})`]));
  try{smartAt(o)}catch(e){}
- if(hasData()&&(a===null||a>=7))o.push([a===null?'You have never backed up your data':`Last backup ${a} days ago, back up now`,'a',"go('more')"]);
+ if(hasData()&&(a===null||a>=7))o.push([a===null?'You have never backed up your data. Tap to save a backup file.':`Last backup ${a} days ago. Tap to save a backup file.`,'a',"bak(1)"]);
  return o}
 
 /* ---------- Edit / delete transactions ---------- */
@@ -879,7 +892,7 @@ V.home=()=>{const s=sm(),nm=S.set.name,hr=new Date().getHours(),gr=hr<12?'Good m
  ${!S.tx.length&&S.acc.every(a=>!a.b)?C('amber','ab',H('Get started','amber')+'<b style="display:block">Set your opening balances</b>',"onclick=\"go('more')\""):''}
  ${HP.at=attCard(at),''}
  ${HP.bal=`<div class=hg><div class="sc t" data-t=1 onclick="mv='a';go('money')"><small>Available balance</small><b><span class=cu>UGX</span> ${F(s.av)}</b>${spark()}<small class=k42an>${S.acc.map(x=>E(x.id=='Mobile Money'?'MoMo':x.id)).join(' · ')}</small></div>
- <div class="sc ${neg?'x':'b'}" data-t=1 onclick="mv='b';go('money')"><small>${neg?'Short by':'Safe to spend'}</small><b><span class=cu>UGX</span> ${F(neg?s.short:s.safe)}</b><small class=k42an>${s.gr?'After bills and savings goals':'After this month\'s commitments'}</small>${sk()}</div>
+ <div class="sc ${neg?'x':'b'}" data-t=1 onclick="whyNum()"><small>${neg?'Short by':'Safe to spend'}</small><b><span class=cu>UGX</span> ${F(neg?s.short:s.safe)}</b><small class=k42an>${s.gr?'After bills and savings goals':'After this month\'s commitments'} · tap for why</small>${sk()}</div>
  <div class="sc ua" data-t=1 onclick="mv='p';go('money')"><small>Expected income</small><b><span class=cu>UGX</span> ${F(s.aw)}</b><small>Not counted until received</small></div><div class="sc p" data-t=1 onclick="mv='b';go('money')"><small>${MN()} unsettled</small><b><span class=cu>UGX</span> ${F(s.cm)}</b><small>Bills and debts left to pay</small></div><div class="sc g" data-t=1 onclick="hGo('income')"><small>${MN()} income</small><b><span class=cu>UGX</span> ${F(m.i)}</b>${tr(m.i,pm.i,1)}</div>
  <div class="sc r" data-t=1 onclick="hGo('expense')"><small>${MN()} expenses</small><b><span class=cu>UGX</span> ${F(m.e)}</b>${tr(m.e,pm.e,0)}</div></div>`,''}
  ${HP.up=C('blue','',H('Upcoming','blue')+(up.map(cRow).join('')||'<br><small>Nothing pending.</small>'),'data-t=1 onclick="cgo(event,\'bills\')"'),''}${HP.wk=C('pu','',H('Work progress','pu')+(ap.map(p=>`<div class=pw onclick="pj=${p.id};go('work')"><div class=top><b>${E(p.title)}</b><b style="color:${pgc(p)}">${p.pg}%</b></div><div class=bar><i style="width:${p.pg}%;background:${pgc(p)}"></i></div><small>${p.dl?(late(p)?'Overdue since ':'Due ')+fm(p.dl):'No deadline'} · ${E(p.client)}</small></div>`).join('')||'<br><small>No active projects.</small>')+(s.pw?`<div class=top style="margin-top:10px"><small>Unpaid by clients</small><b style="font-size:17px"><span class=cu>UGX</span> ${F(s.pw)}</b></div>`:''),'data-t=1 onclick="cgo(event,\'work\')"'),''}${HP.bud=bn.length?C('amber','',H('Top budget categories','amber')+bn.map(([k,l])=>{const u=sp[k]||0,f=u/l,c=pcC(f,paceF());return`<div class=cr style="margin-top:10px;cursor:pointer" data-c="${E(k)}" onclick="catGo(this.dataset.c,'${ym0(0)}')"><small>${E(k)}</small><div class=bar><i class="${f>1?'ovf':''}" style="width:${Math.min(f,1)*100}%;background:var(--${c})"></i>${pcT(paceF())}</div><b style="color:var(--${c})">${Math.round(f*100)}%</b></div>`}).join(''),'data-t=1 onclick="cgo(event,\'ins\')"'):'',''}`};
@@ -1448,8 +1461,8 @@ addEventListener('beforeinstallprompt',e=>{e.preventDefault();ipE=e;if(tab=='hom
 addEventListener('appinstalled',()=>{S.set.ih=1;save()});
 const isApp=()=>matchMedia('(display-mode: standalone)').matches||navigator.standalone===true,isIos=()=>/iphone|ipad|ipod/i.test(navigator.userAgent);
 function instCard(){if(S.set.ih||isApp())return'';
- const how=ipE?'':isIos()?'In Safari, tap Share, then <b>Add to Home Screen</b>.':'In your browser menu, choose <b>Install app</b> or <b>Add to Home screen</b>.';
- return C('accent','',`<div class=top><b style="font-size:16px">Install KiraVault</b><button class=s onclick="ihGo()">Got it</button></div><small style="display:block;margin-top:6px">Install it to open like an app. It works offline, and your data stays on this device.</small>${how?`<small style="display:block;margin-top:6px">${how}</small>`:''}${ipE?'<div class=row style="justify-content:flex-start"><button class="s p" onclick="ihInst()">Install</button></div>':''}`)}
+ return`<div class=ilm><span>Install KiraVault as an app</span>${ipE?'<button class="s p" onclick="ihInst()">Install</button>':'<button class=s onclick="ihHow()">How</button>'}<button class=ilx aria-label="Dismiss for good" onclick="ihGo()">✕</button></div>`}
+function ihHow(){infoDlg('Install KiraVault','<small>'+(isIos()?'In Safari, tap Share, then <b>Add to Home Screen</b>.':'In your browser menu, choose <b>Install app</b> or <b>Add to Home screen</b>.')+'</small>')}
 function ihGo(){S.set.ih=1;save()}
 async function ihInst(){if(!ipE)return;ipE.prompt();try{await ipE.userChoice}catch(e){}ipE=null;S.set.ih=1;save()}
 
@@ -1488,7 +1501,7 @@ function setRate(v){const n=parseFloat(String(v).replace(/,/g,''));S.set.rate=n>
 let stOk=null,dcur=null;
 const stBar=k=>`<div class=kst><small id=kse class=r hidden></small><button id=ksb class="p kbtn" onclick="stSave('${k}')" disabled>${stOk&&stOk.k==k?'✓ All changes saved':'Save changes'}</button></div>`,
  stBan=k=>stOk&&stOk.k==k?`<div class=kok><b>✓</b><div><b>Saved</b><small>${E(stOk.m)}</small></div></div>`:'';
-function showOk(m){const t=$('#toast');t.innerHTML='';const x=document.createElement('span');x.textContent='✓ '+m;t.append(x);t.hidden=false;clearTimeout(tmr);tmr=setTimeout(hideT,3500)}
+function showOk(m){const t=$('#toast');t.classList.remove('ud');t.innerHTML='';const x=document.createElement('span');x.textContent='✓ '+m;t.append(x);t.hidden=false;clearTimeout(tmr);tmr=setTimeout(hideT,3500)}
 function stDirty(){const b=$('#ksb');return !!(b&&!b.disabled)}
 function stGo(k){if(stDirty()&&!confirm('Leave without saving your changes?'))return;stg=k;dcur=null;stOk=null;render();scrollTo(0,0)}
 function curPick(k){dcur=k;[...$('#cr-t').children].forEach(b=>b.classList.toggle('on',b.textContent==k));stChk('cur')}
@@ -1917,7 +1930,7 @@ function smsFlow(t){const p=smsParse(t);if(!p.amt){alert('Could not find an amou
   const a=pa(f.amt),fe=pa(f.fee)||0;if(!a)return'Enter a valid amount';if(f.type=='transfer'&&f.to==f.acc)return'Pick two different accounts';
   if(f.type!='income'&&acc(f.acc).b<a+fe)return`${f.acc} only has UGX ${F(acc(f.acc).b)}`;
   const T=addTx(f.type,a,f.acc,f.cat,f.desc,f.date,{to:f.to,...(p.ref?{ref:p.ref}:{})});if(fe)addTx('expense',fe,f.acc,'Charges',feeLbl(f.acc),f.date,{fo:T.id});learn(f.desc,f.cat,f.type);save()})}
-function quickAdd(){const d=$('#dlg');d.innerHTML=`<form class=kf><div class=kh><h3>Quick add</h3><button type=button class=kx aria-label=Close onclick=dlg.close()>✕</button></div><div class=kb><label>What happened?<textarea id=qa-t rows=4 placeholder="spent 25k on lunch cash"></textarea></label><small class=kh2>Type it like a text, e.g. “received 500k client bank”, or paste an MTN or Airtel Money message.</small><div class=ke hidden></div></div><div class=row><button type=button onclick=dlg.close()>Cancel</button><button class=p>Add</button></div></form>`;
+function quickAdd(){const d=$('#dlg');d.innerHTML=`<form class=kf><div class=kh><h3>Quick add</h3><button type=button class=kx aria-label=Close onclick=dlg.close()>✕</button></div><div class=kb>${rptChips()}<label>What happened?<textarea id=qa-t rows=4 placeholder="spent 25k on lunch cash"></textarea></label><small class=kh2>Type it like a text, e.g. “received 500k client bank”, or paste an MTN or Airtel Money message.</small><div class=ke hidden></div></div><div class=row><button type=button onclick=dlg.close()>Cancel</button><button class=p>Add</button></div></form>`;
  const fm_=d.querySelector('form'),ke=d.querySelector('.ke'),ta=d.querySelector('textarea');fm_.onsubmit=e=>{e.preventDefault();const t=ta.value.trim();if(!/\d/.test(t)){ke.textContent='Include an amount, e.g. spent 25k on lunch cash';ke.hidden=false;return}d.close();smsLike(t)?smsFlow(t):qk({t:{value:t}})};d.showModal();setTimeout(()=>ta.focus(),50)}
 
 /* ===== v54: choose the order of cards on Finance Overview and Insights (like Home layout) ===== */
@@ -2297,4 +2310,39 @@ function kvLoopTog(){S.set.loop=S.set.loop!==true;kvLoopN=0;save();showOk('Repea
   r1=row('kvAnimTog()','<path d="M3 12c2.5-6 5.5-6 9 0s6.5 6 9 0"/>','Animations',on?'On':'Off',on),
   r2=on?row('kvLoopTog()','<path d="M4 12a8 8 0 0 1 14-5.3L20 9M20 4v5h-5M20 12a8 8 0 0 1-14 5.3L4 15M4 20v-5h5"/>','Repeat every 10 s',lp?'On':'Off',lp):'';
  return h.replace('<div class=sr onclick="stGo(\'about\')">',r1+r2+'<div class=sr onclick="stGo(\'about\')">')}}
+
+/* ===== v2.2.0: trust, speed and backup ===== */
+function rawS(){const s=sm();return s.av-s.cm-s.gr}
+function spendWarn(r0){const r1=rawS();if(r0>=0&&r1<0)return`That puts you UGX ${F(-r1)} under your Safe to spend, so some bills this month may not be covered.`;if(r0<0&&r1<r0)return'Safe to spend is already at zero. This takes you further from covering this month\'s bills.';return''}
+function infoDlg(title,body,btns){const d=$('#dlg');d.innerHTML=`<form class=kf method=dialog onsubmit="return false"><div class=kh><h3>${title}</h3><button type=button class=kx aria-label=Close onclick=dlg.close()>✕</button></div><div class="kb why" style="display:block">${body}</div><div class=row>${btns||''}<button type=button class=p onclick=dlg.close()>Done</button></div></form>`;d.showModal()}
+function whyNum(){const s=sm(),e=me(),raw=s.av-s.cm-s.gr,
+ L=S.cm.filter(c=>c.st=='pending'&&rem(c)>0&&(!c.due||c.due<=e)).sort((a,b)=>(a.due||'9').localeCompare(b.due||'9')),
+ nb=L.filter(c=>c.kind!='Debt'&&c.kind!='Savings').length,nd=L.filter(c=>c.kind=='Debt').length,ns=L.filter(c=>c.kind=='Savings').length,
+ R=(sg,l,v,sub)=>`<div class="top${v?'':' mu'}" style="margin-top:10px"><span>${sg} ${l}${sub?`<small style="display:block">${sub}</small>`:''}</span><b style="white-space:nowrap"><span class=cu>UGX</span> ${F(v)}</b></div>`,
+ dt=d=>d?new Date(d+'T00:00').toLocaleDateString('en-GB',{day:'numeric',month:'short'}):'No date',
+ cnt=(n,w)=>n?`${n} ${w}${n>1?'s':''} due by month-end`:'Nothing due by month-end';
+ infoDlg('Why this number?',
+  R('','Money you have now',s.av,S.acc.map(a=>E(a.id=='Mobile Money'?'MoMo':a.id)+' '+sh(a.b)).join(' · '))
+  +R('−','Bills',s.g.Bills,cnt(nb,'bill'))
+  +R('−','Debts',s.g.Debt,cnt(nd,'debt'))
+  +R('−','Savings commitments',s.g.Savings,cnt(ns,'saving'))
+  +R('−','Goal reserves',s.gr,s.gr?'Monthly goal targets not saved yet this month':'No monthly goal targets left to save')
+  +`<div class="top tot"><b>= Safe to spend</b><b style="white-space:nowrap;color:var(--${raw<0?'red':'green'})"><span class=cu>UGX</span> ${F(s.safe)}</b></div>`
+  +(raw<0?`<div class=ke style="margin-top:10px">Your commitments are UGX ${F(-raw)} more than you hold, so Safe to spend shows 0.</div>`:'')
+  +(L.length?`<small style="display:block;margin-top:14px;font-weight:700">What is being set aside</small><ul>${L.slice(0,8).map(c=>`<li><span>${E(c.title)}<small style="display:block">${c.due&&c.due<td()?'Overdue · ':''}${dt(c.due)}</small></span><b style="white-space:nowrap">${F(rem(c))}</b></li>`).join('')}${L.length>8?`<li><span>+ ${L.length-8} more</span></li>`:''}</ul>`:'')
+  +`<small style="display:block;margin-top:12px">Money clients owe you is not counted until you record it as received.</small>`,
+  `<button type=button onclick="dlg.close();mv='b';go('money')">See bills and goals</button>`)}
+function saHint(fm,ke){if(!fm.elements.amt||!ke)return;const h=document.createElement('div');h.className='ksa';h.hidden=true;ke.before(h);
+ const up=()=>{const ty=fm.elements.type?fm.elements.type.value:'expense',a=pa(fm.elements.amt.value)||0;if(ty!='expense'||!a){h.hidden=true;return}const s=sm(),r=s.av-s.cm-s.gr-a;
+  if(r>=0){h.hidden=true;return}h.textContent=s.safe>0?`That is UGX ${F(a-s.safe)} more than your Safe to spend (UGX ${F(s.safe)}). Bills due this month may not be covered.`:'Safe to spend is already UGX 0. This would dip into money set aside for bills.';h.hidden=false};
+ fm.addEventListener('input',up);fm.addEventListener('change',up);up()}
+function rptList(){const lo=addD(td(),-90),M={};S.tx.filter(t=>t.type=='expense'&&!t.fo&&!t.cid&&!t.oo&&(t.date||'')>=lo&&(t.desc||'').trim()).sort((a,b)=>b.date.localeCompare(a.date)||b.id-a.id).forEach(t=>{const k=t.desc.trim().toLowerCase();(M[k]=M[k]||{n:0,t}).n++});
+ return Object.values(M).filter(x=>x.n>=2&&acc(x.t.acc)).sort((a,b)=>b.n-a.n||b.t.date.localeCompare(a.t.date)).slice(0,6).map(x=>x.t)}
+function rptChips(){const L=rptList();if(!L.length)return'';return`<div class=rpt><small>Same as last time</small><div class=rpc>${L.map(t=>`<button type=button onclick="rptGo(${t.id})"><b>${E(t.desc)}</b><small>${sh(t.amt)} · ${E(t.acc=='Mobile Money'?'MoMo':t.acc)}</small></button>`).join('')}</div></div>`}
+function rptGo(i){const t=S.tx.find(x=>x.id==i);if(!t)return;const fe=S.tx.find(x=>x.fo==t.id),fa=fe?fe.amt:0,A=acc(t.acc);dlg.close();
+ if(!A||A.b<t.amt+fa){txForm({type:'expense',acc:t.acc,amt:t.amt,cat:t.cat,desc:t.desc});return}
+ const sn=JSON.stringify(S),T=addTx('expense',t.amt,t.acc,t.cat,t.desc,td());if(fa)addFee(T,fa);const w=pendWarn;pendWarn='';save();showT(`Added ${t.desc}, UGX ${F(t.amt+fa)}.${w?' '+w:''}`,udRestore(sn))}
+/* Android share target: a shared SMS lands in the Add from SMS form */
+function shareIn(t){if(smsLike(t)){smsFlow(t);return}quickAdd();const ta=$('#qa-t');if(ta)ta.value=t.slice(0,600)}
+(function(){const q=new URLSearchParams(location.search);if(!(q.has('text')||q.has('title')||q.has('url')))return;const t=[q.get('title'),q.get('text'),q.get('url')].filter(Boolean).join(' ').trim();try{history.replaceState(null,'',location.pathname+location.hash)}catch(e){}if(!t)return;let n=0;const w=()=>{if(++n>600)return;if($('#sp')||document.body.classList.contains('locked')||$('#dlg').open)return setTimeout(w,500);shareIn(t)};setTimeout(w,500)})();
 </script></body></html>
